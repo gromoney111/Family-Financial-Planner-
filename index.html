@@ -1000,12 +1000,13 @@
                   <th>Category</th>
                   <th>Description</th>
                   <th>Member</th>
+                  <th>Payment</th>
                   <th>Amount</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="transactionsBody">
-                <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px">No transactions yet. Click "+ Add Transaction" to get started.</td></tr>
+                <tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:40px">No transactions yet. Click "+ Add Transaction" to get started.</td></tr>
               </tbody>
             </table>
           </div>
@@ -1188,6 +1189,30 @@
         <div class="form-group">
           <label>Member</label>
           <select id="txMember" required></select>
+        </div>
+        <div class="form-group">
+          <label>Payment Method</label>
+          <select id="txPayment" required onchange="toggleBankName()">
+            <option value="Cash">Cash</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Credit Card">Credit Card</option>
+            <option value="UPI">UPI</option>
+            <option value="Wallet">Wallet (Paytm/PhonePe)</option>
+          </select>
+        </div>
+        <div class="form-group" id="bankNameGroup" style="display:none">
+          <label>Bank / Card Name</label>
+          <select id="txBankName">
+            <option value="">Select bank</option>
+            <option value="SBI">State Bank of India (SBI)</option>
+            <option value="HDFC">HDFC Bank</option>
+            <option value="ICICI">ICICI Bank</option>
+            <option value="Axis">Axis Bank</option>
+            <option value="PNB">Punjab National Bank</option>
+            <option value="BOB">Bank of Baroda</option>
+            <option value="Kotak">Kotak Mahindra Bank</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-outline" onclick="closeModal('transactionModal')">Cancel</button>
@@ -1918,7 +1943,7 @@
     const filtered = getFilteredTransactions();
 
     if (filtered.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px">No transactions found.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:40px">No transactions found.</td></tr>';
       return;
     }
 
@@ -1932,6 +1957,7 @@
         <td>${t.category}</td>
         <td>${t.description || '-'}</td>
         <td>${t.member || '-'}</td>
+        <td style="font-size:0.8rem;color:var(--text-mid)">${t.payment || 'Cash'}</td>
         <td style="font-weight:600;color:${t.type==='income'?'var(--teal)':'var(--rose)'}">${formatCurrency(t.amount)}</td>
         <td><button class="btn-icon" onclick="deleteTransaction('${t.id}')" title="Delete">🗑️</button></td>
       </tr>
@@ -1940,10 +1966,23 @@
 
   function openTransactionModal() {
     document.getElementById('transactionModal').classList.add('active');
+    toggleBankName();
+  }
+
+  function toggleBankName() {
+    const payment = document.getElementById('txPayment').value;
+    const bankGroup = document.getElementById('bankNameGroup');
+    if (payment === 'Bank Transfer' || payment === 'Credit Card') {
+      bankGroup.style.display = 'block';
+    } else {
+      bankGroup.style.display = 'none';
+    }
   }
 
   async function saveTransaction(e) {
     e.preventDefault();
+    const paymentMethod = document.getElementById('txPayment').value;
+    const bankName = document.getElementById('txBankName').value;
     const transaction = {
       id: 'tx_' + Date.now() + '_' + Math.random().toString(36).substr(2,5),
       type: document.getElementById('txType').value,
@@ -1951,7 +1990,8 @@
       category: document.getElementById('txCategory').value,
       amount: document.getElementById('txAmount').value,
       description: document.getElementById('txDesc').value,
-      member: document.getElementById('txMember').value
+      member: document.getElementById('txMember').value,
+      payment: paymentMethod + (bankName ? ' (' + bankName + ')' : '')
     };
 
     try {
@@ -2272,8 +2312,8 @@
       showToast('No transactions to export.', 'info');
       return;
     }
-    const headers = ['Date','Type','Category','Description','Member','Amount'];
-    const rows = transactions.map(t => [t.date, t.type, t.category, t.description||'', t.member||'', t.amount]);
+    const headers = ['Date','Type','Category','Description','Member','Payment Method','Amount'];
+    const rows = transactions.map(t => [t.date, t.type, t.category, t.description||'', t.member||'', t.payment||'Cash', t.amount]);
     const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
