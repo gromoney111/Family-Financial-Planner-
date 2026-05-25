@@ -8,31 +8,36 @@
   <meta name="author" content="FamilyFinPlan Team">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#0f172a">
-  
-  <!-- Open Graph Tags -->
   <meta property="og:title" content="FamilyFinPlan – Smart Family Budget Planner">
   <meta property="og:description" content="Plan your family finances together. Track income, expenses, savings for every member. Free forever.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://familyfinplan.com">
   <meta property="og:image" content="https://familyfinplan.com/og-image.jpg">
-  
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="FamilyFinPlan – Family Budget Planner">
   <meta name="twitter:description" content="Free budget planner for Indian families. Track income, expenses, and savings together.">
   <meta name="twitter:image" content="https://familyfinplan.com/og-image.jpg">
-  
-  <title>FamilyFinPlan – Smart Monthly Family Budget Planner | Free Income & Expense Tracker</title>
-  
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
-  
-  <!-- External Libraries -->
+  <title>FamilyFinPlan – Smart Monthly Family Budget Planner | Free Income &amp; Expense Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  
+  <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit" async defer></script>
+
+  <!-- Schema.org Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "FamilyFinPlan",
+    "description": "Smart monthly family budget planner for Indian families",
+    "url": "https://familyfinplan.com",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "INR" },
+    "author": { "@type": "Organization", "name": "FamilyFinPlan Team" }
+  }
+  </script>
   <style>
-    /* ======= ROOT VARIABLES ======= */
     :root {
       --navy: #0f172a;
       --navy-mid: #1e293b;
@@ -48,7 +53,7 @@
       --sky-light: #e0f2fe;
       --purple: #8b5cf6;
       --purple-light: #ede9fe;
-      --white: #fff;
+      --white: #ffffff;
       --surface: #f8fafc;
       --surface2: #f1f5f9;
       --border: #e2e8f0;
@@ -58,22 +63,12 @@
       --text-muted: #94a3b8;
       --radius: 14px;
       --radius-sm: 9px;
-      --shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
-      --shadow-lg: 0 12px 48px rgba(15, 23, 42, 0.16);
+      --shadow: 0 4px 24px rgba(15,23,42,0.08);
+      --shadow-lg: 0 12px 48px rgba(15,23,42,0.16);
     }
 
-
-    /* ======= RESET ======= */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
       font-family: 'DM Sans', sans-serif;
       background: var(--surface);
@@ -82,2476 +77,2355 @@
       font-size: 15px;
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
-      -webkit-tap-highlight-color: transparent;
     }
-
-    h1, h2, h3, h4, .serif {
-      font-family: 'Playfair Display', serif;
+    h1, h2, h3, h4, .serif { font-family: 'Playfair Display', serif; }
+    h1 { font-size: 2rem; font-weight: 700; }
+    h2 { font-size: 1.5rem; font-weight: 700; }
+    h3 { font-size: 1.25rem; font-weight: 600; }
+    h4 { font-size: 1.1rem; font-weight: 600; }
+    p { font-size: 0.938rem; line-height: 1.6; }
+    button, input, select, textarea { font-family: inherit; font-size: 0.938rem; }
+    button { cursor: pointer; border: none; outline: none; }
+    input, select, textarea {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 0.938rem;
+      transition: border-color 0.2s;
+      width: 100%;
+      background: var(--white);
     }
-
-    button, input, select, textarea {
-      font-family: inherit;
-    }
-
-    button {
-      cursor: pointer;
-      border: none;
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--gold);
       outline: none;
+      box-shadow: 0 0 0 3px rgba(245,158,11,0.1);
     }
+    a { text-decoration: none; color: inherit; }
 
-    img {
-      max-width: 100%;
-      display: block;
-    }
-
-    /* ======= SCROLLBAR ======= */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 10px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-
-    /* ======= LAYOUT ======= */
-    #loginPage {
+    /* ======= LOGIN PAGE ======= */
+    .login-wrapper {
       display: flex;
       min-height: 100vh;
+      width: 100%;
     }
-
-    #mainApp {
-      display: none;
-      grid-template-columns: 264px 1fr;
-      min-height: 100vh;
-    }
-
-    @media (max-width: 960px) {
-      #mainApp {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .main-wrap {
+    .login-hero {
+      flex: 1;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
+      justify-content: center;
+      align-items: center;
+      padding: 60px;
+      color: var(--white);
+      position: relative;
       overflow: hidden;
     }
-
-    /* ======= SIDEBAR ======= */
-    .sidebar {
-      background: var(--navy);
-      color: #e2e8f0;
+    .login-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 70%, rgba(245,158,11,0.08) 0%, transparent 50%);
+    }
+    .login-hero h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .login-hero h1 span { color: var(--gold); }
+    .login-hero p {
+      font-size: 1.1rem;
+      opacity: 0.85;
+      max-width: 380px;
+      text-align: center;
+      line-height: 1.7;
+      position: relative;
+      z-index: 1;
+    }
+    .login-features {
+      margin-top: 40px;
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      position: sticky;
-      top: 0;
-      overflow-y: auto;
-      transition: transform 0.3s ease;
-      z-index: 200;
+      gap: 14px;
+      position: relative;
+      z-index: 1;
+    }
+    .login-features li {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+    .login-features li::before {
+      content: '✓';
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: var(--gold);
+      color: var(--navy);
+      border-radius: 50%;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .login-form-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      background: var(--white);
+      max-width: 520px;
+    }
+    .login-form-container {
+      width: 100%;
+      max-width: 400px;
+    }
+    .auth-tabs {
+      display: flex;
+      margin-bottom: 28px;
+      border-bottom: 2px solid var(--border);
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      background: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+    .auth-tab.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+    .auth-tab:hover { color: var(--gold); }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-mid);
+      margin-bottom: 6px;
+    }
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
+    .form-row .form-group { flex: 1; }
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--gold) 0%, #d97706 100%);
+      color: var(--white);
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: var(--radius-sm);
+      transition: transform 0.15s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(245,158,11,0.3);
+    }
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .forgot-link {
+      display: block;
+      text-align: right;
+      font-size: 0.85rem;
+      color: var(--sky);
+      margin-bottom: 18px;
+      cursor: pointer;
+    }
+    .forgot-link:hover { text-decoration: underline; }
+    .auth-error {
+      background: var(--rose-light);
+      color: var(--rose);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .auth-error.show { display: block; }
+    .recaptcha-box {
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: center;
+      transform: scale(0.92);
+      transform-origin: center;
+    }
+
+    /* ======= SPINNER ======= */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: var(--white);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ======= TOAST ======= */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toast {
+      padding: 14px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--white);
       box-shadow: var(--shadow-lg);
+      animation: slideIn 0.3s ease;
+      max-width: 360px;
+    }
+    .toast.success { background: var(--teal); }
+    .toast.error { background: var(--rose); }
+    .toast.info { background: var(--sky); }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
 
-    @media (max-width: 960px) {
-      .sidebar {
-        position: fixed;
-        left: 0;
-        top: 0;
-        width: 264px;
-        transform: translateX(-100%);
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
+    /* ======= MAIN LAYOUT ======= */
+    .app-layout {
+      display: none;
+      min-height: 100vh;
     }
-
-    .sb-logo {
-      padding: 28px 22px 18px;
+    .app-layout.active { display: flex; }
+    .sidebar {
+      width: 260px;
+      background: var(--navy);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+      transition: transform 0.3s;
+    }
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-header h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .sidebar-header h2 span { color: var(--gold); }
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      overflow-y: auto;
+    }
+    .nav-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+      transition: all 0.2s;
+      margin-bottom: 4px;
+      cursor: pointer;
     }
+    .nav-item:hover {
+      background: rgba(255,255,255,0.06);
+      color: var(--white);
+    }
+    .nav-item.active {
+      background: rgba(245,158,11,0.12);
+      color: var(--gold);
+    }
+    .nav-item .nav-icon {
+      width: 20px;
+      text-align: center;
+      font-size: 1rem;
+    }
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-footer .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--navy);
+    }
+    .user-name { font-size: 0.85rem; font-weight: 600; }
+    .user-role { font-size: 0.75rem; color: var(--text-muted); }
 
-    .sb-logo-icon {
-      width: 42px;
-      height: 42px;
-      background: linear-gradient(135deg, var(--gold), #f97316);
+    /* ======= MAIN CONTENT ======= */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      padding: 32px;
+      min-height: 100vh;
+    }
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .page-header h1 { font-size: 1.75rem; }
+    .page-header .subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .header-actions { display: flex; gap: 10px; }
+
+    /* ======= CARDS ======= */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .stat-icon {
+      width: 48px;
+      height: 48px;
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
-      flex-shrink: 0;
-      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+      font-size: 1.3rem;
     }
-
-    .sb-logo-text .brand {
-      font-family: 'Playfair Display', serif;
-      font-size: 17px;
-      color: #fff;
-      letter-spacing: -0.3px;
-      line-height: 1.2;
-      font-weight: 700;
-    }
-
-    .sb-logo-text .sub {
-      font-size: 10px;
-      color: var(--text-muted);
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-    }
-
-    .sb-month {
-      padding: 14px 18px;
-      background: rgba(245, 158, 11, 0.07);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .sb-month label {
-      font-size: 10px;
-      color: var(--gold);
-      text-transform: uppercase;
-      letter-spacing: 0.7px;
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    .sb-month select {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(245, 158, 11, 0.25);
-      color: #fff;
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-size: 12.5px;
-      cursor: pointer;
-    }
-
-    .sb-month select option {
-      background: var(--navy-mid);
-      color: #fff;
-    }
-
-    .sb-section {
-      padding: 14px 18px 4px;
-      font-size: 10px;
-      color: rgba(148, 163, 184, 0.6);
-      letter-spacing: 0.9px;
-      text-transform: uppercase;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      margin: 2px 8px;
-      border-radius: 9px;
-      cursor: pointer;
-      color: #94a3b8;
-      font-size: 13.5px;
-      transition: all 0.15s ease;
-      user-select: none;
-    }
-
-    .nav-item:hover {
-      background: rgba(255, 255, 255, 0.06);
-      color: #e2e8f0;
-    }
-
-    .nav-item.active {
-      background: linear-gradient(90deg, rgba(245, 158, 11, 0.18), rgba(245, 158, 11, 0.08));
-      color: var(--gold);
+    .stat-icon.income { background: var(--teal-light); color: var(--teal); }
+    .stat-icon.expense { background: var(--rose-light); color: var(--rose); }
+    .stat-icon.savings { background: var(--sky-light); color: var(--sky); }
+    .stat-icon.balance { background: var(--purple-light); color: var(--purple); }
+    .stat-info h4 {
+      font-size: 0.8rem;
       font-weight: 500;
-      border-left: 3px solid var(--gold);
-      padding-left: 11px;
-    }
-
-    .nav-item svg {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-      stroke: currentColor;
-    }
-
-    .nav-badge {
-      background: var(--rose);
-      color: #fff;
-      font-size: 9px;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-left: auto;
-      font-weight: 700;
-    }
-
-    .sb-footer {
-      margin-top: auto;
-      padding: 14px 18px;
-      border-top: 1px solid rgba(255, 255, 255, 0.07);
-    }
-
-    .sb-user {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 0;
-      cursor: pointer;
-    }
-
-    .sb-user-info .uname {
-      font-size: 13px;
-      font-weight: 500;
-      color: #f1f5f9;
-    }
-
-    .sb-user-info .urole {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: capitalize;
-    }
-
-    .sb-logout {
-      width: 100%;
-      margin-top: 8px;
-      background: rgba(244, 63, 94, 0.1);
-      border: 1px solid rgba(244, 63, 94, 0.2);
-      color: #f87171;
-      padding: 8px;
-      border-radius: 8px;
-      font-size: 12px;
-      transition: all 0.15s ease;
-    }
-
-    .sb-logout:hover {
-      background: rgba(244, 63, 94, 0.22);
-    }
-
-
-    /* ======= TOPBAR ======= */
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 28px;
-      background: var(--white);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    @media (max-width: 600px) {
-      .topbar {
-        padding: 12px 16px;
-      }
-    }
-
-    .topbar-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .hamburger {
-      display: none;
-      background: none;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      padding: 7px;
-      color: var(--text-mid);
-      transition: all 0.15s ease;
-    }
-
-    .hamburger:hover {
-      border-color: var(--border2);
-      background: var(--surface2);
-    }
-
-    @media (max-width: 960px) {
-      .hamburger {
-        display: flex;
-        align-items: center;
-      }
-    }
-
-    .page-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 21px;
-      color: var(--navy);
-      font-weight: 700;
-    }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .month-pill {
-      background: var(--gold-pale);
-      color: #92400e;
-      padding: 5px 13px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
-      white-space: nowrap;
-    }
-
-    /* ======= BUTTONS ======= */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 17px;
-      border-radius: var(--radius-sm);
-      border: none;
-      font-size: 13px;
-      font-weight: 500;
-      transition: all 0.17s ease;
-      cursor: pointer;
-      white-space: nowrap;
-      text-decoration: none;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--gold), #f97316);
-      color: #7c2d12;
-      box-shadow: 0 2px 10px rgba(245, 158, 11, 0.25);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 18px rgba(245, 158, 11, 0.35);
-    }
-
-    .btn-navy {
-      background: var(--navy);
-      color: #fff;
-    }
-
-    .btn-navy:hover {
-      background: var(--navy-mid);
-      transform: translateY(-1px);
-    }
-
-    .btn-outline {
-      background: transparent;
-      border: 1.5px solid var(--border2);
-      color: var(--text-mid);
-    }
-
-    .btn-outline:hover {
-      border-color: var(--navy-light);
-      color: var(--text);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      padding: 7px 10px;
-    }
-
-    .btn-ghost:hover {
-      color: var(--text);
-      background: var(--surface2);
-    }
-
-    .btn-danger {
-      background: var(--rose-light);
-      color: var(--rose);
-      border: none;
-    }
-
-    .btn-danger:hover {
-      background: #fecdd3;
-    }
-
-    .btn-success {
-      background: var(--teal-light);
-      color: var(--teal);
-      border: none;
-    }
-
-    .btn-sm {
-      padding: 6px 12px;
-      font-size: 12px;
-    }
-
-    .btn-icon {
-      width: 32px;
-      height: 32px;
-      padding: 0;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      transition: all 0.15s ease;
-    }
-
-    .btn-icon:hover {
-      background: var(--border);
-      color: var(--text);
-    }
-
-    .btn-icon.del:hover {
-      background: var(--rose-light);
-      border-color: var(--rose);
-      color: var(--rose);
-    }
-
-    .btn-icon.edit:hover {
-      background: var(--sky-light);
-      border-color: var(--sky);
-      color: var(--sky);
-    }
-
-    /* ======= VIEWS ======= */
-    .view {
-      display: none;
-      padding: 26px 28px;
-      animation: fadeIn 0.25s ease;
-      overflow-y: auto;
-      flex: 1;
-    }
-
-    .view.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(6px);
-      }
-      to {
-        opacity: 1;
-        transform: none;
-      }
-    }
-
-    @media (max-width: 600px) {
-      .view {
-        padding: 16px;
-      }
-    }
-
-    /* ======= LOGIN PAGE ======= */
-    .login-page {
-      min-height: 100vh;
-      width: 100%;
-      display: flex;
-      align-items: stretch;
-      background: var(--navy);
-    }
-
-    .login-left {
-      flex: 1;
-      background: linear-gradient(145deg, #0f172a 0%, #1e3a5f 40%, #0d2340 100%);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 60px 56px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    @media (max-width: 800px) {
-      .login-left {
-        display: none;
-      }
-    }
-
-    .login-left::before {
-      content: '';
-      position: absolute;
-      width: 500px;
-      height: 500px;
-      border-radius: 50%;
-      background: rgba(245, 158, 11, 0.06);
-      top: -150px;
-      right: -150px;
-      pointer-events: none;
-    }
-
-    .login-left::after {
-      content: '';
-      position: absolute;
-      width: 350px;
-      height: 350px;
-      border-radius: 50%;
-      background: rgba(13, 148, 136, 0.05);
-      bottom: -80px;
-      left: -80px;
-      pointer-events: none;
-    }
-
-    .lhero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(245, 158, 11, 0.12);
-      border: 1px solid rgba(245, 158, 11, 0.2);
-      color: var(--gold);
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 28px;
-    }
-
-    .lhero-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 44px;
-      color: #fff;
-      line-height: 1.18;
-      margin-bottom: 16px;
-      font-weight: 700;
-    }
-
-    .lhero-title span {
-      color: var(--gold);
-    }
-
-    .lhero-sub {
-      color: #64748b;
-      font-size: 16px;
-      line-height: 1.7;
-      max-width: 420px;
-      margin-bottom: 36px;
-    }
-
-    .feature-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .feature-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: #94a3b8;
-      font-size: 14px;
-    }
-
-    .feature-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      flex-shrink: 0;
-    }
-
-    .login-right {
-      width: 440px;
-      background: var(--white);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 56px 48px;
-    }
-
-    @media (max-width: 800px) {
-      .login-right {
-        width: 100%;
-        padding: 40px 24px;
-      }
-    }
-
-    .login-logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 36px;
-    }
-
-    .login-logo-icon {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, var(--gold), #f97316);
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
-    }
-
-    .login-logo-text .brand {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      color: var(--navy);
-      font-weight: 700;
-    }
-
-    .login-logo-text .sub {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .login-heading {
-      font-family: 'Playfair Display', serif;
-      font-size: 30px;
-      color: var(--navy);
-      margin-bottom: 6px;
-      font-weight: 700;
-    }
-
-    .login-sub {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-bottom: 28px;
-    }
-
-    .form-group {
-      margin-bottom: 18px;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 11.5px;
-      font-weight: 600;
-      color: var(--text-mid);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 7px;
-    }
-
-    .form-input,
-    .form-select {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      color: var(--text);
-      background: #fff;
-      outline: none;
-      transition: all 0.15s ease;
-    }
-
-    .form-input:focus,
-    .form-select:focus {
-      border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
-    }
-
-    .login-cta {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, var(--navy), #1e3a8a);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 15px;
-      font-weight: 600;
-      margin-top: 4px;
-      transition: all 0.2s ease;
-      letter-spacing: 0.2px;
-      cursor: pointer;
-    }
-
-    .login-cta:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 24px rgba(15, 23, 42, 0.25);
-    }
-
-    .demo-section {
-      margin-top: 22px;
-      padding: 16px;
-      background: var(--surface2);
-      border-radius: 11px;
-    }
-
-    .demo-title {
-      font-size: 11px;
-      font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 10px;
+      font-family: 'DM Sans', sans-serif;
     }
-
-    .demo-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .demo-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      font-weight: 500;
-    }
-
-    .demo-chip:hover {
-      border-color: var(--gold);
-      background: var(--gold-pale);
-      color: #92400e;
-    }
-
-    .demo-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    /* ======= STAT CARDS ======= */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .stat-card {
-      background: var(--white);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      padding: 20px 22px;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.2s ease;
-    }
-
-    .stat-card:hover {
-      box-shadow: var(--shadow);
-      transform: translateY(-2px);
-    }
-
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      right: -16px;
-      top: -16px;
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      opacity: 0.1;
-      pointer-events: none;
-    }
-
-    .stat-card.s-income::before { background: var(--teal); }
-    .stat-card.s-expense::before { background: var(--rose); }
-    .stat-card.s-savings::before { background: var(--gold); }
-    .stat-card.s-balance::before { background: var(--sky); }
-
-    .stat-icon-box {
-      width: 40px;
-      height: 40px;
-      border-radius: 11px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 19px;
-      position: absolute;
-      right: 18px;
-      top: 18px;
-    }
-
-    .s-income .stat-icon-box { background: var(--teal-light); }
-    .s-expense .stat-icon-box { background: var(--rose-light); }
-    .s-savings .stat-icon-box { background: var(--gold-pale); }
-    .s-balance .stat-icon-box { background: var(--sky-light); }
-
-    .stat-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.7px;
-      color: var(--text-muted);
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .stat-val {
-      font-family: 'Playfair Display', serif;
-      font-size: 28px;
+    .stat-info .amount {
+      font-size: 1.5rem;
       font-weight: 700;
-      line-height: 1.1;
-    }
-
-    .s-income .stat-val { color: var(--teal); }
-    .s-expense .stat-val { color: var(--rose); }
-    .s-savings .stat-val { color: #92400e; }
-    .s-balance .stat-val { color: var(--sky); }
-
-    .stat-sub {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 8px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
     }
 
     /* ======= CHARTS ======= */
-    .charts-row {
+    .charts-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 18px;
-      margin-bottom: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
     }
-
-    @media (max-width: 1100px) {
-      .charts-row {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
-    @media (max-width: 700px) {
-      .charts-row {
-        grid-template-columns: 1fr;
-      }
-    }
-
     .chart-card {
       background: var(--white);
       border-radius: var(--radius);
-      border: 1px solid var(--border);
-      padding: 22px;
-      transition: all 0.2s ease;
-    }
-
-    .chart-card:hover {
+      padding: 24px;
       box-shadow: var(--shadow);
+      border: 1px solid var(--border);
     }
-
-    .chart-hd {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .chart-card h3 {
+      font-size: 1rem;
       margin-bottom: 16px;
-      gap: 8px;
-    }
-
-    .chart-hd h3 {
       font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
       font-weight: 600;
+    }
+    .chart-container { position: relative; height: 260px; }
+
+    /* ======= TABLE ======= */
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: var(--radius);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    thead th {
+      background: var(--surface2);
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       color: var(--text-mid);
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      border-bottom: 1px solid var(--border);
     }
-
-    .chart-canvas-wrap {
-      position: relative;
-      min-height: 200px;
+    tbody td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
     }
+    tbody tr:hover { background: var(--surface); }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-income { background: var(--teal-light); color: var(--teal); }
+    .badge-expense { background: var(--rose-light); color: var(--rose); }
 
-    /* ======= MODALS ======= */
+    /* ======= MODAL ======= */
     .modal-overlay {
-      display: none;
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.55);
+      background: rgba(15,23,42,0.5);
       backdrop-filter: blur(4px);
-      z-index: 500;
+      z-index: 1000;
+      display: none;
       align-items: center;
       justify-content: center;
       padding: 20px;
-      animation: fadeIn 0.25s ease;
     }
-
-    .modal-overlay.open {
-      display: flex;
-    }
-
+    .modal-overlay.active { display: flex; }
     .modal {
       background: var(--white);
-      border-radius: 20px;
+      border-radius: var(--radius);
+      padding: 32px;
+      max-width: 500px;
       width: 100%;
-      max-width: 520px;
-      box-shadow: var(--shadow-lg);
       max-height: 90vh;
       overflow-y: auto;
-      animation: modalIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: var(--shadow-lg);
     }
-
-    @keyframes modalIn {
-      from {
-        opacity: 0;
-        transform: scale(0.94) translateY(14px);
-      }
-      to {
-        opacity: 1;
-        transform: none;
-      }
-    }
-
-    .modal-hd {
-      padding: 26px 28px 0;
+    .modal h3 { margin-bottom: 20px; font-size: 1.2rem; }
+    .modal-actions {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 24px;
     }
 
-    .modal-hd h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 23px;
-      color: var(--navy);
-      font-weight: 700;
+    .btn {
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: all 0.2s;
     }
-
-    .modal-close {
-      background: var(--surface2);
-      border: none;
+    .btn-gold {
+      background: var(--gold);
+      color: var(--white);
+    }
+    .btn-gold:hover { background: #d97706; }
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--text-mid);
+    }
+    .btn-outline:hover { border-color: var(--text-mid); }
+    .btn-danger { background: var(--rose); color: var(--white); }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+    .btn-icon {
       width: 34px;
       height: 34px;
-      border-radius: 50%;
+      border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
-      cursor: pointer;
-      color: var(--text-mid);
-      transition: all 0.15s ease;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 0.9rem;
+      transition: all 0.2s;
     }
+    .btn-icon:hover { background: var(--surface2); }
 
-    .modal-close:hover {
-      background: var(--rose-light);
-      color: var(--rose);
-    }
-
-    .modal-body {
-      padding: 0 28px 28px;
-    }
-
-    .modal-save {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, var(--navy), #1e3a8a);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 15px;
+    /* ======= SECTIONS ======= */
+    .section { display: none; }
+    .section.active { display: block; }
+    .section-title {
+      font-size: 1rem;
       font-weight: 600;
-      margin-top: 6px;
-      transition: all 0.2s ease;
-      letter-spacing: 0.2px;
-      cursor: pointer;
+      margin-bottom: 16px;
+      font-family: 'DM Sans', sans-serif;
     }
 
-    .modal-save:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 24px rgba(15, 23, 42, 0.25);
+    /* ======= BUDGET ======= */
+    .budget-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
     }
-
-    /* ======= TABLE ======= */
-    .tx-table {
+    .budget-item {
       background: var(--white);
       border-radius: var(--radius);
+      padding: 20px;
       border: 1px solid var(--border);
-      overflow: hidden;
     }
-
-    .tx-thead {
-      background: var(--surface2);
-      display: grid;
-      grid-template-columns: 2.5fr 1.2fr 1fr 1fr auto;
-      gap: 12px;
-      padding: 11px 20px;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border);
-    }
-
-    @media (max-width: 700px) {
-      .tx-thead {
-        display: none;
-      }
-    }
-
-    .tx-row {
-      display: grid;
-      grid-template-columns: 2.5fr 1.2fr 1fr 1fr auto;
-      gap: 12px;
-      padding: 13px 20px;
-      border-bottom: 1px solid var(--border);
-      align-items: center;
-      transition: background 0.1s ease;
-    }
-
-    .tx-row:last-child {
-      border-bottom: none;
-    }
-
-    .tx-row:hover {
-      background: var(--surface);
-    }
-
-    @media (max-width: 700px) {
-      .tx-row {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding: 14px 16px;
-      }
-    }
-
-    .tx-desc {
-      font-weight: 500;
-      font-size: 14px;
-      color: var(--text);
-    }
-
-    .tx-amount {
-      font-weight: 700;
-      font-size: 14.5px;
-      font-family: 'Playfair Display', serif;
-      text-align: right;
-    }
-
-    .tx-amount.income { color: var(--teal); }
-    .tx-amount.expense { color: var(--rose); }
-
-    /* ======= PRO BANNER ======= */
-    .pro-banner {
-      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e293b 100%);
-      border-radius: var(--radius);
-      padding: 22px 26px;
+    .budget-header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 22px;
-      flex-wrap: wrap;
-      position: relative;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .budget-header h4 { font-size: 0.9rem; font-family: 'DM Sans', sans-serif; }
+    .progress-bar {
+      height: 8px;
+      background: var(--surface2);
+      border-radius: 4px;
       overflow: hidden;
     }
-
-    .pro-banner::before {
-      content: '✦';
-      position: absolute;
-      right: 120px;
-      top: -10px;
-      font-size: 80px;
-      opacity: 0.04;
-      color: #fff;
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease;
     }
+    .progress-fill.good { background: var(--teal); }
+    .progress-fill.warning { background: var(--gold); }
+    .progress-fill.danger { background: var(--rose); }
 
-    .pro-banner-text h3 {
-      font-family: 'Playfair Display', serif;
-      color: #fff;
-      font-size: 19px;
-      margin-bottom: 4px;
-      font-weight: 700;
+    /* ======= FAMILY MEMBERS ======= */
+    .members-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
     }
-
-    .pro-banner-text p {
-      color: #64748b;
-      font-size: 13px;
-    }
-
-    .pro-tag {
-      background: linear-gradient(135deg, var(--gold), #f97316);
-      color: #7c2d12;
-      padding: 3px 10px;
-      border-radius: 10px;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      margin-left: 8px;
-    }
-
-    .pro-btn {
-      background: linear-gradient(135deg, var(--gold), #f97316);
-      color: #7c2d12;
-      border: none;
-      padding: 11px 24px;
-      border-radius: 9px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-
-    .pro-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
-    }
-
-    /* ======= TOAST ======= */
-    .toast-wrap {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      z-index: 900;
-      pointer-events: none;
-    }
-
-    .toast {
-      background: var(--navy);
-      color: #fff;
-      padding: 13px 18px;
-      border-radius: 11px;
-      font-size: 13px;
-      font-weight: 500;
-      animation: toastIn 0.3s ease;
-      box-shadow: var(--shadow-lg);
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      max-width: 320px;
-      pointer-events: all;
-    }
-
-    @keyframes toastIn {
-      from {
-        opacity: 0;
-        transform: translateY(12px) scale(0.95);
-      }
-      to {
-        opacity: 1;
-        transform: none;
-      }
-    }
-
-    .toast.ok { background: var(--teal); }
-    .toast.err { background: var(--rose); }
-    .toast.warn { background: #d97706; }
-
-    /* ======= UTILITY ======= */
-    .divider {
-      height: 1px;
-      background: var(--border);
-      margin: 20px 0;
-    }
-
-    .empty-state {
-      padding: 60px 20px;
+    .member-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      border: 1px solid var(--border);
       text-align: center;
     }
+    .member-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), #d97706);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--white);
+      margin: 0 auto 12px;
+    }
+    .member-card h4 { font-size: 0.95rem; font-family: 'DM Sans', sans-serif; font-weight: 600; }
+    .member-card .relation { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .member-card .role-badge {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .role-badge.admin { background: var(--gold-pale); color: #92400e; }
+    .role-badge.member { background: var(--sky-light); color: #0369a1; }
 
-    .empty-icon {
-      font-size: 52px;
-      margin-bottom: 14px;
+    /* ======= SETTINGS ======= */
+    .settings-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 28px;
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .settings-card h3 {
+      font-size: 1rem;
+      margin-bottom: 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
     }
 
-    .empty-state p {
-      font-size: 14px;
-      color: var(--text-muted);
+    /* ======= FORGOT PASSWORD ======= */
+    .forgot-form { display: none; }
+    .forgot-form.active { display: block; }
+    .login-forms { display: block; }
+    .login-forms.hidden { display: none; }
+    .back-to-login {
+      font-size: 0.85rem;
+      color: var(--sky);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+    .back-to-login:hover { text-decoration: underline; }
+
+    /* ======= MOBILE MENU ======= */
+    .mobile-menu-btn {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 200;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      background: var(--navy);
+      color: var(--white);
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    /* ======= RESPONSIVE ======= */
+    @media (max-width: 1024px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .login-hero { display: none; }
+      .login-form-section { max-width: 100%; }
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { margin-left: 0; padding: 20px; padding-top: 60px; }
+      .mobile-menu-btn { display: flex; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .form-row { flex-direction: column; gap: 0; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .charts-grid { grid-template-columns: 1fr; }
+      .members-grid { grid-template-columns: 1fr; }
+      .budget-grid { grid-template-columns: 1fr; }
     }
 
     /* ======= PRINT ======= */
     @media print {
-      .sidebar, .topbar, .pro-banner, .modal-overlay, .hamburger, #fab, .toast-wrap {
-        display: none !important;
-      }
-      #mainApp {
-        display: block !important;
-      }
-      .view {
-        display: block !important;
-        padding: 0 !important;
-      }
-      .view:not(#view-report) {
-        display: none !important;
-      }
-      @page {
-        margin: 20mm 15mm;
-      }
-      body {
-        font-size: 12px;
-        background: #fff !important;
-        color: #000 !important;
-      }
+      .sidebar, .mobile-menu-btn, .header-actions, .modal-overlay, .toast-container { display: none !important; }
+      .main-content { margin-left: 0; padding: 16px; }
+      .card, .stat-card, .chart-card { box-shadow: none; border: 1px solid #ddd; }
     }
 
-    /* ======= MOBILE OVERLAY ======= */
-    .mob-overlay {
-      display: none;
+    /* ======= LOADING OVERLAY ======= */
+    .loading-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.45);
-      z-index: 150;
-    }
-
-    .mob-overlay.on {
-      display: block;
-    }
-
-    /* ======= FAB (Floating Action Button) ======= */
-    #fab {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--gold), #f97316);
-      border: none;
-      font-size: 26px;
-      box-shadow: 0 6px 24px rgba(245, 158, 11, 0.4);
-      z-index: 99;
+      background: rgba(255,255,255,0.8);
       display: none;
       align-items: center;
       justify-content: center;
-      color: #7c2d12;
-      transition: all 0.2s ease;
-      cursor: pointer;
+      z-index: 9999;
     }
-
-    #fab:hover {
-      transform: scale(1.08);
-    }
-
-    @media (max-width: 600px) {
-      #fab {
-        display: flex;
-      }
+    .loading-overlay.active { display: flex; }
+    .loading-spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
     }
   </style>
 </head>
+
 <body>
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
 
-<!-- ════ LOGIN PAGE ════ -->
-<div id="loginPage" class="login-page">
-  <div class="login-left">
-    <div class="lhero-badge">🏆 Trusted by 50,000+ Indian families</div>
-    <h1 class="lhero-title">Smart Budgeting<br>for Your <span>Whole Family</span></h1>
-    <p class="lhero-sub">Track every rupee together. Set budgets, split expenses, and build wealth — all in one beautiful planner built for Indian families.</p>
-    <div class="feature-list">
-      <div class="feature-item"><div class="feature-icon" style="background:rgba(13,148,136,.15)">💰</div>Track income & expenses per member</div>
-      <div class="feature-item"><div class="feature-icon" style="background:rgba(245,158,11,.15)">📊</div>Visual charts & monthly reports</div>
-      <div class="feature-item"><div class="feature-icon" style="background:rgba(139,92,246,.15)">🎯</div>Set category budgets & alerts</div>
-      <div class="feature-item"><div class="feature-icon" style="background:rgba(14,165,233,.15)">📥</div>Download PDF & CSV reports</div>
-      <div class="feature-item"><div class="feature-icon" style="background:rgba(244,63,94,.15)">👨‍👩‍👧‍👦</div>Up to 6 members — 100% free</div>
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- ==================== LOGIN PAGE ==================== -->
+  <div class="login-wrapper" id="loginPage">
+    <div class="login-hero">
+      <h1>Family<span>Fin</span>Plan</h1>
+      <p>Smart financial planning for your entire family. Track, budget, and grow together.</p>
+      <ul class="login-features">
+        <li>Track income &amp; expenses for up to 6 members</li>
+        <li>Visual charts &amp; monthly reports</li>
+        <li>Budget goals with progress tracking</li>
+        <li>Export to CSV or PDF anytime</li>
+        <li>Secure cloud sync with Google Sheets</li>
+      </ul>
+    </div>
+    <div class="login-form-section">
+      <div class="login-form-container">
+        <!-- Auth Tabs -->
+        <div class="login-forms" id="loginForms">
+          <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+            <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+          </div>
+          <div class="auth-error" id="authError"></div>
+
+          <!-- Login Form -->
+          <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+              <label>Email or Phone</label>
+              <input type="text" id="loginIdentifier" placeholder="Enter email or phone" required>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="loginPassword" placeholder="Enter password" required>
+            </div>
+            <span class="forgot-link" onclick="showForgotPassword()">Forgot Password?</span>
+            <div class="recaptcha-box">
+              <div class="g-recaptcha" id="loginRecaptcha"></div>
+            </div>
+            <button type="submit" class="btn-primary" id="loginBtn">
+              <span>Login</span>
+            </button>
+          </form>
+
+          <!-- Register Form -->
+          <form id="registerForm" style="display:none" onsubmit="handleRegister(event)">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="regName" placeholder="Enter full name" required>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="regEmail" placeholder="Email address" required>
+              </div>
+              <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" id="regPhone" placeholder="Phone number" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="regPassword" placeholder="Min 6 characters" required minlength="6">
+            </div>
+            <div class="form-group">
+              <label>Confirm Password</label>
+              <input type="password" id="regConfirm" placeholder="Re-enter password" required>
+            </div>
+            <div class="recaptcha-box">
+              <div class="g-recaptcha" id="registerRecaptcha"></div>
+            </div>
+            <button type="submit" class="btn-primary" id="registerBtn">
+              <span>Create Account</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Forgot Password Form -->
+        <div class="forgot-form" id="forgotForm">
+          <span class="back-to-login" onclick="hideForgotPassword()">← Back to Login</span>
+          <h3>Reset Password</h3>
+          <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:20px;">Enter your registered email and we'll send you a new password.</p>
+          <div class="auth-error" id="forgotError"></div>
+          <form onsubmit="handleForgotPassword(event)">
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="forgotEmail" placeholder="Enter registered email" required>
+            </div>
+            <button type="submit" class="btn-primary" id="forgotBtn">
+              <span>Send Reset Link</span>
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="login-right">
-    <div class="login-logo">
-      <div class="login-logo-icon">💰</div>
-      <div class="login-logo-text">
-        <div class="brand">FamilyFinPlan</div>
-        <div class="sub">Smart Budget Planner</div>
+
+  <!-- ==================== APP LAYOUT ==================== -->
+  <div class="app-layout" id="appLayout">
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h2>Family<span>Fin</span>Plan</h2>
       </div>
-    </div>
-    <h2 class="login-heading">Welcome</h2>
-    <p class="login-sub">Sign in to manage your family finances</p>
-    <div class="form-group">
-      <label class="form-label">Select Account</label>
-      <select id="loginUser" class="form-select"></select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">PIN / Password</label>
-      <input type="password" id="loginPin" class="form-input" placeholder="Enter your PIN (demo: 1234)" maxlength="6" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <button class="login-cta" onclick="doLogin()">Sign In →</button>
-    <div class="demo-section">
-      <div class="demo-title">Demo Accounts (PIN: 1234)</div>
-      <div class="demo-chips" id="demoChips"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ════ MOBILE OVERLAY ════ -->
-<div class="mob-overlay" id="mobOverlay" onclick="closeSidebar()"></div>
-
-<!-- ════ MAIN APP ════ -->
-<div id="mainApp" style="display:none">
-  <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sb-logo">
-      <div class="sb-logo-icon">💰</div>
-      <div class="sb-logo-text">
-        <div class="brand">FamilyFinPlan</div>
-        <div class="sub">Budget Planner</div>
-      </div>
-    </div>
-    <div class="sb-month">
-      <label>📅 Select Month</label>
-      <select id="monthSel" onchange="changeMonth()"></select>
-    </div>
-
-    <div class="sb-section">Overview</div>
-    <div class="nav-item active" data-view="dashboard" onclick="nav(this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Dashboard
-    </div>
-    <div class="nav-item" data-view="report" onclick="nav(this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 17v-2m3 2v-4m3 4v-6M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
-      Reports
-    </div>
-
-    <div class="sb-section">Finances</div>
-    <div class="nav-item" data-view="income" onclick="nav(this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-      Income
-    </div>
-    <div class="nav-item" data-view="expenses" onclick="nav(this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
-      Expenses
-    </div>
-    <div class="nav-item" data-view="budget" onclick="nav(this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-      Budgets
-    </div>
-
-    <div class="sb-section">Family <span class="nav-badge" id="memberBadge">3</span></div>
-    <div class="nav-item" data-view="members" onclick="nav(this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-      Members
-    </div>
-
-    <div class="sb-section">Account</div>
-    <div class="nav-item" data-view="settings" onclick="nav(this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      Settings
-    </div>
-
-    <div class="sb-footer">
-      <div class="sb-user">
-        <div class="mc-av" id="sbAvatar" style="width:38px;height:38px;font-size:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700"></div>
-        <div class="sb-user-info">
-          <div class="uname" id="sbName">—</div>
-          <div class="urole" id="sbRole">—</div>
+      <nav class="sidebar-nav">
+        <div class="nav-item active" onclick="navigateTo('dashboard')">
+          <span class="nav-icon">📊</span> Dashboard
         </div>
-      </div>
-      <button class="sb-logout" onclick="doLogout()">← Sign Out</button>
-    </div>
-  </aside>
-
-  <!-- MAIN WRAP -->
-  <div class="main-wrap">
-    <!-- TOPBAR -->
-    <div class="topbar">
-      <div class="topbar-left">
-        <button class="hamburger" onclick="toggleSidebar()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-        <h1 class="page-title" id="pageTitle">Dashboard</h1>
-      </div>
-      <div class="topbar-right">
-        <span class="month-pill" id="monthPill">—</span>
-        <button class="btn btn-outline btn-sm" onclick="exportCSV()" title="Export CSV">📥 CSV</button>
-        <button class="btn btn-primary" onclick="openAddModal()">+ Add Entry</button>
-      </div>
-    </div>
-
-    <!-- ═══ DASHBOARD ═══ -->
-    <div class="view active" id="view-dashboard">
-      <div class="stats-grid">
-        <div class="stat-card s-income">
-          <div class="stat-icon-box">💵</div>
-          <div class="stat-label">Total Income</div>
-          <div class="stat-val" id="dIncome">₹0</div>
-          <div class="stat-sub"><span id="dIncomeCount">0 entries</span></div>
+        <div class="nav-item" onclick="navigateTo('transactions')">
+          <span class="nav-icon">💰</span> Transactions
         </div>
-        <div class="stat-card s-expense">
-          <div class="stat-icon-box">💸</div>
-          <div class="stat-label">Total Expenses</div>
-          <div class="stat-val" id="dExpense">₹0</div>
-          <div class="stat-sub"><span id="dExpCount">0 entries</span></div>
+        <div class="nav-item" onclick="navigateTo('budget')">
+          <span class="nav-icon">🎯</span> Budget Goals
         </div>
-        <div class="stat-card s-savings">
-          <div class="stat-icon-box">🏦</div>
-          <div class="stat-label">Net Savings</div>
-          <div class="stat-val" id="dSavings">₹0</div>
-          <div class="stat-sub" id="dSavRate">0% savings rate</div>
+        <div class="nav-item" onclick="navigateTo('family')">
+          <span class="nav-icon">👨‍👩‍👧‍👦</span> Family Members
         </div>
-        <div class="stat-card s-balance">
-          <div class="stat-icon-box">⚖️</div>
-          <div class="stat-label">Net Balance</div>
-          <div class="stat-val" id="dBalance">₹0</div>
-          <div class="stat-sub" id="dBalSub">income − expenses</div>
+        <div class="nav-item" onclick="navigateTo('reports')">
+          <span class="nav-icon">📈</span> Reports
         </div>
-      </div>
-
-      <!-- PRO BANNER -->
-      <div class="pro-banner">
-        <div class="pro-banner-text">
-          <h3>Upgrade to Pro <span class="pro-tag">PRO</span></h3>
-          <p>Unlimited history, AI insights, bank sync & custom categories</p>
+        <div class="nav-item" onclick="navigateTo('settings')">
+          <span class="nav-icon">⚙️</span> Settings
         </div>
-        <button class="pro-btn" onclick="showToast('📱 Get Pro: ₹199/month','warn')">Upgrade Now</button>
-      </div>
-
-      <div class="charts-row">
-        <div class="chart-card">
-          <div class="chart-hd"><h3>📊 Income vs Expenses</h3></div>
-          <div class="chart-canvas-wrap" style="height:200px"><canvas id="barChart"></canvas></div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="sidebarAvatar">A</div>
+          <div>
+            <div class="user-name" id="sidebarName">User</div>
+            <div class="user-role" id="sidebarRole">Member</div>
+          </div>
         </div>
-        <div class="chart-card">
-          <div class="chart-hd"><h3>🍩 Expenses by Category</h3></div>
-          <div class="chart-canvas-wrap" style="height:200px"><canvas id="doughnutChart"></canvas></div>
+        <button class="btn btn-outline btn-sm" style="margin-top:12px;width:100%" onclick="handleLogout()">Logout</button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- ===== DASHBOARD ===== -->
+      <section class="section active" id="sec-dashboard">
+        <div class="page-header">
+          <div>
+            <h1>Dashboard</h1>
+            <p class="subtitle">Overview of your family finances</p>
+          </div>
+          <div class="header-actions">
+            <select id="monthFilter" onchange="filterByMonth()" style="width:auto;padding:8px 12px">
+              <option value="all">All Months</option>
+            </select>
+          </div>
         </div>
-        <div class="chart-card">
-          <div class="chart-hd"><h3>👥 Member Contribution</h3></div>
-          <div class="chart-canvas-wrap" style="height:200px"><canvas id="memberChart"></canvas></div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon income">📈</div>
+            <div class="stat-info"><h4>Total Income</h4><div class="amount" id="statIncome">₹0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon expense">📉</div>
+            <div class="stat-info"><h4>Total Expense</h4><div class="amount" id="statExpense">₹0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon savings">🏦</div>
+            <div class="stat-info"><h4>Savings</h4><div class="amount" id="statSavings">₹0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon balance">💎</div>
+            <div class="stat-info"><h4>Balance</h4><div class="amount" id="statBalance">₹0</div></div>
+          </div>
         </div>
-      </div>
-
-      <h2 style="font-size:20px;color:var(--navy);margin-top:28px;margin-bottom:16px">Recent Transactions</h2>
-      <div class="tx-table">
-        <div class="tx-thead"><span>Description</span><span>Member</span><span>Category</span><span>Date</span><span>Amount</span></div>
-        <div id="recentTxList"></div>
-      </div>
-    </div>
-
-    <!-- ═══ INCOME ═══ -->
-    <div class="view" id="view-income">
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
-        <select class="form-select" id="fi-member" onchange="renderTxView('income')" style="flex:1;min-width:150px">
-          <option value="">👤 All Members</option>
-        </select>
-        <select class="form-select" id="fi-cat" onchange="renderTxView('income')" style="flex:1;min-width:150px">
-          <option value="">🏷️ All Categories</option>
-          <option>Salary</option><option>Freelance</option><option>Business</option><option>Rental</option><option>Investment</option><option>Other</option>
-        </select>
-        <input class="form-input" id="fi-search" placeholder="🔍 Search..." oninput="renderTxView('income')" style="flex:1;min-width:150px">
-        <button class="btn btn-primary btn-sm" onclick="openAddModal('income')">+ Add</button>
-      </div>
-      <div class="tx-table">
-        <div class="tx-thead"><span>Description</span><span>Member</span><span>Category</span><span>Date</span><span style="text-align:right">Amount</span></div>
-        <div id="incomeTxList"></div>
-      </div>
-    </div>
-
-    <!-- ═══ EXPENSES ═══ -->
-    <div class="view" id="view-expenses">
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
-        <select class="form-select" id="fe-member" onchange="renderTxView('expense')" style="flex:1;min-width:150px">
-          <option value="">👤 All Members</option>
-        </select>
-        <select class="form-select" id="fe-cat" onchange="renderTxView('expense')" style="flex:1;min-width:150px">
-          <option value="">🏷️ All Categories</option>
-          <option>Food</option><option>Transport</option><option>Utilities</option><option>Health</option>
-          <option>Shopping</option><option>Entertainment</option><option>Education</option><option>Rent</option><option>Savings</option><option>Other</option>
-        </select>
-        <input class="form-input" id="fe-search" placeholder="🔍 Search..." oninput="renderTxView('expense')" style="flex:1;min-width:150px">
-        <button class="btn btn-danger btn-sm" onclick="openAddModal('expense')">+ Add</button>
-      </div>
-      <div class="tx-table">
-        <div class="tx-thead"><span>Description</span><span>Member</span><span>Category</span><span>Date</span><span style="text-align:right">Amount</span></div>
-        <div id="expenseTxList"></div>
-      </div>
-    </div>
-
-    <!-- ═══ BUDGETS ═══ -->
-    <div class="view" id="view-budget">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-        <h2 style="font-size:20px;color:var(--navy)">Budget Goals</h2>
-        <button class="btn btn-primary btn-sm" onclick="openBudgetModal()">+ Set Budget</button>
-      </div>
-      <div id="budgetGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px"></div>
-    </div>
-
-    <!-- ═══ MEMBERS ═══ -->
-    <div class="view" id="view-members">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-        <h2 style="font-size:20px;color:var(--navy)">Family Members</h2>
-        <button class="btn btn-primary btn-sm" id="addMemberBtn" onclick="openMemberModal()">+ Add</button>
-      </div>
-      <div id="membersGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px"></div>
-    </div>
-
-    <!-- ═══ REPORTS ═══ -->
-    <div class="view" id="view-report">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
-        <h2 style="font-size:20px;color:var(--navy)">Monthly Report</h2>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-navy btn-sm" onclick="doPrint()">🖨️ Print/PDF</button>
-          <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV</button>
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>Income vs Expense (Monthly)</h3>
+            <div class="chart-container"><canvas id="overviewChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Expense by Category</h3>
+            <div class="chart-container"><canvas id="categoryChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Spending by Member</h3>
+            <div class="chart-container"><canvas id="memberChart"></canvas></div>
+          </div>
         </div>
-      </div>
-      <div id="reportContent"></div>
-    </div>
+      </section>
 
-    <!-- ═══ SETTINGS ═══ -->
-    <div class="view" id="view-settings">
-      <h2 style="font-size:20px;color:var(--navy);margin-bottom:20px">Settings</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
-        <div style="background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:22px">
-          <h3 style="font-size:15px;font-weight:600;margin-bottom:16px;color:var(--navy)">👤 My Profile</h3>
-          <div id="profileCard"></div>
+      <!-- ===== TRANSACTIONS ===== -->
+      <section class="section" id="sec-transactions">
+        <div class="page-header">
+          <div>
+            <h1>Transactions</h1>
+            <p class="subtitle">Manage income &amp; expenses</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-gold" onclick="openTransactionModal()">+ Add Transaction</button>
+            <button class="btn btn-outline" onclick="exportCSV()">📥 CSV</button>
+          </div>
         </div>
-        <div style="background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:22px">
-          <h3 style="font-size:15px;font-weight:600;margin-bottom:16px;color:var(--navy)">🔐 Change PIN</h3>
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Member</th>
+                  <th>Amount</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="transactionsBody">
+                <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px">No transactions yet. Click "+ Add Transaction" to get started.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== BUDGET ===== -->
+      <section class="section" id="sec-budget">
+        <div class="page-header">
+          <div>
+            <h1>Budget Goals</h1>
+            <p class="subtitle">Set spending limits per category</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-gold" onclick="openBudgetModal()">+ Set Budget</button>
+            <button class="btn btn-outline" onclick="saveBudgetsToCloud()">💾 Save</button>
+          </div>
+        </div>
+        <div class="budget-grid" id="budgetGrid">
+          <div class="budget-item" style="text-align:center;color:var(--text-muted);padding:40px">
+            No budgets set. Click "+ Set Budget" to add one.
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== FAMILY ===== -->
+      <section class="section" id="sec-family">
+        <div class="page-header">
+          <div>
+            <h1>Family Members</h1>
+            <p class="subtitle">Manage your family team</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-gold" id="addMemberBtn" onclick="openMemberModal()">+ Add Member</button>
+          </div>
+        </div>
+        <div class="members-grid" id="membersGrid">
+        </div>
+      </section>
+
+      <!-- ===== REPORTS ===== -->
+      <section class="section" id="sec-reports">
+        <div class="page-header">
+          <div>
+            <h1>Monthly Reports</h1>
+            <p class="subtitle">Detailed financial summary</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-gold" onclick="generatePDF()">📄 Download PDF</button>
+            <button class="btn btn-outline" onclick="window.print()">🖨️ Print</button>
+          </div>
+        </div>
+        <div class="card" id="reportContent">
+          <h3 style="margin-bottom:16px">Monthly Summary</h3>
+          <div id="reportSummary">
+            <p style="color:var(--text-muted)">Select a month to generate report.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SETTINGS ===== -->
+      <section class="section" id="sec-settings">
+        <div class="page-header">
+          <div>
+            <h1>Settings</h1>
+            <p class="subtitle">Profile &amp; preferences</p>
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3>Profile Information</h3>
           <div class="form-group">
-            <label class="form-label">Current PIN</label>
-            <input type="password" class="form-input" id="oldPin" placeholder="Current PIN" maxlength="6">
+            <label>Name</label>
+            <input type="text" id="settingsName" readonly>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="settingsEmail" readonly>
+            </div>
+            <div class="form-group">
+              <label>Phone</label>
+              <input type="tel" id="settingsPhone" readonly>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Role</label>
+              <input type="text" id="settingsRole" readonly>
+            </div>
+            <div class="form-group">
+              <label>Family ID</label>
+              <input type="text" id="settingsFamilyId" readonly>
+            </div>
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3>App Settings</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Currency Symbol</label>
+              <input type="text" id="settingsCurrency" value="₹" style="width:80px">
+            </div>
+            <div class="form-group">
+              <label>App Script URL</label>
+              <input type="text" id="settingsAppUrl" placeholder="Google Apps Script URL">
+            </div>
+          </div>
+          <button class="btn btn-gold" onclick="saveSettings()" style="margin-top:12px">Save Settings</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ===== TRANSACTION MODAL ===== -->
+  <div class="modal-overlay" id="transactionModal">
+    <div class="modal">
+      <h3>Add Transaction</h3>
+      <form onsubmit="saveTransaction(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type</label>
+            <select id="txType" required>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
           </div>
           <div class="form-group">
-            <label class="form-label">New PIN</label>
-            <input type="password" class="form-input" id="newPin" placeholder="New PIN" maxlength="6">
+            <label>Date</label>
+            <input type="date" id="txDate" required>
           </div>
-          <button class="btn btn-navy" onclick="changePin()">Update PIN</button>
         </div>
-      </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category</label>
+            <select id="txCategory" required>
+              <option value="">Select category</option>
+              <option value="Salary">Salary</option>
+              <option value="Business">Business</option>
+              <option value="Freelance">Freelance</option>
+              <option value="Investment">Investment</option>
+              <option value="Rent">Rent</option>
+              <option value="Food">Food</option>
+              <option value="Transport">Transport</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Bills">Bills</option>
+              <option value="Health">Health</option>
+              <option value="Education">Education</option>
+              <option value="Entertainment">Entertainment</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Amount</label>
+            <input type="number" id="txAmount" placeholder="0.00" required min="1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" id="txDesc" placeholder="Brief description">
+        </div>
+        <div class="form-group">
+          <label>Member</label>
+          <select id="txMember" required></select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('transactionModal')">Cancel</button>
+          <button type="submit" class="btn btn-gold">Save Transaction</button>
+        </div>
+      </form>
     </div>
   </div>
-</div>
 
-<!-- FAB (mobile) -->
-<button id="fab" onclick="openAddModal()">+</button>
-
-<!-- ═══ MODALS ═══ -->
-<!-- Add Entry Modal -->
-<div class="modal-overlay" id="entryModal">
-  <div class="modal">
-    <div class="modal-hd">
-      <h2>Add Entry</h2>
-      <button class="modal-close" onclick="closeModal('entryModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div style="display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:22px">
-        <button id="typeIncomeBtn" class="type-btn-income on" style="padding:11px;border:none;background:transparent;font-size:13px;font-weight:500;cursor:pointer" onclick="setEntryType('income')">↑ Income</button>
-        <button id="typeExpenseBtn" class="type-btn-expense" style="padding:11px;border:none;background:transparent;font-size:13px;font-weight:500;cursor:pointer" onclick="setEntryType('expense')">↓ Expense</button>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Member</label>
-        <select class="form-select" id="eMember"></select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Amount (₹)</label>
-        <input type="number" class="form-input" id="eAmount" placeholder="0.00" min="1" step="0.01">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Description</label>
-        <input type="text" class="form-input" id="eDesc" placeholder="e.g., Monthly Salary">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Category</label>
-        <div id="catGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+  <!-- ===== BUDGET MODAL ===== -->
+  <div class="modal-overlay" id="budgetModal">
+    <div class="modal">
+      <h3>Set Budget Goal</h3>
+      <form onsubmit="saveBudget(event)">
         <div class="form-group">
-          <label class="form-label">Date</label>
-          <input type="date" class="form-input" id="eDate">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Month</label>
-          <select class="form-select" id="eMonthOverride"></select>
-        </div>
-      </div>
-      <button class="modal-save" onclick="saveEntry()">💾 Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- Add Member Modal -->
-<div class="modal-overlay" id="memberModal">
-  <div class="modal">
-    <div class="modal-hd">
-      <h2>Add Family Member</h2>
-      <button class="modal-close" onclick="closeModal('memberModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Full Name</label>
-        <input type="text" class="form-input" id="nmName" placeholder="e.g., Priya Sharma">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="form-group">
-          <label class="form-label">Role</label>
-          <select class="form-select" id="nmRole">
-            <option value="member">Member</option>
-            <option value="admin">Admin</option>
+          <label>Category</label>
+          <select id="budgetCategory" required>
+            <option value="">Select category</option>
+            <option value="Food">Food</option>
+            <option value="Transport">Transport</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Bills">Bills</option>
+            <option value="Health">Health</option>
+            <option value="Education">Education</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Rent">Rent</option>
+            <option value="Other">Other</option>
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Relation</label>
-          <select class="form-select" id="nmRelation">
-            <option>Father</option><option>Mother</option><option>Son</option><option>Daughter</option><option>Spouse</option><option>Other</option>
-          </select>
+          <label>Monthly Limit</label>
+          <input type="number" id="budgetLimit" placeholder="Enter amount" required min="1">
         </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">PIN (4-6 digits)</label>
-        <input type="password" class="form-input" id="nmPin" placeholder="e.g., 1234" maxlength="6">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Avatar Color</label>
-        <div id="colorPicker" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-      </div>
-      <button class="modal-save" onclick="saveMember()">👨‍👩‍👧 Add Member</button>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('budgetModal')">Cancel</button>
+          <button type="submit" class="btn btn-gold">Save Budget</button>
+        </div>
+      </form>
     </div>
   </div>
-</div>
 
-<!-- Budget Modal -->
-<div class="modal-overlay" id="budgetModal">
-  <div class="modal">
-    <div class="modal-hd">
-      <h2>Set Budget Goal</h2>
-      <button class="modal-close" onclick="closeModal('budgetModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Category</label>
-        <select class="form-select" id="bgCat">
-          <option>Food</option><option>Transport</option><option>Utilities</option><option>Health</option>
-          <option>Shopping</option><option>Entertainment</option><option>Education</option><option>Rent</option><option>Savings</option><option>Other</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Monthly Limit (₹)</label>
-        <input type="number" class="form-input" id="bgAmount" placeholder="0" min="1">
-      </div>
-      <button class="modal-save" onclick="saveBudget()">🎯 Save Budget</button>
+  <!-- ===== ADD MEMBER MODAL ===== -->
+  <div class="modal-overlay" id="memberModal">
+    <div class="modal">
+      <h3>Add Family Member</h3>
+      <form onsubmit="addMember(event)">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="memberName" placeholder="Member's name" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="memberEmail" placeholder="Email" required>
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" id="memberPhone" placeholder="Phone" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Password (for their login)</label>
+          <input type="password" id="memberPassword" placeholder="Min 6 characters" required minlength="6">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Role</label>
+            <select id="memberRole">
+              <option value="member">Member</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Relation</label>
+            <select id="memberRelation">
+              <option value="Spouse">Spouse</option>
+              <option value="Son">Son</option>
+              <option value="Daughter">Daughter</option>
+              <option value="Father">Father</option>
+              <option value="Mother">Mother</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('memberModal')">Cancel</button>
+          <button type="submit" class="btn btn-gold">Add Member</button>
+        </div>
+      </form>
     </div>
   </div>
-</div>
 
-<!-- TOAST -->
-<div class="toast-wrap" id="toastWrap"></div>
-
-<script>
-
-// ════════════════════════════════════════════════════
-// CONSTANTS & CONFIG
-// ════════════════════════════════════════════════════
-const COLORS = ['#0d9488', '#8b5cf6', '#0ea5e9', '#f59e0b', '#ef4444', '#10b981', '#f97316', '#ec4899', '#6366f1', '#14b8a6'];
-const INCOME_CATS = [
-  {n:'Salary',e:'💼'}, {n:'Freelance',e:'💻'}, {n:'Business',e:'🏢'},
-  {n:'Rental',e:'🏠'}, {n:'Investment',e:'📈'}, {n:'Other',e:'💰'}
-];
-const EXP_CATS = [
-  {n:'Food',e:'🍕'}, {n:'Transport',e:'🚗'}, {n:'Utilities',e:'💡'}, {n:'Health',e:'🏥'},
-  {n:'Shopping',e:'🛍️'}, {n:'Entertainment',e:'🎬'}, {n:'Education',e:'📚'}, 
-  {n:'Rent',e:'🏠'}, {n:'Savings',e:'🏦'}, {n:'Other',e:'📦'}
-];
-const CAT_COLOR = {
-  Salary:'#0d9488', Freelance:'#0ea5e9', Business:'#8b5cf6', Rental:'#f59e0b', Investment:'#10b981',
-  Food:'#ef4444', Transport:'#f97316', Utilities:'#6366f1', Health:'#ec4899', Shopping:'#f59e0b',
-  Entertainment:'#8b5cf6', Education:'#14b8a6', Rent:'#e11d48', Savings:'#10b981', Other:'#94a3b8'
-};
-
-// ════════════════════════════════════════════════════
-// DATA FUNCTIONS
-// ════════════════════════════════════════════════════
-function loadData() {
-  try {
-    const d = JSON.parse(localStorage.getItem('ffp_data'));
-    if (d && d.members && d.transactions) return d;
-  } catch (e) {}
-  return seed();
-}
-
-function saveData(d) {
-  localStorage.setItem('ffp_data', JSON.stringify(d));
-}
-
-function uid() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
-
-function seed() {
-  const d = {
-    members: [
-      {id:'m1', name:'Rahul Sharma', role:'admin', relation:'Father', color:'#0d9488', pin:'1234', income:75000, notes:''},
-      {id:'m2', name:'Priya Sharma', role:'member', relation:'Mother', color:'#8b5cf6', pin:'1234', income:45000, notes:''},
-      {id:'m3', name:'Arjun Sharma', role:'member', relation:'Son', color:'#0ea5e9', pin:'1234', income:0, notes:'Student'},
-    ],
-    transactions: [],
-    budgets: {}
+  <!-- ==================== JAVASCRIPT ==================== -->
+  <script>
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  CONFIGURATION - CHANGE THESE VALUES                      ║
+  // ╚══════════════════════════════════════════════════════════╝
+  const CONFIG = {
+    APPS_SCRIPT_URL: 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL',
+    RECAPTCHA_SITE_KEY: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
+    APP_NAME: 'FamilyFinPlan',
+    MAX_MEMBERS: 6,
+    CURRENCY: '₹',
+    LOCALE: 'en-IN'
   };
-  
-  const now = new Date();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const y = now.getFullYear();
-  const mk = `${y}-${m}`;
-  
-  const tx = [
-    {id:uid(), mid:'m1', type:'income', amount:75000, desc:'Monthly Salary', cat:'Salary', date:`${y}-${m}-01`, mk},
-    {id:uid(), mid:'m2', type:'income', amount:45000, desc:'Freelance Project', cat:'Freelance', date:`${y}-${m}-03`, mk},
-    {id:uid(), mid:'m1', type:'income', amount:8000, desc:'Rental Income', cat:'Rental', date:`${y}-${m}-05`, mk},
-    {id:uid(), mid:'m1', type:'expense', amount:18000, desc:'House Rent', cat:'Rent', date:`${y}-${m}-01`, mk},
-    {id:uid(), mid:'m2', type:'expense', amount:9200, desc:'Groceries', cat:'Food', date:`${y}-${m}-04`, mk},
-    {id:uid(), mid:'m1', type:'expense', amount:3800, desc:'Electricity & Water', cat:'Utilities', date:`${y}-${m}-06`, mk},
-    {id:uid(), mid:'m3', type:'expense', amount:6500, desc:'School Fees', cat:'Education', date:`${y}-${m}-07`, mk},
-    {id:uid(), mid:'m2', type:'expense', amount:5500, desc:'Shopping', cat:'Shopping', date:`${y}-${m}-10`, mk},
-    {id:uid(), mid:'m1', type:'expense', amount:2800, desc:'Medical', cat:'Health', date:`${y}-${m}-12`, mk},
-    {id:uid(), mid:'m1', type:'expense', amount:1800, desc:'Petrol', cat:'Transport', date:`${y}-${m}-14`, mk},
-    {id:uid(), mid:'m3', type:'expense', amount:2200, desc:'Entertainment', cat:'Entertainment', date:`${y}-${m}-16`, mk},
-    {id:uid(), mid:'m1', type:'expense', amount:10000, desc:'Savings', cat:'Savings', date:`${y}-${m}-20`, mk},
-  ];
-  
-  d.transactions = tx;
-  d.budgets = {Rent:20000, Food:12000, Utilities:5000, Education:8000, Shopping:6000, Health:4000, Transport:3000, Entertainment:3000, Savings:12000};
-  return d;
-}
 
-// ════════════════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════════════════
-let DATA = loadData();
-let CU = null;
-let CM = curMonthKey();
-let editId = null;
-let selType = 'income';
-let selCat = '';
-let selColor = COLORS[0];
-let charts_ = {};
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  STATE                                                     ║
+  // ╚══════════════════════════════════════════════════════════╝
+  let currentUser = null;
+  let familyData = { transactions: [], members: [], budgets: [] };
+  let charts = {};
+  let loginRecaptchaWidget = null;
+  let registerRecaptchaWidget = null;
 
-function curMonthKey() {
-  const n = new Date();
-  return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}`;
-}
-
-function fmtMK(mk) {
-  const [y, m] = mk.split('-');
-  return new Date(y, m - 1, 1).toLocaleDateString('en-IN', {month: 'long', year: 'numeric'});
-}
-
-function fmt(n) {
-  return '₹' + Number(n || 0).toLocaleString('en-IN', {maximumFractionDigits: 0});
-}
-
-function fmtDate(s) {
-  return s ? new Date(s + 'T00:00:00').toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: '2-digit'}) : '';
-}
-
-function ini(name) {
-  return (name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-}
-
-function mkTx(mk) {
-  return DATA.transactions.filter(t => t.mk === mk);
-}
-
-function getM(id) {
-  return DATA.members.find(m => m.id === id) || {name: 'Unknown', color: '#94a3b8', role: 'member'};
-}
-
-function isAdmin() {
-  return CU && CU.role === 'admin';
-}
-
-function canEdit(t) {
-  return isAdmin() || t.mid === CU.id;
-}
-
-function esc(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-// ════════════════════════════════════════════════════
-// AUTH
-// ════════════════════════════════════════════════════
-function buildLoginList() {
-  const sel = document.getElementById('loginUser');
-  sel.innerHTML = '<option value="">— Choose account —</option>';
-  DATA.members.forEach(m => sel.innerHTML += `<option value="${m.id}">${m.name} · ${m.role}</option>`);
-  
-  const chips = document.getElementById('demoChips');
-  chips.innerHTML = '';
-  DATA.members.forEach(m => {
-    const c = document.createElement('span');
-    c.className = 'demo-chip';
-    c.innerHTML = `<span class="demo-dot" style="background:${m.color}"></span>${m.name}`;
-    c.onclick = () => {document.getElementById('loginUser').value = m.id; document.getElementById('loginPin').value = '1234';};
-    chips.appendChild(c);
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  INITIALIZATION                                            ║
+  // ╚══════════════════════════════════════════════════════════╝
+  document.addEventListener('DOMContentLoaded', () => {
+    initApp();
   });
-}
 
-function doLogin() {
-  const uid = document.getElementById('loginUser').value;
-  const pin = document.getElementById('loginPin').value;
-  if (!uid) {toast('Select an account', 'err'); return;}
-  const u = DATA.members.find(m => m.id === uid);
-  if (!u || pin !== u.pin) {toast('Incorrect PIN', 'err'); return;}
-  CU = u;
-  document.getElementById('loginPage').style.display = 'none';
-  document.getElementById('mainApp').style.display = 'grid';
-  initApp();
-}
-
-function doLogout() {
-  CU = null;
-  document.getElementById('mainApp').style.display = 'none';
-  document.getElementById('loginPage').style.display = 'flex';
-  document.getElementById('loginPin').value = '';
-  buildLoginList();
-}
-
-document.addEventListener('keydown', e => {if (!CU && e.key === 'Enter') doLogin();});
-
-// ════════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════════
-function initApp() {
-  const av = document.getElementById('sbAvatar');
-  av.textContent = ini(CU.name);
-  av.style.background = CU.color + '28';
-  av.style.color = CU.color;
-  document.getElementById('sbName').textContent = CU.name;
-  document.getElementById('sbRole').textContent = CU.role;
-  buildMonthSel();
-  updateMemberBadge();
-  renderAll();
-  renderProfileCard();
-  document.getElementById('addMemberBtn').style.display = isAdmin() ? '' : 'none';
-}
-
-function buildMonthSel() {
-  const sel = document.getElementById('monthSel');
-  sel.innerHTML = '';
-  const now = new Date();
-  for (let i = 3; i >= 1; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-    const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    sel.innerHTML += `<option value="${k}">${d.toLocaleDateString('en-IN', {month: 'long', year: 'numeric'})}</option>`;
+  function initApp() {
+    // Check for existing session
+    const session = localStorage.getItem('ffp_session');
+    if (session) {
+      try {
+        currentUser = JSON.parse(session);
+        showApp();
+        loadFamilyData();
+      } catch(e) {
+        localStorage.removeItem('ffp_session');
+        showLogin();
+      }
+    } else {
+      showLogin();
+    }
+    // Set today's date for transaction form
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('txDate').value = today;
+    populateMonthFilter();
   }
-  for (let i = 0; i < 15; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    sel.innerHTML += `<option value="${k}"${k === CM ? ' selected' : ''}>${d.toLocaleDateString('en-IN', {month: 'long', year: 'numeric'})}</option>`;
-  }
-  document.getElementById('monthPill').textContent = fmtMK(CM);
-}
 
-function buildMonthOverride() {
-  const sel = document.getElementById('eMonthOverride');
-  if (!sel) return;
-  sel.innerHTML = '';
-  const now = new Date();
-  for (let i = 0; i < 15; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    sel.innerHTML += `<option value="${k}"${k === CM ? ' selected' : ''}>${d.toLocaleDateString('en-IN', {month: 'short', year: 'numeric'})}</option>`;
-  }
-}
+  // reCAPTCHA callback - called by Google's script
+  var onRecaptchaLoad = function() {
+    if (document.getElementById('loginRecaptcha')) {
+      loginRecaptchaWidget = grecaptcha.render('loginRecaptcha', {
+        sitekey: CONFIG.RECAPTCHA_SITE_KEY
+      });
+    }
+    if (document.getElementById('registerRecaptcha')) {
+      registerRecaptchaWidget = grecaptcha.render('registerRecaptcha', {
+        sitekey: CONFIG.RECAPTCHA_SITE_KEY
+      });
+    }
+  };
 
-function changeMonth() {
-  CM = document.getElementById('monthSel').value;
-  document.getElementById('monthPill').textContent = fmtMK(CM);
-  renderAll();
-}
+  // Expose callback globally
+  window.onRecaptchaLoad = onRecaptchaLoad;
 
-function renderAll() {
-  renderDashboard();
-  renderTxView('income');
-  renderTxView('expense');
-  renderMembers();
-  renderBudget();
-  renderReport();
-}
-
-function updateMemberBadge() {
-  document.getElementById('memberBadge').textContent = DATA.members.length;
-}
-
-// ════════════════════════════════════════════════════
-// NAVIGATION
-// ════════════════════════════════════════════════════
-function nav(el) {
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  el.classList.add('active');
-  const v = el.dataset.view;
-  document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
-  document.getElementById('view-' + v).classList.add('active');
-  document.getElementById('pageTitle').textContent = v.charAt(0).toUpperCase() + v.slice(1);
-  closeSidebar();
-}
-
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('mobOverlay').classList.toggle('on');
-}
-
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('mobOverlay').classList.remove('on');
-}
-
-// ════════════════════════════════════════════════════
-// DASHBOARD
-// ════════════════════════════════════════════════════
-function renderDashboard() {
-  const txs = mkTx(CM);
-  const inc = txs.filter(t => t.type === 'income');
-  const exp = txs.filter(t => t.type === 'expense');
-  const tInc = inc.reduce((a, t) => a + t.amount, 0);
-  const tExp = exp.reduce((a, t) => a + t.amount, 0);
-  const net = tInc - tExp;
-  const saved = Math.max(0, net);
-  const rate = tInc > 0 ? Math.round(saved / tInc * 100) : 0;
-
-  document.getElementById('dIncome').textContent = fmt(tInc);
-  document.getElementById('dExpense').textContent = fmt(tExp);
-  document.getElementById('dSavings').textContent = fmt(saved);
-  document.getElementById('dBalance').textContent = fmt(net);
-  document.getElementById('dIncomeCount').textContent = inc.length + ' entr' + (inc.length !== 1 ? 'ies' : 'y');
-  document.getElementById('dExpCount').textContent = exp.length + ' entr' + (exp.length !== 1 ? 'ies' : 'y');
-  document.getElementById('dSavRate').textContent = rate + '% savings rate';
-  const bEl = document.getElementById('dBalance');
-  bEl.style.color = net >= 0 ? 'var(--sky)' : 'var(--rose)';
-  document.getElementById('dBalSub').textContent = net >= 0 ? '↑ Positive' : '↓ Overspending';
-
-  buildCharts(tInc, tExp, exp, txs);
-  renderRecentTx(txs);
-}
-
-// ════════════════════════════════════════════════════
-// CHARTS
-// ════════════════════════════════════════════════════
-function destroyChart(k) {
-  if (charts_[k]) {charts_[k].destroy(); delete charts_[k];}
-}
-
-function buildCharts(tInc, tExp, exps, txs) {
-  // Bar Chart
-  destroyChart('bar');
-  charts_.bar = new Chart(document.getElementById('barChart'), {
-    type: 'bar',
-    data: {
-      labels: ['Income', 'Expenses', 'Savings'],
-      datasets: [{
-        data: [tInc, tExp, Math.max(0, tInc - tExp)],
-        backgroundColor: ['rgba(13,148,136,.15)', 'rgba(244,63,94,.15)', 'rgba(245,158,11,.15)'],
-        borderColor: ['#0d9488', '#f43f5e', '#f59e0b'],
-        borderWidth: 2,
-        borderRadius: 10
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {legend: {display: false}},
-      scales: {y: {grid: {color: 'rgba(0,0,0,.04)'}}, x: {grid: {display: false}}}
+  // Try to render reCAPTCHA after page load if API already loaded
+  window.addEventListener('load', () => {
+    if (typeof grecaptcha !== 'undefined' && grecaptcha.render) {
+      setTimeout(() => {
+        try {
+          if (document.getElementById('loginRecaptcha') && !document.getElementById('loginRecaptcha').hasChildNodes()) {
+            loginRecaptchaWidget = grecaptcha.render('loginRecaptcha', { sitekey: CONFIG.RECAPTCHA_SITE_KEY });
+          }
+          if (document.getElementById('registerRecaptcha') && !document.getElementById('registerRecaptcha').hasChildNodes()) {
+            registerRecaptchaWidget = grecaptcha.render('registerRecaptcha', { sitekey: CONFIG.RECAPTCHA_SITE_KEY });
+          }
+        } catch(e) { /* already rendered */ }
+      }, 500);
     }
   });
 
-  // Doughnut
-  destroyChart('doughnut');
-  const cm = {}; exps.forEach(t => cm[t.cat] = (cm[t.cat] || 0) + t.amount);
-  const cl = Object.keys(cm);
-  const cv = cl.map(k => cm[k]);
-  const cc = cl.map(k => CAT_COLOR[k] || '#94a3b8');
-  if (cl.length) {
-    charts_.doughnut = new Chart(document.getElementById('doughnutChart'), {
-      type: 'doughnut',
-      data: {labels: cl, datasets: [{data: cv, backgroundColor: cc, borderWidth: 0}]},
-      options: {responsive: true, maintainAspectRatio: false, cutout: '66%', plugins: {legend: {display: false}}}
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  API COMMUNICATION                                         ║
+  // ╚══════════════════════════════════════════════════════════╝
+  async function apiCall(data) {
+    if (CONFIG.APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
+      showToast('Please configure your Google Apps Script URL in Settings or in the source code CONFIG section.', 'error');
+      throw new Error('Apps Script URL not configured');
+    }
+    showLoading(true);
+    try {
+      const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      showLoading(false);
+      return result;
+    } catch (error) {
+      showLoading(false);
+      showToast('Network error. Please check your connection and Apps Script URL.', 'error');
+      throw error;
+    }
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  AUTHENTICATION                                            ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function switchAuthTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+    document.getElementById('authError').classList.remove('show');
+  }
+
+  function showAuthError(msg) {
+    const el = document.getElementById('authError');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const identifier = document.getElementById('loginIdentifier').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    // Validate reCAPTCHA
+    if (typeof grecaptcha !== 'undefined') {
+      const response = grecaptcha.getResponse(loginRecaptchaWidget);
+      if (!response) {
+        showAuthError('Please complete the reCAPTCHA verification.');
+        return;
+      }
+    }
+
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Logging in...';
+
+    try {
+      const result = await apiCall({ action: 'login', identifier, password });
+      if (result.success) {
+        currentUser = result.user;
+        localStorage.setItem('ffp_session', JSON.stringify(currentUser));
+        showToast('Welcome back, ' + currentUser.name + '!', 'success');
+        showApp();
+        loadFamilyData();
+      } else {
+        showAuthError(result.message || 'Invalid credentials.');
+      }
+    } catch(err) {
+      showAuthError('Login failed. Please try again.');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<span>Login</span>';
+    if (typeof grecaptcha !== 'undefined') grecaptcha.reset(loginRecaptchaWidget);
+  }
+
+  async function handleRegister(e) {
+    e.preventDefault();
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const confirm = document.getElementById('regConfirm').value;
+
+    if (password !== confirm) {
+      showAuthError('Passwords do not match.');
+      return;
+    }
+    if (password.length < 6) {
+      showAuthError('Password must be at least 6 characters.');
+      return;
+    }
+
+    // Validate reCAPTCHA
+    if (typeof grecaptcha !== 'undefined') {
+      const response = grecaptcha.getResponse(registerRecaptchaWidget);
+      if (!response) {
+        showAuthError('Please complete the reCAPTCHA verification.');
+        return;
+      }
+    }
+
+    const btn = document.getElementById('registerBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Creating account...';
+
+    try {
+      const result = await apiCall({ action: 'register', name, email, phone, password });
+      if (result.success) {
+        currentUser = result.user;
+        localStorage.setItem('ffp_session', JSON.stringify(currentUser));
+        showToast('Account created successfully! You are the family admin.', 'success');
+        showApp();
+        loadFamilyData();
+      } else {
+        showAuthError(result.message || 'Registration failed.');
+      }
+    } catch(err) {
+      showAuthError('Registration failed. Please try again.');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<span>Create Account</span>';
+    if (typeof grecaptcha !== 'undefined') grecaptcha.reset(registerRecaptchaWidget);
+  }
+
+  async function handleForgotPassword(e) {
+    e.preventDefault();
+    const email = document.getElementById('forgotEmail').value.trim();
+    const btn = document.getElementById('forgotBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Sending...';
+
+    try {
+      const result = await apiCall({ action: 'forgotPassword', email });
+      if (result.success) {
+        showToast('A new password has been sent to your email.', 'success');
+        hideForgotPassword();
+      } else {
+        document.getElementById('forgotError').textContent = result.message || 'Email not found.';
+        document.getElementById('forgotError').classList.add('show');
+      }
+    } catch(err) {
+      document.getElementById('forgotError').textContent = 'Request failed. Try again.';
+      document.getElementById('forgotError').classList.add('show');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<span>Send Reset Link</span>';
+  }
+
+  function showForgotPassword() {
+    document.getElementById('loginForms').classList.add('hidden');
+    document.getElementById('forgotForm').classList.add('active');
+  }
+
+  function hideForgotPassword() {
+    document.getElementById('loginForms').classList.remove('hidden');
+    document.getElementById('forgotForm').classList.remove('active');
+    document.getElementById('forgotError').classList.remove('show');
+  }
+
+  function handleLogout() {
+    currentUser = null;
+    familyData = { transactions: [], members: [], budgets: [] };
+    localStorage.removeItem('ffp_session');
+    showLogin();
+    showToast('Logged out successfully.', 'info');
+  }
+
+  function showLogin() {
+    document.getElementById('loginPage').style.display = 'flex';
+    document.getElementById('appLayout').classList.remove('active');
+  }
+
+  function showApp() {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('appLayout').classList.add('active');
+    updateSidebar();
+    updateMemberSelect();
+    // Hide add member button for non-admins
+    const addBtn = document.getElementById('addMemberBtn');
+    if (addBtn) {
+      addBtn.style.display = (currentUser && currentUser.role === 'admin') ? 'inline-flex' : 'none';
+    }
+  }
+
+  function updateSidebar() {
+    if (!currentUser) return;
+    document.getElementById('sidebarAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+    document.getElementById('sidebarName').textContent = currentUser.name;
+    document.getElementById('sidebarRole').textContent = currentUser.role === 'admin' ? 'Admin' : 'Member';
+    document.getElementById('settingsName').value = currentUser.name;
+    document.getElementById('settingsEmail').value = currentUser.email || '';
+    document.getElementById('settingsPhone').value = currentUser.phone || '';
+    document.getElementById('settingsRole').value = currentUser.role;
+    document.getElementById('settingsFamilyId').value = currentUser.familyId || '';
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  DATA LOADING                                              ║
+  // ╚══════════════════════════════════════════════════════════╝
+  async function loadFamilyData() {
+    if (!currentUser || !currentUser.familyId) return;
+    try {
+      const result = await apiCall({ action: 'loadData', familyId: currentUser.familyId });
+      if (result.success) {
+        familyData.transactions = result.transactions || [];
+        familyData.members = result.members || [];
+        familyData.budgets = result.budgets || [];
+        renderAll();
+      }
+    } catch(err) {
+      console.error('Failed to load data:', err);
+    }
+  }
+
+  function renderAll() {
+    renderStats();
+    renderCharts();
+    renderTransactions();
+    renderBudgets();
+    renderMembers();
+    updateMemberSelect();
+    renderReport();
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  NAVIGATION                                                ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function navigateTo(section) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('sec-' + section).classList.add('active');
+    event.currentTarget.classList.add('active');
+    // Close mobile sidebar
+    document.getElementById('sidebar').classList.remove('open');
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  STATS                                                     ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function renderStats() {
+    const filtered = getFilteredTransactions();
+    const income = filtered.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
+    const expense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+    const savings = income - expense;
+    document.getElementById('statIncome').textContent = formatCurrency(income);
+    document.getElementById('statExpense').textContent = formatCurrency(expense);
+    document.getElementById('statSavings').textContent = formatCurrency(savings > 0 ? savings : 0);
+    document.getElementById('statBalance').textContent = formatCurrency(savings);
+  }
+
+  function formatCurrency(amount) {
+    return CONFIG.CURRENCY + Number(amount).toLocaleString(CONFIG.LOCALE);
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  CHARTS                                                    ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function renderCharts() {
+    renderOverviewChart();
+    renderCategoryChart();
+    renderMemberChart();
+  }
+
+  function renderOverviewChart() {
+    const ctx = document.getElementById('overviewChart').getContext('2d');
+    if (charts.overview) charts.overview.destroy();
+
+    const months = getLast6Months();
+    const incomeData = months.map(m => {
+      return familyData.transactions.filter(t => t.type === 'income' && getMonthKey(t.date) === m.key).reduce((s,t) => s + Number(t.amount), 0);
+    });
+    const expenseData = months.map(m => {
+      return familyData.transactions.filter(t => t.type === 'expense' && getMonthKey(t.date) === m.key).reduce((s,t) => s + Number(t.amount), 0);
+    });
+
+    charts.overview = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: months.map(m => m.label),
+        datasets: [
+          { label: 'Income', data: incomeData, backgroundColor: '#0d9488', borderRadius: 6 },
+          { label: 'Expense', data: expenseData, backgroundColor: '#f43f5e', borderRadius: 6 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { font: { family: 'DM Sans', size: 12 } } } },
+        scales: { y: { beginAtZero: true, ticks: { font: { family: 'DM Sans', size: 11 } } }, x: { ticks: { font: { family: 'DM Sans', size: 11 } } } }
+      }
     });
   }
 
-  // Member Chart
-  destroyChart('member');
-  const ml = DATA.members.map(m => m.name.split(' ')[0]);
-  const mInc = DATA.members.map(m => txs.filter(t => t.mid === m.id && t.type === 'income').reduce((a, t) => a + t.amount, 0));
-  const mExp = DATA.members.map(m => txs.filter(t => t.mid === m.id && t.type === 'expense').reduce((a, t) => a + t.amount, 0));
-  charts_.member = new Chart(document.getElementById('memberChart'), {
-    type: 'bar',
-    data: {
-      labels: ml,
-      datasets: [
-        {label: 'Income', data: mInc, backgroundColor: DATA.members.map(m => m.color + '55'), borderColor: DATA.members.map(m => m.color), borderWidth: 2},
-        {label: 'Expense', data: mExp, backgroundColor: DATA.members.map(m => m.color + '22'), borderColor: DATA.members.map(m => m.color), borderWidth: 1}
-      ]
-    },
-    options: {responsive: true, maintainAspectRatio: false, scales: {y: {grid: {color: 'rgba(0,0,0,.04)'}}, x: {grid: {display: false}}}}
-  });
-}
+  function renderCategoryChart() {
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+    if (charts.category) charts.category.destroy();
 
-function renderRecentTx(txs) {
-  const recent = [...txs].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
-  document.getElementById('recentTxList').innerHTML = txRowsHtml(recent) || '<div class="empty-state"><p>No transactions yet</p></div>';
-}
+    const filtered = getFilteredTransactions().filter(t => t.type === 'expense');
+    const categories = {};
+    filtered.forEach(t => { categories[t.category] = (categories[t.category] || 0) + Number(t.amount); });
 
-function txRowsHtml(txs) {
-  return txs.map(t => {
-    const m = getM(t.mid);
-    const col = CAT_COLOR[t.cat] || '#94a3b8';
-    const ce = canEdit(t);
-    return `<div class="tx-row">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="width:8px;height:8px;border-radius:50%;background:${col}"></span>
-        <span>${esc(t.desc)}</span>
-      </div>
-      <span style="font-size:12px">${ini(m.name)}</span>
-      <span style="background:${col}18;color:${col};padding:2px 8px;border-radius:4px;font-size:11px">${t.cat}</span>
-      <span style="font-size:12px;color:var(--text-muted)">${fmtDate(t.date)}</span>
-      <span style="font-weight:700;color:${t.type==='income'?'var(--teal)':'var(--rose)'}">${t.type==='income'?'+':'-'}${fmt(t.amount)}</span>
-    </div>`;
-  }).join('');
-}
+    const labels = Object.keys(categories);
+    const data = Object.values(categories);
+    const colors = ['#f43f5e','#f59e0b','#0d9488','#0ea5e9','#8b5cf6','#ec4899','#10b981','#6366f1','#f97316'];
 
-// ════════════════════════════════════════════════════
-// TRANSACTIONS
-// ════════════════════════════════════════════════════
-function renderTxView(type) {
-  const isInc = type === 'income';
-  const pfx = isInc ? 'fi' : 'fe';
-  const memSel = document.getElementById(pfx + '-member');
-  const catSel = document.getElementById(pfx + '-cat');
-  const srch = document.getElementById(pfx + '-search');
-  if (!memSel) return;
-  
-  const curMem = memSel.value;
-  memSel.innerHTML = '<option value="">👤 All</option>';
-  DATA.members.forEach(m => memSel.innerHTML += `<option value="${m.id}"${m.id === curMem ? ' selected' : ''}>${m.name}</option>`);
-  
-  let txs = mkTx(CM).filter(t => t.type === type);
-  if (memSel.value) txs = txs.filter(t => t.mid === memSel.value);
-  if (catSel.value) txs = txs.filter(t => t.cat === catSel.value);
-  const q = (srch.value || '').toLowerCase();
-  if (q) txs = txs.filter(t => t.desc.toLowerCase().includes(q));
-  txs.sort((a, b) => new Date(b.date) - new Date(a.date));
-  
-  const total = txs.reduce((a, t) => a + t.amount, 0);
-  document.getElementById(isInc ? 'incomeTxList' : 'expenseTxList').innerHTML = txRowsHtml(txs) || '<div class="empty-state"><p>No ' + type + 's found</p></div>';
-}
-
-// ════════════════════════════════════════════════════
-// MEMBERS
-// ════════════════════════════════════════════════════
-function renderMembers() {
-  const txs = mkTx(CM);
-  const tExp = txs.filter(t => t.type === 'expense').reduce((a, t) => a + t.amount, 0);
-  let html = DATA.members.map(m => {
-    const mt = txs.filter(t => t.mid === m.id);
-    const mInc = mt.filter(t => t.type === 'income').reduce((a, t) => a + t.amount, 0);
-    const mExp = mt.filter(t => t.type === 'expense').reduce((a, t) => a + t.amount, 0);
-    const mNet = mInc - mExp;
-    const pct = tExp > 0 ? Math.min(100, Math.round(mExp / tExp * 100)) : 0;
-    const isYou = m.id === CU.id;
-    return `<div style="background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:22px;position:relative;transition:all .2s">
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-        <div style="width:48px;height:48px;background:${m.color}22;color:${m.color};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700">${ini(m.name)}</div>
-        <div>
-          <div style="font-weight:600;font-size:15px">${esc(m.name)}${isYou?' (you)':''}</div>
-          <div style="font-size:12px;color:var(--text-muted)">${m.relation} · ${m.role}</div>
-        </div>
-        ${isAdmin() && !isYou ? `<button class="btn-icon del" onclick="deleteMember('${m.id}')" style="position:absolute;right:14px;top:14px">🗑️</button>` : ''}
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
-        <div style="background:var(--surface2);border-radius:9px;padding:10px;text-align:center">
-          <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--teal)">${fmt(mInc)}</div>
-          <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase">Income</div>
-        </div>
-        <div style="background:var(--surface2);border-radius:9px;padding:10px;text-align:center">
-          <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--rose)">${fmt(mExp)}</div>
-          <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase">Expense</div>
-        </div>
-        <div style="background:var(--surface2);border-radius:9px;padding:10px;text-align:center">
-          <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:${mNet>=0?'var(--sky)':'var(--rose)'}">${fmt(mNet)}</div>
-          <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase">Balance</div>
-        </div>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-bottom:5px">
-        <span>Expense share</span><span>${pct}%</span>
-      </div>
-      <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${m.color};border-radius:3px"></div></div>
-    </div>`;
-  }).join('');
-  
-  if (isAdmin() && DATA.members.length < 6) {
-    html += `<div onclick="openMemberModal()" style="background:transparent;border:2px dashed var(--border2);border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;min-height:180px;text-align:center;transition:all .2s">
-      <div style="width:48px;height:48px;background:var(--surface2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--text-muted)">+</div>
-      <h4 style="font-size:14px;color:var(--text-mid);font-weight:500">Add Member</h4>
-      <span style="font-size:11px;color:var(--text-muted)">${DATA.members.length}/6</span>
-    </div>`;
+    charts.category = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{ data, backgroundColor: colors.slice(0, labels.length), borderWidth: 0 }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { font: { family: 'DM Sans', size: 12 }, padding: 12 } } }
+      }
+    });
   }
-  
-  document.getElementById('membersGrid').innerHTML = html;
+
+  function renderMemberChart() {
+    const ctx = document.getElementById('memberChart').getContext('2d');
+    if (charts.member) charts.member.destroy();
+
+    const filtered = getFilteredTransactions().filter(t => t.type === 'expense');
+    const members = {};
+    filtered.forEach(t => { members[t.member || 'Unknown'] = (members[t.member || 'Unknown'] || 0) + Number(t.amount); });
+
+    charts.member = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: Object.keys(members),
+        datasets: [{ label: 'Spending', data: Object.values(members), backgroundColor: '#8b5cf6', borderRadius: 6 }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true, ticks: { font: { family: 'DM Sans', size: 11 } } }, y: { ticks: { font: { family: 'DM Sans', size: 11 } } } }
+      }
+    });
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  TRANSACTIONS                                              ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function renderTransactions() {
+    const tbody = document.getElementById('transactionsBody');
+    const filtered = getFilteredTransactions();
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px">No transactions found.</td></tr>';
+      return;
+    }
+
+    // Sort by date descending
+    filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+    tbody.innerHTML = filtered.map(t => `
+      <tr>
+        <td>${formatDate(t.date)}</td>
+        <td><span class="badge badge-${t.type}">${t.type}</span></td>
+        <td>${t.category}</td>
+        <td>${t.description || '-'}</td>
+        <td>${t.member || '-'}</td>
+        <td style="font-weight:600;color:${t.type==='income'?'var(--teal)':'var(--rose)'}">${formatCurrency(t.amount)}</td>
+        <td><button class="btn-icon" onclick="deleteTransaction('${t.id}')" title="Delete">🗑️</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function openTransactionModal() {
+    document.getElementById('transactionModal').classList.add('active');
+  }
+
+  async function saveTransaction(e) {
+    e.preventDefault();
+    const transaction = {
+      id: 'tx_' + Date.now() + '_' + Math.random().toString(36).substr(2,5),
+      type: document.getElementById('txType').value,
+      date: document.getElementById('txDate').value,
+      category: document.getElementById('txCategory').value,
+      amount: document.getElementById('txAmount').value,
+      description: document.getElementById('txDesc').value,
+      member: document.getElementById('txMember').value
+    };
+
+    try {
+      const result = await apiCall({ action: 'saveTransaction', familyId: currentUser.familyId, transaction });
+      if (result.success) {
+        familyData.transactions.push(transaction);
+        renderAll();
+        closeModal('transactionModal');
+        showToast('Transaction saved!', 'success');
+        e.target.reset();
+        document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+      } else {
+        showToast(result.message || 'Failed to save.', 'error');
+      }
+    } catch(err) {
+      showToast('Failed to save transaction.', 'error');
+    }
+  }
+
+  async function deleteTransaction(txId) {
+    if (!confirm('Delete this transaction?')) return;
+    try {
+      const result = await apiCall({ action: 'deleteTransaction', familyId: currentUser.familyId, txId });
+      if (result.success) {
+        familyData.transactions = familyData.transactions.filter(t => t.id !== txId);
+        renderAll();
+        showToast('Transaction deleted.', 'info');
+      }
+    } catch(err) {
+      showToast('Failed to delete.', 'error');
+    }
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  BUDGET                                                    ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function renderBudgets() {
+    const grid = document.getElementById('budgetGrid');
+    if (familyData.budgets.length === 0) {
+      grid.innerHTML = '<div class="budget-item" style="text-align:center;color:var(--text-muted);padding:40px">No budgets set. Click "+ Set Budget" to add one.</div>';
+      return;
+    }
+
+    const currentMonth = new Date().toISOString().slice(0,7);
+    const expenses = familyData.transactions.filter(t => t.type === 'expense' && t.date && t.date.startsWith(currentMonth));
+
+    grid.innerHTML = familyData.budgets.map(b => {
+      const spent = expenses.filter(t => t.category === b.category).reduce((s,t) => s + Number(t.amount), 0);
+      const pct = Math.min((spent / b.limit) * 100, 100);
+      const cls = pct < 60 ? 'good' : pct < 85 ? 'warning' : 'danger';
+      return `
+        <div class="budget-item">
+          <div class="budget-header">
+            <h4>${b.category}</h4>
+            <span style="font-size:0.8rem;color:var(--text-muted)">${formatCurrency(spent)} / ${formatCurrency(b.limit)}</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill ${cls}" style="width:${pct}%"></div>
+          </div>
+          <p style="font-size:0.75rem;color:var(--text-muted);margin-top:6px">${Math.round(pct)}% used</p>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function openBudgetModal() {
+    document.getElementById('budgetModal').classList.add('active');
+  }
+
+  function saveBudget(e) {
+    e.preventDefault();
+    const category = document.getElementById('budgetCategory').value;
+    const limit = Number(document.getElementById('budgetLimit').value);
+
+    // Update existing or add new
+    const existing = familyData.budgets.findIndex(b => b.category === category);
+    if (existing >= 0) {
+      familyData.budgets[existing].limit = limit;
+    } else {
+      familyData.budgets.push({ category, limit });
+    }
+
+    renderBudgets();
+    closeModal('budgetModal');
+    showToast('Budget saved locally. Click "💾 Save" to sync to cloud.', 'success');
+    e.target.reset();
+  }
+
+  async function saveBudgetsToCloud() {
+    try {
+      const result = await apiCall({ action: 'saveBudget', familyId: currentUser.familyId, budgets: familyData.budgets });
+      if (result.success) {
+        showToast('Budgets saved to cloud!', 'success');
+      } else {
+        showToast(result.message || 'Failed to save budgets.', 'error');
+      }
+    } catch(err) {
+      showToast('Failed to save budgets.', 'error');
+    }
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  FAMILY MEMBERS                                            ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function renderMembers() {
+    const grid = document.getElementById('membersGrid');
+    const allMembers = familyData.members.length > 0 ? familyData.members : (currentUser ? [currentUser] : []);
+
+    grid.innerHTML = allMembers.map(m => `
+      <div class="member-card">
+        <div class="member-avatar">${(m.name || '?').charAt(0).toUpperCase()}</div>
+        <h4>${m.name}</h4>
+        <div class="relation">${m.relation || 'Self'}</div>
+        <span class="role-badge ${m.role === 'admin' ? 'admin' : 'member'}">${m.role || 'member'}</span>
+      </div>
+    `).join('');
+  }
+
+  function openMemberModal() {
+    if (currentUser.role !== 'admin') {
+      showToast('Only admins can add family members.', 'error');
+      return;
+    }
+    if (familyData.members.length >= CONFIG.MAX_MEMBERS) {
+      showToast(`Maximum ${CONFIG.MAX_MEMBERS} members allowed.`, 'error');
+      return;
+    }
+    document.getElementById('memberModal').classList.add('active');
+  }
+
+  async function addMember(e) {
+    e.preventDefault();
+    const memberData = {
+      name: document.getElementById('memberName').value.trim(),
+      email: document.getElementById('memberEmail').value.trim(),
+      phone: document.getElementById('memberPhone').value.trim(),
+      password: document.getElementById('memberPassword').value,
+      role: document.getElementById('memberRole').value,
+      relation: document.getElementById('memberRelation').value
+    };
+
+    try {
+      const result = await apiCall({
+        action: 'addMember',
+        familyId: currentUser.familyId,
+        ...memberData
+      });
+      if (result.success) {
+        familyData.members.push({ ...memberData, id: result.memberId });
+        renderMembers();
+        updateMemberSelect();
+        closeModal('memberModal');
+        showToast('Member added! They can now login independently.', 'success');
+        e.target.reset();
+      } else {
+        showToast(result.message || 'Failed to add member.', 'error');
+      }
+    } catch(err) {
+      showToast('Failed to add member.', 'error');
+    }
+  }
+
+  function updateMemberSelect() {
+    const select = document.getElementById('txMember');
+    const allMembers = familyData.members.length > 0 ? familyData.members : (currentUser ? [currentUser] : []);
+    select.innerHTML = allMembers.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  REPORTS & EXPORT                                          ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function renderReport() {
+    const filtered = getFilteredTransactions();
+    const income = filtered.filter(t => t.type === 'income').reduce((s,t) => s + Number(t.amount), 0);
+    const expense = filtered.filter(t => t.type === 'expense').reduce((s,t) => s + Number(t.amount), 0);
+    const savings = income - expense;
+
+    const categories = {};
+    filtered.filter(t => t.type === 'expense').forEach(t => {
+      categories[t.category] = (categories[t.category] || 0) + Number(t.amount);
+    });
+
+    let catHTML = Object.entries(categories).map(([k,v]) =>
+      `<tr><td>${k}</td><td>${formatCurrency(v)}</td><td>${expense > 0 ? Math.round((v/expense)*100) : 0}%</td></tr>`
+    ).join('');
+
+    document.getElementById('reportSummary').innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px">
+        <div style="padding:16px;background:var(--teal-light);border-radius:var(--radius-sm)">
+          <div style="font-size:0.8rem;color:var(--teal);font-weight:600">INCOME</div>
+          <div style="font-size:1.3rem;font-weight:700;margin-top:4px">${formatCurrency(income)}</div>
+        </div>
+        <div style="padding:16px;background:var(--rose-light);border-radius:var(--radius-sm)">
+          <div style="font-size:0.8rem;color:var(--rose);font-weight:600">EXPENSE</div>
+          <div style="font-size:1.3rem;font-weight:700;margin-top:4px">${formatCurrency(expense)}</div>
+        </div>
+        <div style="padding:16px;background:var(--sky-light);border-radius:var(--radius-sm)">
+          <div style="font-size:0.8rem;color:var(--sky);font-weight:600">NET SAVINGS</div>
+          <div style="font-size:1.3rem;font-weight:700;margin-top:4px">${formatCurrency(savings)}</div>
+        </div>
+      </div>
+      <h4 style="margin-bottom:12px;font-family:'DM Sans',sans-serif;font-size:1rem">Expense Breakdown</h4>
+      <table>
+        <thead><tr><th>Category</th><th>Amount</th><th>Share</th></tr></thead>
+        <tbody>${catHTML || '<tr><td colspan="3" style="text-align:center;color:var(--text-muted)">No expenses</td></tr>'}</tbody>
+      </table>
+    `;
+  }
+
+  function generatePDF() {
+    const element = document.getElementById('reportContent');
+    const opt = {
+      margin: 10,
+      filename: 'FamilyFinPlan_Report.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+    showToast('PDF downloading...', 'success');
+  }
+
+  function exportCSV() {
+    const transactions = getFilteredTransactions();
+    if (transactions.length === 0) {
+      showToast('No transactions to export.', 'info');
+      return;
+    }
+    const headers = ['Date','Type','Category','Description','Member','Amount'];
+    const rows = transactions.map(t => [t.date, t.type, t.category, t.description||'', t.member||'', t.amount]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'FamilyFinPlan_Transactions.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('CSV exported!', 'success');
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  SETTINGS                                                  ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function saveSettings() {
+    const currency = document.getElementById('settingsCurrency').value.trim();
+    const appUrl = document.getElementById('settingsAppUrl').value.trim();
+    if (currency) CONFIG.CURRENCY = currency;
+    if (appUrl) CONFIG.APPS_SCRIPT_URL = appUrl;
+    localStorage.setItem('ffp_settings', JSON.stringify({ currency: CONFIG.CURRENCY, appUrl: CONFIG.APPS_SCRIPT_URL }));
+    showToast('Settings saved!', 'success');
+    renderAll();
+  }
+
+  // Load settings from localStorage
+  (function loadSettings() {
+    const saved = localStorage.getItem('ffp_settings');
+    if (saved) {
+      const s = JSON.parse(saved);
+      if (s.currency) CONFIG.CURRENCY = s.currency;
+      if (s.appUrl && s.appUrl !== 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') CONFIG.APPS_SCRIPT_URL = s.appUrl;
+    }
+  })();
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  UTILITY FUNCTIONS                                         ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+  }
+
+  function showLoading(show) {
+    document.getElementById('loadingOverlay').classList.toggle('active', show);
+  }
+
+  function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 4000);
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString(CONFIG.LOCALE, { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  function getMonthKey(dateStr) {
+    if (!dateStr) return '';
+    return dateStr.slice(0,7);
+  }
+
+  function getLast6Months() {
+    const months = [];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({
+        key: d.toISOString().slice(0,7),
+        label: d.toLocaleDateString(CONFIG.LOCALE, { month: 'short', year: '2-digit' })
+      });
+    }
+    return months;
+  }
+
+  function populateMonthFilter() {
+    const select = document.getElementById('monthFilter');
+    const months = getLast6Months();
+    months.reverse().forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.key;
+      opt.textContent = m.label;
+      select.appendChild(opt);
+    });
+  }
+
+  function filterByMonth() {
+    renderAll();
+  }
+
+  function getFilteredTransactions() {
+    const month = document.getElementById('monthFilter').value;
+    if (month === 'all') return familyData.transactions;
+    return familyData.transactions.filter(t => t.date && t.date.startsWith(month));
+  }
+  </script>
+
+
+<!--
+╔══════════════════════════════════════════════════════════════════════╗
+║                    SETUP GUIDE                                        ║
+║  How to create and deploy your Google Apps Script backend             ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+STEP 1: Go to https://script.google.com and create a new project
+STEP 2: Create a new Google Sheet (this will be your database)
+STEP 3: In the Sheet, create 4 tabs/sheets named exactly:
+        - "Users"
+        - "Transactions"
+        - "Budgets"
+        - "Families"
+STEP 4: In the Users sheet, add headers in Row 1:
+        id | name | email | phone | passwordHash | role | familyId | relation | createdAt
+STEP 5: In the Transactions sheet, add headers in Row 1:
+        id | familyId | type | date | category | description | member | amount | createdAt
+STEP 6: In the Budgets sheet, add headers in Row 1:
+        familyId | category | limit | updatedAt
+STEP 7: In the Families sheet, add headers in Row 1:
+        id | adminEmail | createdAt
+STEP 8: Copy the Code.gs below into your Apps Script project
+STEP 9: Replace SPREADSHEET_ID with your Google Sheet's ID
+        (Found in the Sheet URL: https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit)
+STEP 10: Click Deploy > New Deployment > Web App
+         - Execute as: Me
+         - Who has access: Anyone
+         - Click Deploy and copy the URL
+STEP 11: Paste that URL into CONFIG.APPS_SCRIPT_URL in this file
+         OR paste it in Settings > App Script URL within the app
+
+STEP 12 (reCAPTCHA): Go to https://www.google.com/recaptcha/admin
+         - Register a new site (reCAPTCHA v2, "I'm not a robot")
+         - Add your domain(s)
+         - Copy the Site Key and replace CONFIG.RECAPTCHA_SITE_KEY
+
+═══════════════════════════════════════════════════════════════════════
+                        Code.gs (Google Apps Script)
+═══════════════════════════════════════════════════════════════════════
+
+// ============================================================
+// Code.gs - Copy everything below into your Apps Script editor
+// ============================================================
+
+const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID_HERE';
+
+function getSheet(name) {
+  return SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(name);
 }
 
-function deleteMember(id) {
-  if (!confirm('Remove this member?')) return;
-  DATA.members = DATA.members.filter(m => m.id !== id);
-  saveData(DATA);
-  renderAll();
-  updateMemberBadge();
-  buildLoginList();
-  toast('Member removed');
+// Handle CORS preflight
+function doGet(e) {
+  return ContentService.createTextOutput(JSON.stringify({ status: 'ok' }))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
-// ════════════════════════════════════════════════════
-// BUDGET
-// ════════════════════════════════════════════════════
-function renderBudget() {
-  const txs = mkTx(CM).filter(t => t.type === 'expense');
-  const spent = {}; txs.forEach(t => spent[t.cat] = (spent[t.cat] || 0) + t.amount);
-  const budgets = DATA.budgets || {};
-  const cats = EXP_CATS.map(c => c.n);
-  
-  let html = '';
-  cats.forEach(cat => {
-    const bgt = budgets[cat] || 0;
-    const sp = spent[cat] || 0;
-    if (!bgt && !sp) return;
-    const pct = bgt > 0 ? Math.min(100, Math.round(sp / bgt * 100)) : sp > 0 ? 100 : 0;
-    const col = CAT_COLOR[cat] || '#94a3b8';
-    const pctClass = pct < 70 ? 'ok' : pct < 90 ? 'warn' : 'over';
-    const em = EXP_CATS.find(c => c.n === cat)?.e || '📦';
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    let result;
     
-    html += `<div style="background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:18px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:6px;font-weight:600;font-size:14px"><span style="width:10px;height:10px;border-radius:50%;background:${col}"></span>${em} ${cat}</div>
-        <span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:20px;background:${pct<70?'var(--teal-light)':pct<90?'var(--gold-pale)':'var(--rose-light)'};color:${pct<70?'var(--teal)':pct<90?'#92400e':'var(--rose)'}">${bgt?pct+'%':'—'}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:8px">
-        <span style="color:var(--rose);font-weight:600">${fmt(sp)}</span>
-        <span>${bgt?'/ '+fmt(bgt):'no limit'}</span>
-      </div>
-      ${bgt?`<div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${pct>=90?'var(--rose)':pct>=70?'var(--gold)':col};border-radius:3px"></div></div>`:''}
-    </div>`;
-  });
-  
-  document.getElementById('budgetGrid').innerHTML = html || '<p style="color:var(--text-muted)">No budgets set</p>';
+    switch(data.action) {
+      case 'register': result = handleRegister(data); break;
+      case 'login': result = handleLogin(data); break;
+      case 'addMember': result = handleAddMember(data); break;
+      case 'saveTransaction': result = handleSaveTransaction(data); break;
+      case 'deleteTransaction': result = handleDeleteTransaction(data); break;
+      case 'loadData': result = handleLoadData(data); break;
+      case 'saveBudget': result = handleSaveBudget(data); break;
+      case 'forgotPassword': result = handleForgotPassword(data); break;
+      default: result = { success: false, message: 'Unknown action' };
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ 
+      success: false, 
+      message: 'Server error: ' + err.message 
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
-function openBudgetModal() {openModal('budgetModal');}
-
-function saveBudget() {
-  const cat = document.getElementById('bgCat').value;
-  const amt = parseFloat(document.getElementById('bgAmount').value);
-  if (!amt || amt <= 0) {toast('Enter a valid amount', 'err'); return;}
-  if (!DATA.budgets) DATA.budgets = {};
-  DATA.budgets[cat] = amt;
-  saveData(DATA);
-  renderBudget();
-  closeModal('budgetModal');
-  toast(`Budget: ${cat} → ${fmt(amt)}`, 'ok');
+// ============ SHA-256 HASH ============
+function sha256(str) {
+  const rawHash = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, str);
+  return rawHash.map(function(byte) {
+    return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+  }).join('');
 }
 
-// ════════════════════════════════════════════════════
-// REPORT
-// ════════════════════════════════════════════════════
-function renderReport() {
-  const txs = mkTx(CM);
-  const tInc = txs.filter(t => t.type === 'income').reduce((a, t) => a + t.amount, 0);
-  const tExp = txs.filter(t => t.type === 'expense').reduce((a, t) => a + t.amount, 0);
-  const net = tInc - tExp;
+// ============ REGISTER ============
+function handleRegister(data) {
+  const sheet = getSheet('Users');
+  const familySheet = getSheet('Families');
   
-  let html = `<div style="background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:30px">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:20px;border-bottom:2px solid var(--border);margin-bottom:24px;flex-wrap:wrap;gap:12px">
-      <div>
-        <div style="font-family:'Playfair Display',serif;font-size:26px;color:var(--navy);font-weight:700">Monthly Report</div>
-        <div style="font-size:12px;color:var(--text-muted)">${fmtMK(CM)} · ${new Date().toLocaleDateString('en-IN')}</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:${net>=0?'var(--teal)':'var(--rose)'}">${fmt(net)}</div>
-        <div style="font-size:11px;color:var(--text-muted)">Net Balance</div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-bottom:24px">
-      <div style="background:var(--teal-light);border-radius:var(--radius);padding:16px">
-        <div style="font-size:11px;color:var(--teal);text-transform:uppercase;font-weight:600;margin-bottom:6px">Income</div>
-        <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--teal);font-weight:700">${fmt(tInc)}</div>
-      </div>
-      <div style="background:var(--rose-light);border-radius:var(--radius);padding:16px">
-        <div style="font-size:11px;color:var(--rose);text-transform:uppercase;font-weight:600;margin-bottom:6px">Expenses</div>
-        <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--rose);font-weight:700">${fmt(tExp)}</div>
-      </div>
-    </div>
-    <div style="padding:16px;background:var(--surface2);border-radius:11px;text-align:center;font-size:12px;color:var(--text-muted)">
-      Generated by <strong>FamilyFinPlan</strong> · Smart Budget Planner
-    </div>
-  </div>`;
-  
-  document.getElementById('reportContent').innerHTML = html;
-}
-
-function doPrint() {
-  nav(document.querySelector('[data-view=report]'));
-  setTimeout(() => window.print(), 350);
-}
-
-// ════════════════════════════════════════════════════
-// MODALS & ENTRIES
-// ════════════════════════════════════════════════════
-function openAddModal(type) {
-  editId = null;
-  selType = type || 'income';
-  selCat = '';
-  document.getElementById('eAmount').value = '';
-  document.getElementById('eDesc').value = '';
-  document.getElementById('eDate').value = new Date().toISOString().slice(0, 10);
-  buildMonthOverride();
-  document.getElementById('eMonthOverride').value = CM;
-  
-  const ms = document.getElementById('eMember');
-  ms.innerHTML = DATA.members.map(m => `<option value="${m.id}"${m.id === CU.id ? ' selected' : ''}>${m.name}</option>`).join('');
-  ms.disabled = !isAdmin();
-  
-  setEntryType(selType);
-  openModal('entryModal');
-  setTimeout(() => document.getElementById('eAmount').focus(), 200);
-}
-
-function setEntryType(type) {
-  selType = type;
-  document.getElementById('typeIncomeBtn').style.background = type === 'income' ? 'var(--teal-light)' : 'transparent';
-  document.getElementById('typeIncomeBtn').style.color = type === 'income' ? 'var(--teal)' : 'inherit';
-  document.getElementById('typeExpenseBtn').style.background = type === 'expense' ? 'var(--rose-light)' : 'transparent';
-  document.getElementById('typeExpenseBtn').style.color = type === 'expense' ? 'var(--rose)' : 'inherit';
-  
-  const cats = type === 'income' ? INCOME_CATS : EXP_CATS;
-  document.getElementById('catGrid').innerHTML = cats.map(c => 
-    `<button onclick="pickCat('${c.n}')" style="padding:9px 6px;border:1.5px solid var(--border);border-radius:9px;background:${selCat===c.n?'var(--gold-pale)':'transparent'};cursor:pointer;transition:all .15s;text-align:center;color:${selCat===c.n?'#92400e':'var(--text-mid)'};font-weight:${selCat===c.n?600:400}">
-      <div style="font-size:18px;margin-bottom:2px">${c.e}</div>${c.n}
-    </button>`
-  ).join('');
-}
-
-function pickCat(c) {
-  selCat = c;
-  setEntryType(selType);
-}
-
-function saveEntry() {
-  const amount = parseFloat(document.getElementById('eAmount').value);
-  const desc = document.getElementById('eDesc').value.trim();
-  const mid = document.getElementById('eMember').value;
-  const date = document.getElementById('eDate').value;
-  const mk = document.getElementById('eMonthOverride').value;
-  
-  if (!amount || amount <= 0) {toast('Enter amount', 'err'); return;}
-  if (!desc) {toast('Add description', 'err'); return;}
-  if (!selCat) {toast('Select category', 'err'); return;}
-  if (!mid) {toast('Select member', 'err'); return;}
-  
-  if (editId) {
-    const t = DATA.transactions.find(x => x.id === editId);
-    if (t) Object.assign(t, {amount, desc, mid, date, type: selType, cat: selCat, mk});
-  } else {
-    DATA.transactions.push({id: uid(), mid, type: selType, amount, desc, cat: selCat, date, mk});
+  // Check if email already exists
+  const users = sheet.getDataRange().getValues();
+  for (let i = 1; i < users.length; i++) {
+    if (users[i][2] === data.email) {
+      return { success: false, message: 'Email already registered.' };
+    }
+    if (users[i][3] === data.phone) {
+      return { success: false, message: 'Phone already registered.' };
+    }
   }
   
-  saveData(DATA);
-  renderAll();
-  closeModal('entryModal');
-  toast(editId ? 'Updated ✓' : 'Saved ✓', 'ok');
-  editId = null;
-}
-
-function deleteEntry(id) {
-  if (!confirm('Delete entry?')) return;
-  DATA.transactions = DATA.transactions.filter(x => x.id !== id);
-  saveData(DATA);
-  renderAll();
-  toast('Deleted');
-}
-
-// ════════════════════════════════════════════════════
-// MEMBERS MODAL
-// ════════════════════════════════════════════════════
-function openMemberModal() {
-  if (DATA.members.length >= 6) {toast('Max 6 members', 'err'); return;}
-  if (!isAdmin()) {toast('Admin only', 'err'); return;}
+  // First user becomes admin
+  const isFirstUser = users.length <= 1;
+  const role = isFirstUser ? 'admin' : 'admin'; // Each registrant is admin of their family
+  const familyId = 'fam_' + new Date().getTime();
+  const userId = 'usr_' + new Date().getTime();
+  const passwordHash = sha256(data.password);
   
-  document.getElementById('nmName').value = '';
-  document.getElementById('nmPin').value = '';
-  selColor = COLORS[DATA.members.length % COLORS.length];
+  // Create family
+  familySheet.appendRow([familyId, data.email, new Date().toISOString()]);
   
-  const cp = document.getElementById('colorPicker');
-  cp.innerHTML = COLORS.map(c => 
-    `<div onclick="pickColor('${c}')" style="width:30px;height:30px;border-radius:50%;background:${c};cursor:pointer;border:3px solid ${c===selColor?'var(--navy)':'transparent'};transition:all .15s"></div>`
-  ).join('');
+  // Create user
+  sheet.appendRow([userId, data.name, data.email, data.phone, passwordHash, role, familyId, 'Self', new Date().toISOString()]);
   
-  openModal('memberModal');
+  return {
+    success: true,
+    user: {
+      id: userId,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      role: role,
+      familyId: familyId,
+      relation: 'Self'
+    }
+  };
 }
 
-function pickColor(c) {
-  selColor = c;
-  const cp = document.getElementById('colorPicker');
-  cp.innerHTML = COLORS.map(col => 
-    `<div onclick="pickColor('${col}')" style="width:30px;height:30px;border-radius:50%;background:${col};cursor:pointer;border:3px solid ${col===c?'var(--navy)':'transparent'};transition:all .15s"></div>`
-  ).join('');
-}
-
-function saveMember() {
-  const name = document.getElementById('nmName').value.trim();
-  const role = document.getElementById('nmRole').value;
-  const relation = document.getElementById('nmRelation').value;
-  const pin = document.getElementById('nmPin').value;
+// ============ LOGIN ============
+function handleLogin(data) {
+  const sheet = getSheet('Users');
+  const users = sheet.getDataRange().getValues();
+  const passwordHash = sha256(data.password);
   
-  if (!name) {toast('Enter name', 'err'); return;}
-  if (!pin || pin.length < 4) {toast('PIN must be 4-6 digits', 'err'); return;}
+  for (let i = 1; i < users.length; i++) {
+    const row = users[i];
+    // row: id, name, email, phone, passwordHash, role, familyId, relation, createdAt
+    if ((row[2] === data.identifier || row[3] === data.identifier) && row[4] === passwordHash) {
+      return {
+        success: true,
+        user: {
+          id: row[0],
+          name: row[1],
+          email: row[2],
+          phone: row[3],
+          role: row[5],
+          familyId: row[6],
+          relation: row[7]
+        }
+      };
+    }
+  }
   
-  DATA.members.push({id: uid(), name, role, relation, color: selColor, pin, income: 0, notes: ''});
-  saveData(DATA);
-  renderAll();
-  updateMemberBadge();
-  buildLoginList();
-  closeModal('memberModal');
-  toast(`${name} added! 🎉`, 'ok');
+  return { success: false, message: 'Invalid email/phone or password.' };
 }
 
-// ════════════════════════════════════════════════════
-// SETTINGS
-// ════════════════════════════════════════════════════
-function renderProfileCard() {
-  document.getElementById('profileCard').innerHTML = `
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-      <div style="width:48px;height:48px;border-radius:50%;background:${CU.color}22;color:${CU.color};display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700">${ini(CU.name)}</div>
-      <div>
-        <div style="font-weight:600;font-size:15px">${esc(CU.name)}</div>
-        <div style="font-size:12px;color:var(--text-muted)">${CU.relation} · ${CU.role}</div>
-      </div>
-    </div>
-    <div style="font-size:13px;color:var(--text-muted);line-height:1.9">
-      <div>📅 Month: <strong>${fmtMK(CM)}</strong></div>
-      <div>💼 Transactions: <strong>${mkTx(CM).filter(t => t.mid === CU.id).length}</strong></div>
-      <div>👨‍👩‍👧 Family: <strong>${DATA.members.length} members</strong></div>
-    </div>
-  `;
-}
-
-function changePin() {
-  const old = document.getElementById('oldPin').value;
-  const np = document.getElementById('newPin').value;
-  const cp = document.getElementById('confirmPin') ? document.getElementById('confirmPin').value : np;
+// ============ ADD MEMBER ============
+function handleAddMember(data) {
+  const sheet = getSheet('Users');
+  const users = sheet.getDataRange().getValues();
   
-  if (old !== CU.pin) {toast('Wrong PIN', 'err'); return;}
-  if (!np || np.length < 4) {toast('PIN must be 4-6 digits', 'err'); return;}
-  if (np !== cp && document.getElementById('confirmPin')) {toast('PINs not matching', 'err'); return;}
+  // Check max members for this family
+  let memberCount = 0;
+  for (let i = 1; i < users.length; i++) {
+    if (users[i][6] === data.familyId) memberCount++;
+  }
+  if (memberCount >= 6) {
+    return { success: false, message: 'Maximum 6 members allowed per family.' };
+  }
   
-  CU.pin = np;
-  const m = DATA.members.find(x => x.id === CU.id);
-  if (m) m.pin = np;
-  saveData(DATA);
+  // Check if email/phone already exists
+  for (let i = 1; i < users.length; i++) {
+    if (users[i][2] === data.email) {
+      return { success: false, message: 'Email already in use.' };
+    }
+    if (users[i][3] === data.phone) {
+      return { success: false, message: 'Phone already in use.' };
+    }
+  }
   
-  document.getElementById('oldPin').value = '';
-  document.getElementById('newPin').value = '';
-  if (document.getElementById('confirmPin')) document.getElementById('confirmPin').value = '';
+  const userId = 'usr_' + new Date().getTime();
+  const passwordHash = sha256(data.password);
   
-  toast('PIN updated ✓', 'ok');
-}
-
-// ════════════════════════════════════════════════════
-// EXPORT
-// ════════════════════════════════════════════════════
-function exportCSV() {
-  const txs = mkTx(CM).sort((a, b) => new Date(a.date) - new Date(b.date));
-  const rows = [['Date', 'Member', 'Type', 'Category', 'Description', 'Amount (₹)']];
-  txs.forEach(t => {
-    const m = getM(t.mid);
-    rows.push([t.date, m.name, t.type, t.cat, t.desc, t.amount]);
-  });
+  sheet.appendRow([userId, data.name, data.email, data.phone, passwordHash, data.role || 'member', data.familyId, data.relation || 'Other', new Date().toISOString()]);
   
-  rows.push([]);
-  const tInc = txs.filter(t => t.type === 'income').reduce((a, t) => a + t.amount, 0);
-  const tExp = txs.filter(t => t.type === 'expense').reduce((a, t) => a + t.amount, 0);
-  rows.push(['Total Income', '', '', '', '', tInc]);
-  rows.push(['Total Expense', '', '', '', '', tExp]);
-  rows.push(['Net Balance', '', '', '', '', tInc - tExp]);
+  return {
+    success: true,
+    memberId: userId,
+    message: 'Member added successfully.'
+  };
+}
+
+// ============ SAVE TRANSACTION ============
+function handleSaveTransaction(data) {
+  const sheet = getSheet('Transactions');
+  const tx = data.transaction;
   
-  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `FamilyFinPlan_${CM}.csv`;
-  a.click();
-  toast('CSV downloaded! 📥', 'ok');
+  sheet.appendRow([
+    tx.id,
+    data.familyId,
+    tx.type,
+    tx.date,
+    tx.category,
+    tx.description || '',
+    tx.member || '',
+    tx.amount,
+    new Date().toISOString()
+  ]);
+  
+  return { success: true, message: 'Transaction saved.' };
 }
 
-// ════════════════════════════════════════════════════
-// MODAL UTILS
-// ════════════════════════════════════════════════════
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
+// ============ DELETE TRANSACTION ============
+function handleDeleteTransaction(data) {
+  const sheet = getSheet('Transactions');
+  const rows = sheet.getDataRange().getValues();
+  
+  for (let i = 1; i < rows.length; i++) {
+    if (rows[i][0] === data.txId && rows[i][1] === data.familyId) {
+      sheet.deleteRow(i + 1);
+      return { success: true, message: 'Transaction deleted.' };
+    }
+  }
+  
+  return { success: false, message: 'Transaction not found.' };
 }
 
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
+// ============ LOAD DATA ============
+function handleLoadData(data) {
+  const userSheet = getSheet('Users');
+  const txSheet = getSheet('Transactions');
+  const budgetSheet = getSheet('Budgets');
+  
+  // Get family members
+  const users = userSheet.getDataRange().getValues();
+  const members = [];
+  for (let i = 1; i < users.length; i++) {
+    if (users[i][6] === data.familyId) {
+      members.push({
+        id: users[i][0],
+        name: users[i][1],
+        email: users[i][2],
+        phone: users[i][3],
+        role: users[i][5],
+        familyId: users[i][6],
+        relation: users[i][7]
+      });
+    }
+  }
+  
+  // Get transactions
+  const txRows = txSheet.getDataRange().getValues();
+  const transactions = [];
+  for (let i = 1; i < txRows.length; i++) {
+    if (txRows[i][1] === data.familyId) {
+      transactions.push({
+        id: txRows[i][0],
+        type: txRows[i][2],
+        date: txRows[i][3],
+        category: txRows[i][4],
+        description: txRows[i][5],
+        member: txRows[i][6],
+        amount: txRows[i][7]
+      });
+    }
+  }
+  
+  // Get budgets
+  const budgetRows = budgetSheet.getDataRange().getValues();
+  const budgets = [];
+  for (let i = 1; i < budgetRows.length; i++) {
+    if (budgetRows[i][0] === data.familyId) {
+      budgets.push({
+        category: budgetRows[i][1],
+        limit: budgetRows[i][2]
+      });
+    }
+  }
+  
+  return {
+    success: true,
+    members: members,
+    transactions: transactions,
+    budgets: budgets
+  };
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
-});
-
-document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', function(e) {
-  if (e.target === this) this.classList.remove('open');
-}));
-
-// ════════════════════════════════════════════════════
-// TOAST
-// ════════════════════════════════════════════════════
-function toast(msg, type = '') {
-  const el = document.createElement('div');
-  el.className = `toast ${type}`;
-  el.innerHTML = `${type === 'ok' ? '✓' : type === 'err' ? '✕' : type === 'warn' ? '⚠' : ''} ${msg}`;
-  document.getElementById('toastWrap').appendChild(el);
-  setTimeout(() => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(8px)';
-    setTimeout(() => el.remove(), 320);
-  }, 3500);
+// ============ SAVE BUDGET ============
+function handleSaveBudget(data) {
+  const sheet = getSheet('Budgets');
+  const rows = sheet.getDataRange().getValues();
+  
+  // Remove existing budgets for this family
+  for (let i = rows.length - 1; i >= 1; i--) {
+    if (rows[i][0] === data.familyId) {
+      sheet.deleteRow(i + 1);
+    }
+  }
+  
+  // Add new budgets
+  if (data.budgets && data.budgets.length > 0) {
+    data.budgets.forEach(function(b) {
+      sheet.appendRow([data.familyId, b.category, b.limit, new Date().toISOString()]);
+    });
+  }
+  
+  return { success: true, message: 'Budgets saved.' };
 }
 
-function showToast(msg, type) {
-  toast(msg, type);
+// ============ FORGOT PASSWORD ============
+function handleForgotPassword(data) {
+  const sheet = getSheet('Users');
+  const users = sheet.getDataRange().getValues();
+  
+  for (let i = 1; i < users.length; i++) {
+    if (users[i][2] === data.email) {
+      // Generate a random temporary password
+      const tempPass = 'Temp' + Math.random().toString(36).substr(2, 8) + '!';
+      const newHash = sha256(tempPass);
+      
+      // Update password in sheet (column 5 = index 4, but row is i+1 for 1-indexed)
+      sheet.getRange(i + 1, 5).setValue(newHash);
+      
+      // Send email with new password
+      try {
+        MailApp.sendEmail({
+          to: data.email,
+          subject: 'FamilyFinPlan - Password Reset',
+          htmlBody: '<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px">' +
+            '<h2 style="color:#0f172a">Password Reset</h2>' +
+            '<p>Your temporary password is:</p>' +
+            '<div style="background:#f1f5f9;padding:16px;border-radius:8px;font-size:18px;font-weight:bold;letter-spacing:1px;text-align:center">' + tempPass + '</div>' +
+            '<p style="margin-top:16px;color:#64748b">Please login and change your password immediately.</p>' +
+            '<p style="color:#94a3b8;font-size:12px">- FamilyFinPlan Team</p>' +
+            '</div>'
+        });
+      } catch(emailErr) {
+        return { success: false, message: 'Could not send email. Check Apps Script permissions.' };
+      }
+      
+      return { success: true, message: 'New password sent to your email.' };
+    }
+  }
+  
+  return { success: false, message: 'Email not found in our records.' };
 }
 
-// ════════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════════
-buildLoginList();
+// ============================================================
+// END OF Code.gs
+// ============================================================
 
-// Auto-login if demo in URL
-if (new URLSearchParams(location.search).has('demo')) {
-  document.getElementById('loginUser').value = 'm1';
-  document.getElementById('loginPin').value = '1234';
-  doLogin();
-}
-</script>
-
-<!-- Schema.org Structured Data -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "FamilyFinPlan",
-  "url": "https://familyfinplan.com",
-  "description": "Free monthly family budget planner for up to 6 members. Track income, expenses, and savings together.",
-  "applicationCategory": "FinanceApplication",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "INR",
-    "name": "Free Plan"
-  },
-  "featureList": ["Family budgeting", "Income tracking", "Expense tracking", "PDF reports", "CSV export"]
-}
-</script>
+-->
 </body>
 </html>
