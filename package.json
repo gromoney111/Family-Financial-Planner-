@@ -1,0 +1,25 @@
+{
+  "name": "family-financial-planner",
+  "version": "1.0.0",
+  "description": "Smart monthly family budget planner for up to 6 members",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "build": "npm run minify",
+    "minify": "echo 'Ready to minify with build tools'"
+  },
+  "keywords": [
+    "family budget",
+    "financial planner",
+    "expense tracker",
+    "income tracker",
+    "budget app",
+    "personal finance"
+  ],
+  "author": "FamilyFinPlan",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/family-financial-planner"
+  }
+}
