@@ -1348,10 +1348,142 @@
   // ╔══════════════════════════════════════════════════════════╗
   // ║  API COMMUNICATION                                         ║
   // ╚══════════════════════════════════════════════════════════╝
+  // ── LOCAL STORAGE FALLBACK (works without Google Sheets) ──
+  function getLocalUsers() {
+    return JSON.parse(localStorage.getItem('ffp_users') || '[]');
+  }
+  function saveLocalUsers(users) {
+    localStorage.setItem('ffp_users', JSON.stringify(users));
+  }
+  function getLocalTransactions(familyId) {
+    const all = JSON.parse(localStorage.getItem('ffp_transactions') || '[]');
+    return all.filter(t => t.familyId === familyId);
+  }
+  function saveLocalTransaction(familyId, tx) {
+    const all = JSON.parse(localStorage.getItem('ffp_transactions') || '[]');
+    tx.familyId = familyId;
+    all.push(tx);
+    localStorage.setItem('ffp_transactions', JSON.stringify(all));
+  }
+  function deleteLocalTransaction(familyId, txId) {
+    let all = JSON.parse(localStorage.getItem('ffp_transactions') || '[]');
+    all = all.filter(t => !(t.id === txId && t.familyId === familyId));
+    localStorage.setItem('ffp_transactions', JSON.stringify(all));
+  }
+  function getLocalBudgets(familyId) {
+    const all = JSON.parse(localStorage.getItem('ffp_budgets') || '[]');
+    return all.filter(b => b.familyId === familyId);
+  }
+  function saveLocalBudgets(familyId, budgets) {
+    let all = JSON.parse(localStorage.getItem('ffp_budgets') || '[]');
+    all = all.filter(b => b.familyId !== familyId);
+    budgets.forEach(b => { b.familyId = familyId; all.push(b); });
+    localStorage.setItem('ffp_budgets', JSON.stringify(all));
+  }
+
+  function localSha256(str) {
+    // Simple hash for local mode (not cryptographically secure but fine for local PIN)
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const chr = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + chr;
+      hash |= 0;
+    }
+    return 'local_' + Math.abs(hash).toString(36);
+  }
+
+  // Local handler for when Google Sheets is not configured
+  function handleLocalAction(data) {
+    switch(data.action) {
+      case 'register': {
+        const users = getLocalUsers();
+        if (users.find(u => u.email === data.email)) {
+          return { success: false, message: 'Email already registered.' };
+        }
+        if (users.find(u => u.phone === data.phone)) {
+          return { success: false, message: 'Phone number already registered.' };
+        }
+        const familyId = 'fam_' + Date.now();
+        const userId = 'usr_' + Date.now();
+        const user = {
+          id: userId,
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          passwordHash: localSha256(data.password),
+          role: 'admin',
+          familyId: familyId,
+          relation: 'Self'
+        };
+        users.push(user);
+        saveLocalUsers(users);
+        return { success: true, user: { id: userId, name: data.name, email: data.email, phone: data.phone, role: 'admin', familyId, relation: 'Self' } };
+      }
+      case 'login': {
+        const users = getLocalUsers();
+        const hash = localSha256(data.password);
+        const found = users.find(u => (u.email === data.identifier || u.phone === data.identifier) && u.passwordHash === hash);
+        if (found) {
+          return { success: true, user: { id: found.id, name: found.name, email: found.email, phone: found.phone, role: found.role, familyId: found.familyId, relation: found.relation } };
+        }
+        return { success: false, message: 'Invalid email/phone or password.' };
+      }
+      case 'addMember': {
+        const users = getLocalUsers();
+        const familyMembers = users.filter(u => u.familyId === data.familyId);
+        if (familyMembers.length >= CONFIG.MAX_MEMBERS) {
+          return { success: false, message: 'Maximum ' + CONFIG.MAX_MEMBERS + ' members allowed.' };
+        }
+        if (users.find(u => u.email === data.email)) {
+          return { success: false, message: 'Email already in use.' };
+        }
+        const memberId = 'usr_' + Date.now();
+        users.push({
+          id: memberId,
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          passwordHash: localSha256(data.password),
+          role: data.role || 'member',
+          familyId: data.familyId,
+          relation: data.relation || 'Other'
+        });
+        saveLocalUsers(users);
+        return { success: true, memberId, message: 'Member added successfully.' };
+      }
+      case 'saveTransaction': {
+        saveLocalTransaction(data.familyId, data.transaction);
+        return { success: true, message: 'Transaction saved.' };
+      }
+      case 'deleteTransaction': {
+        deleteLocalTransaction(data.familyId, data.txId);
+        return { success: true, message: 'Transaction deleted.' };
+      }
+      case 'loadData': {
+        const users = getLocalUsers();
+        const members = users.filter(u => u.familyId === data.familyId).map(u => ({
+          id: u.id, name: u.name, email: u.email, phone: u.phone, role: u.role, familyId: u.familyId, relation: u.relation
+        }));
+        const transactions = getLocalTransactions(data.familyId);
+        const budgets = getLocalBudgets(data.familyId);
+        return { success: true, members, transactions, budgets };
+      }
+      case 'saveBudget': {
+        saveLocalBudgets(data.familyId, data.budgets || []);
+        return { success: true, message: 'Budgets saved.' };
+      }
+      case 'forgotPassword': {
+        return { success: false, message: 'Password reset requires Google Sheets backend. Please configure your Apps Script URL in Settings.' };
+      }
+      default:
+        return { success: false, message: 'Unknown action.' };
+    }
+  }
+
   async function apiCall(data) {
+    // If Google Sheets is not configured, use LOCAL storage mode
     if (CONFIG.APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
-      showToast('Please configure your Google Apps Script URL in Settings or in the source code CONFIG section.', 'error');
-      throw new Error('Apps Script URL not configured');
+      return handleLocalAction(data);
     }
     showLoading(true);
     try {
@@ -1365,8 +1497,9 @@
       return result;
     } catch (error) {
       showLoading(false);
-      showToast('Network error. Please check your connection and Apps Script URL.', 'error');
-      throw error;
+      // Fallback to local mode on network error
+      showToast('Cloud sync failed. Using local storage.', 'info');
+      return handleLocalAction(data);
     }
   }
 
