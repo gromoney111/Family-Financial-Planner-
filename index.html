@@ -1040,6 +1040,25 @@
           </div>
           <div class="header-actions">
             <button class="btn btn-gold" id="addMemberBtn" onclick="openMemberModal()">+ Add Member</button>
+            <button class="btn btn-outline" id="inviteMemberBtn" onclick="openInviteModal()">📨 Invite</button>
+          </div>
+        </div>
+        <!-- Invite Link Card -->
+        <div id="inviteCard" style="display:none;background:linear-gradient(135deg,var(--gold-pale),#fff);border:1.5px solid var(--gold);border-radius:var(--radius);padding:20px;margin-bottom:20px">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+            <div>
+              <h4 style="font-size:0.95rem;color:var(--navy);margin-bottom:4px">Invite Family Members</h4>
+              <p style="font-size:0.8rem;color:var(--text-muted)">Share this link so members can join your family directly</p>
+            </div>
+            <button class="btn btn-gold btn-sm" onclick="generateInviteLink()">Generate Invite Link</button>
+          </div>
+          <div id="inviteLinkBox" style="display:none;margin-top:14px">
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="text" id="inviteLinkInput" readonly style="flex:1;font-size:0.8rem;padding:10px;background:var(--white);border:1px solid var(--border)">
+              <button class="btn btn-gold btn-sm" onclick="copyInviteLink()">📋 Copy</button>
+              <button class="btn btn-outline btn-sm" onclick="shareInviteWhatsApp()">💬 WhatsApp</button>
+            </div>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px">Link expires in 7 days. Max 6 members per family.</p>
           </div>
         </div>
         <div class="members-grid" id="membersGrid">
@@ -1258,6 +1277,37 @@
           <button type="submit" class="btn btn-gold">Add Member</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ===== INVITE MODAL ===== -->
+  <div class="modal-overlay" id="inviteModal">
+    <div class="modal">
+      <h3>📨 Invite Family Member</h3>
+      <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:20px">Share the invite link below. When they open it, they can register and automatically join your family.</p>
+      <div class="form-group">
+        <label>Invite Link</label>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="modalInviteLink" readonly style="flex:1;font-size:0.8rem">
+          <button class="btn btn-gold btn-sm" onclick="copyInviteLink()">Copy</button>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:8px">
+        <p style="font-size:0.85rem;font-weight:600;margin-bottom:12px">Or share via:</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" onclick="shareInviteWhatsApp()">💬 WhatsApp</button>
+          <button class="btn btn-outline btn-sm" onclick="shareInviteEmail()">📧 Email</button>
+          <button class="btn btn-outline btn-sm" onclick="shareInviteTelegram()">✈️ Telegram</button>
+          <button class="btn btn-outline btn-sm" onclick="shareInviteSMS()">📱 SMS</button>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding:12px;background:var(--surface2);border-radius:var(--radius-sm);font-size:0.8rem;color:var(--text-muted)">
+        <strong>Family Code:</strong> <span id="familyCodeDisplay" style="font-family:monospace;color:var(--navy);font-weight:700"></span><br>
+        Members can also enter this code during registration to join.
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" onclick="closeModal('inviteModal')">Close</button>
+      </div>
     </div>
   </div>
 
@@ -1588,13 +1638,42 @@
     btn.innerHTML = '<div class="spinner"></div> Creating account...';
 
     try {
-      const result = await apiCall({ action: 'register', name, email, phone, password });
+      // Check if user has an invite code (joining existing family)
+      const pendingInvite = sessionStorage.getItem('ffp_pending_invite');
+      let actionData = { action: 'register', name, email, phone, password };
+      
+      if (pendingInvite) {
+        // Look up family ID from invite code
+        const inviteInfo = localStorage.getItem('ffp_invite_' + pendingInvite);
+        if (inviteInfo) {
+          const invite = JSON.parse(inviteInfo);
+          // Check expiration
+          if (new Date() < new Date(invite.expiresAt)) {
+            actionData = { action: 'addMember', familyId: invite.familyId, name, email, phone, password, role: 'member', relation: 'Other' };
+          }
+        }
+        sessionStorage.removeItem('ffp_pending_invite');
+      }
+      
+      const result = await apiCall(actionData);
       if (result.success) {
-        currentUser = result.user;
+        if (actionData.action === 'addMember') {
+          // Member joined via invite - login them
+          const loginResult = await apiCall({ action: 'login', identifier: email, password });
+          if (loginResult.success) {
+            currentUser = loginResult.user;
+          } else {
+            currentUser = { id: result.memberId, name, email, phone, role: 'member', familyId: actionData.familyId, relation: 'Other' };
+          }
+        } else {
+          currentUser = result.user;
+        }
         localStorage.setItem('ffp_session', JSON.stringify(currentUser));
-        showToast('Account created successfully! You are the family admin.', 'success');
+        showToast('Account created successfully!' + (actionData.action === 'addMember' ? ' You joined the family.' : ' You are the family admin.'), 'success');
         showApp();
         loadFamilyData();
+        // Clean URL
+        window.history.replaceState({}, '', window.location.pathname);
       } else {
         showAuthError(result.message || 'Registration failed.');
       }
@@ -1659,11 +1738,13 @@
     document.getElementById('appLayout').classList.add('active');
     updateSidebar();
     updateMemberSelect();
-    // Hide add member button for non-admins
+    // Hide add member & invite buttons for non-admins
     const addBtn = document.getElementById('addMemberBtn');
-    if (addBtn) {
-      addBtn.style.display = (currentUser && currentUser.role === 'admin') ? 'inline-flex' : 'none';
-    }
+    const inviteBtn = document.getElementById('inviteMemberBtn');
+    const inviteCard = document.getElementById('inviteCard');
+    if (addBtn) addBtn.style.display = (currentUser && currentUser.role === 'admin') ? 'inline-flex' : 'none';
+    if (inviteBtn) inviteBtn.style.display = (currentUser && currentUser.role === 'admin') ? 'inline-flex' : 'none';
+    if (inviteCard) inviteCard.style.display = (currentUser && currentUser.role === 'admin') ? 'block' : 'none';
   }
 
   function updateSidebar() {
@@ -2038,6 +2119,98 @@
     const allMembers = familyData.members.length > 0 ? familyData.members : (currentUser ? [currentUser] : []);
     select.innerHTML = allMembers.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
   }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  INVITE SYSTEM                                             ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function openInviteModal() {
+    if (currentUser.role !== 'admin') {
+      showToast('Only admins can invite members.', 'error');
+      return;
+    }
+    if (familyData.members.length >= CONFIG.MAX_MEMBERS) {
+      showToast(`Family already has ${CONFIG.MAX_MEMBERS} members (maximum).`, 'error');
+      return;
+    }
+    generateInviteLink();
+    document.getElementById('inviteModal').classList.add('active');
+  }
+
+  function generateInviteLink() {
+    const familyId = currentUser.familyId;
+    const inviteCode = familyId.replace('fam_', '');
+    const baseUrl = window.location.href.split('?')[0].split('#')[0];
+    const inviteLink = baseUrl + '?invite=' + inviteCode;
+
+    document.getElementById('inviteLinkInput').value = inviteLink;
+    document.getElementById('modalInviteLink').value = inviteLink;
+    document.getElementById('familyCodeDisplay').textContent = inviteCode;
+    document.getElementById('inviteLinkBox').style.display = 'block';
+
+    // Save invite code locally
+    localStorage.setItem('ffp_invite_' + inviteCode, JSON.stringify({
+      familyId: familyId,
+      adminName: currentUser.name,
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+    }));
+  }
+
+  function copyInviteLink() {
+    const link = document.getElementById('inviteLinkInput').value || document.getElementById('modalInviteLink').value;
+    navigator.clipboard.writeText(link).then(() => {
+      showToast('Invite link copied! Share with your family member.', 'success');
+    }).catch(() => {
+      // Fallback for older browsers
+      const input = document.getElementById('inviteLinkInput');
+      input.select();
+      document.execCommand('copy');
+      showToast('Invite link copied!', 'success');
+    });
+  }
+
+  function shareInviteWhatsApp() {
+    const link = document.getElementById('modalInviteLink').value || document.getElementById('inviteLinkInput').value;
+    const text = encodeURIComponent(`Join our family budget planner on FamilyFinPlan! Click here to register: ${link}`);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+  }
+
+  function shareInviteEmail() {
+    const link = document.getElementById('modalInviteLink').value || document.getElementById('inviteLinkInput').value;
+    const subject = encodeURIComponent('Join our Family Budget Planner');
+    const body = encodeURIComponent(`Hi,\n\n${currentUser.name} has invited you to join their family on FamilyFinPlan - a smart family budget planner.\n\nClick here to register and join: ${link}\n\nOnce registered, you can add your income & expenses and help manage the family budget together.\n\nBest,\n${currentUser.name}`);
+    window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+  }
+
+  function shareInviteTelegram() {
+    const link = document.getElementById('modalInviteLink').value || document.getElementById('inviteLinkInput').value;
+    const text = encodeURIComponent(`Join our family budget on FamilyFinPlan: ${link}`);
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${text}`, '_blank');
+  }
+
+  function shareInviteSMS() {
+    const link = document.getElementById('modalInviteLink').value || document.getElementById('inviteLinkInput').value;
+    const text = encodeURIComponent(`Join our family budget planner: ${link}`);
+    window.open(`sms:?body=${text}`, '_blank');
+  }
+
+  // Check if user arrived via invite link
+  function checkInviteLink() {
+    const params = new URLSearchParams(window.location.search);
+    const inviteCode = params.get('invite');
+    if (inviteCode) {
+      // Switch to register tab
+      switchAuthTab('register');
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.auth-tab')[1].classList.add('active');
+      // Store invite code for registration
+      sessionStorage.setItem('ffp_pending_invite', inviteCode);
+      showToast('You have been invited! Register to join the family.', 'info');
+    }
+  }
+
+  // Call on page load
+  window.addEventListener('DOMContentLoaded', checkInviteLink);
 
   // ╔══════════════════════════════════════════════════════════╗
   // ║  REPORTS & EXPORT                                          ║
