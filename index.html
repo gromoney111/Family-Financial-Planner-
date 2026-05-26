@@ -1266,7 +1266,7 @@
         <div class="stats-grid" id="loanStatsGrid">
           <div class="stat-card">
             <div class="stat-icon" style="background:#fee2e2;color:#dc2626">🏦</div>
-            <div class="stat-info"><h4>Total Loan (P+I)</h4><div class="amount" id="statTotalLoan">₹0</div></div>
+            <div class="stat-info"><h4>Total Loan (with Interest)</h4><div class="amount" id="statTotalLoan">₹0</div></div>
           </div>
           <div class="stat-card">
             <div class="stat-icon" style="background:#fef3c7;color:#d97706">💳</div>
@@ -1277,8 +1277,12 @@
             <div class="stat-info"><h4>Total Paid</h4><div class="amount" id="statTotalPaid">₹0</div></div>
           </div>
           <div class="stat-card">
+            <div class="stat-icon" style="background:#e0f2fe;color:#0284c7">💰</div>
+            <div class="stat-info"><h4>Balance Principal</h4><div class="amount" id="statBalancePrincipal">₹0</div></div>
+          </div>
+          <div class="stat-card">
             <div class="stat-icon" style="background:#ede9fe;color:#7c3aed">⏳</div>
-            <div class="stat-info"><h4>Outstanding Balance</h4><div class="amount" id="statOutstanding">₹0</div></div>
+            <div class="stat-info"><h4>Interest Pending</h4><div class="amount" id="statInterestPending">₹0</div></div>
           </div>
         </div>
         <!-- Loans Table -->
@@ -1294,7 +1298,7 @@
                   <th>Tenure</th>
                   <th>EMI</th>
                   <th>EMIs Paid</th>
-                  <th>Balance</th>
+                  <th>Balance (P + Int)</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -1333,7 +1337,7 @@
         <div class="page-header">
           <div>
             <h1>Investment Portfolio</h1>
-            <p class="subtitle">Track Mutual Funds, Insurance, Bonds, FDs & more</p>
+            <p class="subtitle">Track Mutual Funds, Bonds, FDs & more</p>
           </div>
           <div class="header-actions">
             <button class="btn btn-gold" onclick="openInvestmentModal()">+ Add Investment</button>
@@ -1895,10 +1899,6 @@
               <option value="Mutual Fund - Debt">Mutual Fund - Debt</option>
               <option value="Mutual Fund - Hybrid">Mutual Fund - Hybrid</option>
               <option value="SIP">SIP (Systematic Investment)</option>
-              <option value="Life Insurance">Life Insurance (LIC)</option>
-              <option value="Health Insurance">Health Insurance</option>
-              <option value="Term Insurance">Term Insurance</option>
-              <option value="ULIP">ULIP</option>
               <option value="Fixed Deposit">Fixed Deposit</option>
               <option value="Recurring Deposit">Recurring Deposit</option>
               <option value="PPF">PPF</option>
@@ -1923,8 +1923,8 @@
             <input type="number" id="investAmount" placeholder="Total invested" required min="1" step="0.01">
           </div>
           <div class="form-group">
-            <label>Current Value (₹) <span style="font-size:0.7rem;color:var(--text-muted)">(Enter 0 for protection plans)</span></label>
-            <input type="number" id="investCurrentValue" placeholder="Present market value (0 for insurance)" required min="0" step="0.01">
+            <label>Current Value (₹)</label>
+            <input type="number" id="investCurrentValue" placeholder="Present market value" required min="0" step="0.01">
           </div>
         </div>
         <div class="form-row">
@@ -3674,13 +3674,10 @@
     const N = loan.tenure;
     const n = loan.emisPaid;
     if (n >= N) return 0;
-    // Total obligation = EMI × Total tenure months (principal + total interest)
-    const totalObligation = loan.emi * N;
-    // Total paid so far = EMI × EMIs paid
-    const totalPaid = loan.emi * n;
-    // Outstanding balance = Total obligation - Total paid
-    const balance = totalObligation - totalPaid;
-    return Math.max(0, Math.round(balance));
+    // Use amortization formula for remaining principal
+    if (r === 0) return Math.max(0, Math.round(loan.principal - (loan.principal / N) * n));
+    const remainingPrincipal = loan.principal * Math.pow(1 + r, n) - (loan.emi * (Math.pow(1 + r, n) - 1) / r);
+    return Math.max(0, Math.round(remainingPrincipal));
   }
 
   // Get total interest payable over full loan tenure
@@ -3691,6 +3688,19 @@
   // Get total interest amount for a loan
   function getTotalInterest(loan) {
     return (loan.emi * loan.tenure) - loan.principal;
+  }
+
+  // Get principal portion paid so far (using amortization formula)
+  function getPrincipalPaidSoFar(loan) {
+    const r = loan.rate / 12 / 100;
+    const P = loan.principal;
+    const n = loan.emisPaid;
+    if (n === 0) return 0;
+    if (r === 0) return (P / loan.tenure) * n; // No interest case
+    // Remaining principal after n EMIs using amortization formula
+    const remainingPrincipal = P * Math.pow(1 + r, n) - (loan.emi * (Math.pow(1 + r, n) - 1) / r);
+    const principalPaid = P - Math.max(0, remainingPrincipal);
+    return Math.max(0, Math.round(principalPaid));
   }
 
   function openPayEmiModal(loanId) {
@@ -3775,16 +3785,24 @@
     if (familyData.loans.length === 0) {
       tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:40px">No loans added yet.</td></tr>';
     } else {
-      let totalLoan = 0, totalEMI = 0, totalPaid = 0, totalOutstanding = 0;
+      let totalLoan = 0, totalEMI = 0, totalPaid = 0, totalBalancePrincipal = 0, totalInterestPending = 0;
       tbody.innerHTML = familyData.loans.map(l => {
         const balance = getLoanBalance(l);
         const isPaid = l.emisPaid >= l.tenure;
         const totalObligation = getTotalLoanObligation(l);
         const totalInterest = getTotalInterest(l);
+        // Calculate remaining principal (principal minus principal portion paid so far)
+        const principalPaidSoFar = getPrincipalPaidSoFar(l);
+        const balancePrincipal = Math.max(0, l.principal - principalPaidSoFar);
+        // Interest pending = total interest - interest paid so far
+        const interestPaidSoFar = (l.emisPaid * l.emi) - principalPaidSoFar;
+        const interestPending = Math.max(0, totalInterest - interestPaidSoFar);
+
         totalLoan += totalObligation; // Principal + Total Interest
         totalEMI += isPaid ? 0 : l.emi;
         totalPaid += l.emisPaid * l.emi;
-        totalOutstanding += balance;
+        totalBalancePrincipal += isPaid ? 0 : balancePrincipal;
+        totalInterestPending += isPaid ? 0 : interestPending;
         return `<tr>
           <td><strong>${l.type}</strong></td>
           <td>${l.lender}</td>
@@ -3793,7 +3811,10 @@
           <td>${l.tenure} mo (${l.emisPaid}/${l.tenure})</td>
           <td style="font-weight:600">${formatCurrency(l.emi)}</td>
           <td>${l.emisPaid} of ${l.tenure}</td>
-          <td style="font-weight:600;color:${isPaid?'var(--teal)':'var(--rose)'}">${formatCurrency(balance)}</td>
+          <td style="font-weight:600;color:${isPaid?'var(--teal)':'var(--rose)'}">
+            ${formatCurrency(balancePrincipal)}
+            <br><span style="font-size:0.7rem;color:var(--purple)">Int: ${formatCurrency(interestPending)}</span>
+          </td>
           <td><span class="badge ${isPaid?'badge-income':'badge-expense'}">${isPaid?'Paid':'Active'}</span></td>
           <td>
             ${!isPaid ? `<button class="btn btn-gold btn-sm" onclick="openPayEmiModal('${l.id}')" style="margin-right:4px">Pay EMI</button>` : ''}
@@ -3805,7 +3826,8 @@
       document.getElementById('statTotalLoan').textContent = formatCurrency(totalLoan);
       document.getElementById('statTotalEMI').textContent = formatCurrency(totalEMI);
       document.getElementById('statTotalPaid').textContent = formatCurrency(totalPaid);
-      document.getElementById('statOutstanding').textContent = formatCurrency(totalOutstanding);
+      document.getElementById('statBalancePrincipal').textContent = formatCurrency(totalBalancePrincipal);
+      document.getElementById('statInterestPending').textContent = formatCurrency(totalInterestPending);
     }
     // EMI History
     if (familyData.emiPayments.length === 0) {
@@ -3903,8 +3925,7 @@
 
   // Identify investment types that are protection plans (no monetary returns)
   function isProtectionPlan(type) {
-    const protectionTypes = ['Term Insurance', 'Health Insurance'];
-    return protectionTypes.includes(type);
+    return false; // Insurance types removed from investments
   }
 
   // Identify investment types that may not have market-linked returns
