@@ -780,6 +780,38 @@
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
+
+    /* ======= LOAN & INVESTMENT BADGES ======= */
+    .loan-status-active {
+      background: var(--rose-light);
+      color: var(--rose);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .loan-status-paid {
+      background: var(--teal-light);
+      color: var(--teal);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .alert-card {
+      background: var(--rose-light);
+      border: 1px solid var(--rose);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .alert-card.success {
+      background: var(--teal-light);
+      border-color: var(--teal);
+    }
   </style>
 </head>
 
@@ -858,6 +890,11 @@
               <label>Confirm Password</label>
               <input type="password" id="regConfirm" placeholder="Re-enter password" required>
             </div>
+            <div class="form-group">
+              <label>Family ID (optional - choose your own)</label>
+              <input type="text" id="regFamilyId" placeholder="e.g., sharma_family, gupta2024 (leave blank for auto)">
+              <span style="font-size:0.75rem;color:var(--text-muted)">Letters, numbers & underscores only. This is your unique family identifier.</span>
+            </div>
             <div class="recaptcha-box">
               <div class="g-recaptcha" id="registerRecaptcha"></div>
             </div>
@@ -909,6 +946,15 @@
         </div>
         <div class="nav-item" onclick="navigateTo('family')">
           <span class="nav-icon">👨‍👩‍👧‍👦</span> Family Members
+        </div>
+        <div class="nav-item" onclick="navigateTo('loans')">
+          <span class="nav-icon">🏦</span> Loans & EMI
+        </div>
+        <div class="nav-item" onclick="navigateTo('investments')">
+          <span class="nav-icon">📊</span> Investments
+        </div>
+        <div class="nav-item" onclick="navigateTo('networth')">
+          <span class="nav-icon">💎</span> Net Worth
         </div>
         <div class="nav-item" onclick="navigateTo('reports')">
           <span class="nav-icon">📈</span> Reports
@@ -1090,6 +1136,195 @@
         </div>
       </section>
 
+      <!-- ===== LOANS & EMI ===== -->
+      <section class="section" id="sec-loans">
+        <div class="page-header">
+          <div>
+            <h1>Loans & EMI Tracker</h1>
+            <p class="subtitle">Track all loans, EMIs, tenure & auto-reduce balance on payment</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-gold" onclick="openLoanModal()">+ Add Loan</button>
+          </div>
+        </div>
+        <!-- Loan Summary Cards -->
+        <div class="stats-grid" id="loanStatsGrid">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fee2e2;color:#dc2626">🏦</div>
+            <div class="stat-info"><h4>Total Loan Amount</h4><div class="amount" id="statTotalLoan">₹0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7;color:#d97706">💳</div>
+            <div class="stat-info"><h4>Monthly EMI Total</h4><div class="amount" id="statTotalEMI">₹0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#d1fae5;color:#059669">✅</div>
+            <div class="stat-info"><h4>Total Paid</h4><div class="amount" id="statTotalPaid">₹0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#ede9fe;color:#7c3aed">⏳</div>
+            <div class="stat-info"><h4>Outstanding Balance</h4><div class="amount" id="statOutstanding">₹0</div></div>
+          </div>
+        </div>
+        <!-- Loans Table -->
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Loan Type</th>
+                  <th>Lender / Bank</th>
+                  <th>Principal</th>
+                  <th>Interest Rate</th>
+                  <th>Tenure</th>
+                  <th>EMI</th>
+                  <th>EMIs Paid</th>
+                  <th>Balance</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="loansTableBody">
+                <tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:40px">No loans added. Click "+ Add Loan" to track your loans.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- EMI Payment History -->
+        <div class="card" style="margin-top:20px">
+          <h3 style="font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;margin-bottom:16px">EMI Payment History</h3>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Loan</th>
+                  <th>EMI Amount</th>
+                  <th>Principal Portion</th>
+                  <th>Interest Portion</th>
+                  <th>Remaining Balance</th>
+                </tr>
+              </thead>
+              <tbody id="emiHistoryBody">
+                <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">No EMI payments recorded yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== INVESTMENTS ===== -->
+      <section class="section" id="sec-investments">
+        <div class="page-header">
+          <div>
+            <h1>Investment Portfolio</h1>
+            <p class="subtitle">Track Mutual Funds, Insurance, Bonds, FDs & more</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-gold" onclick="openInvestmentModal()">+ Add Investment</button>
+          </div>
+        </div>
+        <!-- Investment Summary -->
+        <div class="stats-grid" id="investStatsGrid">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#d1fae5;color:#059669">📈</div>
+            <div class="stat-info"><h4>Total Invested</h4><div class="amount" id="statTotalInvested">₹0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#e0f2fe;color:#0284c7">💰</div>
+            <div class="stat-info"><h4>Current Value</h4><div class="amount" id="statCurrentValue">₹0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7;color:#d97706">📊</div>
+            <div class="stat-info"><h4>Total Returns</h4><div class="amount" id="statTotalReturns">₹0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#ede9fe;color:#7c3aed">%</div>
+            <div class="stat-info"><h4>Avg. Return %</h4><div class="amount" id="statAvgReturn">0%</div></div>
+          </div>
+        </div>
+        <!-- Investment Table -->
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Name / Scheme</th>
+                  <th>Invested Amount</th>
+                  <th>Current Value</th>
+                  <th>Returns</th>
+                  <th>Start Date</th>
+                  <th>Maturity</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="investmentsTableBody">
+                <tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:40px">No investments added. Click "+ Add Investment" to track your portfolio.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Portfolio Allocation Chart -->
+        <div class="charts-grid" style="margin-top:20px">
+          <div class="chart-card">
+            <h3>Portfolio Allocation</h3>
+            <div class="chart-container"><canvas id="portfolioChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Investment Growth</h3>
+            <div class="chart-container"><canvas id="investGrowthChart"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== NET WORTH ===== -->
+      <section class="section" id="sec-networth">
+        <div class="page-header">
+          <div>
+            <h1>Net Worth Dashboard</h1>
+            <p class="subtitle">Complete overview of your family's financial health</p>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#d1fae5;color:#059669">🏠</div>
+            <div class="stat-info"><h4>Total Assets</h4><div class="amount" id="statTotalAssets">₹0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fee2e2;color:#dc2626">📉</div>
+            <div class="stat-info"><h4>Total Liabilities</h4><div class="amount" id="statTotalLiabilities">₹0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7;color:#d97706">💎</div>
+            <div class="stat-info"><h4>Net Worth</h4><div class="amount" id="statNetWorth">₹0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#e0f2fe;color:#0284c7">📅</div>
+            <div class="stat-info"><h4>Upcoming EMIs</h4><div class="amount" id="statUpcomingEMI">₹0</div></div>
+          </div>
+        </div>
+        <!-- Net Worth Breakdown -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>Assets vs Liabilities</h3>
+            <div class="chart-container"><canvas id="netWorthChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Asset Breakdown</h3>
+            <div class="chart-container"><canvas id="assetBreakdownChart"></canvas></div>
+          </div>
+        </div>
+        <!-- Upcoming Payments Alert -->
+        <div class="card" style="margin-top:20px">
+          <h3 style="font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;margin-bottom:16px">⚠️ Upcoming Payments & Alerts</h3>
+          <div id="upcomingPayments">
+            <p style="color:var(--text-muted)">No upcoming payments.</p>
+          </div>
+        </div>
+      </section>
+
       <!-- ===== REPORTS ===== -->
       <section class="section" id="sec-reports">
         <div class="page-header">
@@ -1198,6 +1433,7 @@
               <option value="Health">Health</option>
               <option value="Education">Education</option>
               <option value="Entertainment">Entertainment</option>
+              <option value="EMI Payment">EMI Payment</option>
               <option value="Other">Other</option>
             </select>
           </div>
@@ -1420,6 +1656,260 @@
     </div>
   </div>
 
+  <!-- ===== LOAN MODAL ===== -->
+  <div class="modal-overlay" id="loanModal">
+    <div class="modal">
+      <h3 id="loanModalTitle">Add Loan</h3>
+      <form onsubmit="saveLoan(event)">
+        <input type="hidden" id="loanEditId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Loan Type</label>
+            <select id="loanType" required>
+              <option value="">Select type</option>
+              <option value="Home Loan">Home Loan</option>
+              <option value="Car Loan">Car Loan</option>
+              <option value="Personal Loan">Personal Loan</option>
+              <option value="Education Loan">Education Loan</option>
+              <option value="Gold Loan">Gold Loan</option>
+              <option value="Business Loan">Business Loan</option>
+              <option value="Two-Wheeler Loan">Two-Wheeler Loan</option>
+              <option value="Credit Card Loan">Credit Card Loan</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Lender / Bank</label>
+            <input type="text" id="loanLender" placeholder="e.g., SBI, HDFC" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Principal Amount (₹)</label>
+            <input type="number" id="loanPrincipal" placeholder="e.g., 500000" required min="1" step="1">
+          </div>
+          <div class="form-group">
+            <label>Interest Rate (% p.a.)</label>
+            <input type="number" id="loanRate" placeholder="e.g., 8.5" required min="0" step="0.01">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tenure (Months)</label>
+            <input type="number" id="loanTenure" placeholder="e.g., 60" required min="1" step="1">
+          </div>
+          <div class="form-group">
+            <label>EMI Amount (₹)</label>
+            <input type="number" id="loanEMI" placeholder="Auto-calculated" step="0.01">
+            <button type="button" class="btn btn-outline btn-sm" style="margin-top:6px" onclick="calculateEMI()">🧮 Calculate EMI</button>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Start Date</label>
+            <input type="date" id="loanStartDate" required>
+          </div>
+          <div class="form-group">
+            <label>EMIs Already Paid</label>
+            <input type="number" id="loanEmisPaid" value="0" min="0" step="1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <input type="text" id="loanNotes" placeholder="Any additional details">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('loanModal')">Cancel</button>
+          <button type="submit" class="btn btn-gold">Save Loan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== PAY EMI MODAL ===== -->
+  <div class="modal-overlay" id="payEmiModal">
+    <div class="modal">
+      <h3>💳 Pay EMI</h3>
+      <form onsubmit="processEmiPayment(event)">
+        <input type="hidden" id="payEmiLoanId">
+        <div class="form-group">
+          <label>Loan</label>
+          <input type="text" id="payEmiLoanName" readonly style="background:var(--surface2)">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>EMI Amount (₹)</label>
+            <input type="number" id="payEmiAmount" readonly style="background:var(--surface2)">
+          </div>
+          <div class="form-group">
+            <label>Payment Date</label>
+            <input type="date" id="payEmiDate" required>
+          </div>
+        </div>
+        <div style="background:var(--surface2);padding:14px;border-radius:var(--radius-sm);margin-bottom:16px">
+          <p style="font-size:0.85rem;color:var(--text-mid)">
+            <strong>Principal Portion:</strong> <span id="payEmiPrincipal">₹0</span><br>
+            <strong>Interest Portion:</strong> <span id="payEmiInterest">₹0</span><br>
+            <strong>Remaining Balance After:</strong> <span id="payEmiRemaining">₹0</span>
+          </p>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('payEmiModal')">Cancel</button>
+          <button type="submit" class="btn btn-gold">Confirm Payment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== INVESTMENT MODAL ===== -->
+  <div class="modal-overlay" id="investmentModal">
+    <div class="modal">
+      <h3 id="investModalTitle">Add Investment</h3>
+      <form onsubmit="saveInvestment(event)">
+        <input type="hidden" id="investEditId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Investment Type</label>
+            <select id="investType" required>
+              <option value="">Select type</option>
+              <option value="Mutual Fund - Equity">Mutual Fund - Equity</option>
+              <option value="Mutual Fund - Debt">Mutual Fund - Debt</option>
+              <option value="Mutual Fund - Hybrid">Mutual Fund - Hybrid</option>
+              <option value="SIP">SIP (Systematic Investment)</option>
+              <option value="Life Insurance">Life Insurance</option>
+              <option value="Health Insurance">Health Insurance</option>
+              <option value="Term Insurance">Term Insurance</option>
+              <option value="ULIP">ULIP</option>
+              <option value="Fixed Deposit">Fixed Deposit</option>
+              <option value="Recurring Deposit">Recurring Deposit</option>
+              <option value="PPF">PPF</option>
+              <option value="NPS">NPS</option>
+              <option value="Bonds">Bonds</option>
+              <option value="Government Securities">Government Securities</option>
+              <option value="Gold">Gold / Gold ETF</option>
+              <option value="Stocks">Stocks / Equity</option>
+              <option value="Real Estate">Real Estate</option>
+              <option value="Crypto">Cryptocurrency</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Scheme / Fund Name</label>
+            <input type="text" id="investName" placeholder="e.g., HDFC Mid Cap Fund" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Amount Invested (₹)</label>
+            <input type="number" id="investAmount" placeholder="Total invested" required min="1" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Current Value (₹)</label>
+            <input type="number" id="investCurrentValue" placeholder="Present market value" required min="0" step="0.01">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Start Date</label>
+            <input type="date" id="investStartDate" required>
+          </div>
+          <div class="form-group">
+            <label>Maturity Date (if applicable)</label>
+            <input type="date" id="investMaturityDate">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Expected Return (% p.a.)</label>
+            <input type="number" id="investExpReturn" placeholder="e.g., 12" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Member</label>
+            <select id="investMember"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <input type="text" id="investNotes" placeholder="Policy number, folio number, etc.">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('investmentModal')">Cancel</button>
+          <button type="submit" class="btn btn-gold">Save Investment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== EDIT TRANSACTION MODAL ===== -->
+  <div class="modal-overlay" id="editTransactionModal">
+    <div class="modal">
+      <h3>✏️ Edit Transaction</h3>
+      <form onsubmit="updateTransaction(event)">
+        <input type="hidden" id="editTxId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type</label>
+            <select id="editTxType" required>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="editTxDate" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category</label>
+            <select id="editTxCategory" required>
+              <option value="Salary">Salary</option>
+              <option value="Business">Business</option>
+              <option value="Freelance">Freelance</option>
+              <option value="Investment">Investment</option>
+              <option value="Rent">Rent</option>
+              <option value="Food">Food</option>
+              <option value="Transport">Transport</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Bills">Bills</option>
+              <option value="Health">Health</option>
+              <option value="Education">Education</option>
+              <option value="Entertainment">Entertainment</option>
+              <option value="EMI Payment">EMI Payment</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Amount</label>
+            <input type="number" id="editTxAmount" required min="1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" id="editTxDesc">
+        </div>
+        <div class="form-group">
+          <label>Member</label>
+          <select id="editTxMember"></select>
+        </div>
+        <div class="form-group">
+          <label>Payment Method</label>
+          <select id="editTxPayment">
+            <option value="Cash">Cash</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Credit Card">Credit Card</option>
+            <option value="UPI">UPI</option>
+            <option value="Wallet">Wallet (Paytm/PhonePe)</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('editTransactionModal')">Cancel</button>
+          <button type="submit" class="btn btn-gold">Update Transaction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- ==================== JAVASCRIPT ==================== -->
   <script>
   // ╔══════════════════════════════════════════════════════════╗
@@ -1438,7 +1928,7 @@
   // ║  STATE                                                     ║
   // ╚══════════════════════════════════════════════════════════╝
   let currentUser = null;
-  let familyData = { transactions: [], members: [], budgets: [] };
+  let familyData = { transactions: [], members: [], budgets: [], loans: [], investments: [], emiPayments: [] };
   let charts = {};
   let loginRecaptchaWidget = null;
   let registerRecaptchaWidget = null;
@@ -1564,7 +2054,17 @@
         if (users.find(u => u.phone === data.phone.trim())) {
           return { success: false, message: 'Phone number already registered. Please login instead.' };
         }
-        const familyId = 'fam_' + Date.now();
+        // Use custom family ID if provided, otherwise auto-generate
+        let familyId;
+        if (data.customFamilyId) {
+          // Check if custom ID already taken
+          if (users.find(u => u.familyId === data.customFamilyId)) {
+            return { success: false, message: 'This Family ID is already taken. Please choose another.' };
+          }
+          familyId = data.customFamilyId;
+        } else {
+          familyId = 'fam_' + Date.now();
+        }
         const userId = 'usr_' + Date.now();
         const user = {
           id: userId,
@@ -1733,6 +2233,7 @@
     const phone = document.getElementById('regPhone').value.trim();
     const password = document.getElementById('regPassword').value;
     const confirm = document.getElementById('regConfirm').value;
+    const customFamilyId = document.getElementById('regFamilyId').value.trim();
 
     if (password !== confirm) {
       showAuthError('Passwords do not match.');
@@ -1740,6 +2241,11 @@
     }
     if (password.length < 6) {
       showAuthError('Password must be at least 6 characters.');
+      return;
+    }
+    // Validate custom family ID
+    if (customFamilyId && !/^[a-zA-Z0-9_]+$/.test(customFamilyId)) {
+      showAuthError('Family ID can only contain letters, numbers and underscores.');
       return;
     }
 
@@ -1759,7 +2265,7 @@
     try {
       // Check if user has an invite code (joining existing family)
       const pendingInvite = sessionStorage.getItem('ffp_pending_invite');
-      let actionData = { action: 'register', name, email, phone, password };
+      let actionData = { action: 'register', name, email, phone, password, customFamilyId };
       
       if (pendingInvite) {
         // Look up family ID from invite code
@@ -1889,6 +2395,9 @@
         familyData.transactions = result.transactions || [];
         familyData.members = result.members || [];
         familyData.budgets = result.budgets || [];
+        familyData.loans = getLocalLoans(currentUser.familyId);
+        familyData.investments = getLocalInvestments(currentUser.familyId);
+        familyData.emiPayments = getLocalEmiPayments(currentUser.familyId);
         
         // Ensure current user is always in members list
         if (familyData.members.length === 0) {
@@ -1916,6 +2425,10 @@
     renderBudgets();
     renderMembers();
     renderBalances();
+    renderLoans();
+    renderInvestments();
+    renderNetWorth();
+    renderUpcomingPayments();
     updateMemberSelect();
     renderReport();
   }
@@ -2067,7 +2580,10 @@
         <td>${t.member || '-'}</td>
         <td style="font-size:0.8rem;color:var(--text-mid)">${t.payment || 'Cash'}</td>
         <td style="font-weight:600;color:${t.type==='income'?'var(--teal)':'var(--rose)'}">${formatCurrency(t.amount)}</td>
-        <td><button class="btn-icon" onclick="deleteTransaction('${t.id}')" title="Delete">🗑️</button></td>
+        <td>
+          <button class="btn-icon" onclick="editTransaction('${t.id}')" title="Edit" style="margin-right:4px">✏️</button>
+          <button class="btn-icon" onclick="deleteTransaction('${t.id}')" title="Delete">🗑️</button>
+        </td>
       </tr>
     `).join('');
   }
@@ -2706,6 +3222,514 @@
     const month = document.getElementById('monthFilter').value;
     if (month === 'all') return familyData.transactions;
     return familyData.transactions.filter(t => t.date && t.date.startsWith(month));
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  EDIT TRANSACTION                                          ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function editTransaction(txId) {
+    const tx = familyData.transactions.find(t => t.id === txId);
+    if (!tx) { showToast('Transaction not found.', 'error'); return; }
+    document.getElementById('editTxId').value = tx.id;
+    document.getElementById('editTxType').value = tx.type;
+    document.getElementById('editTxDate').value = tx.date;
+    document.getElementById('editTxCategory').value = tx.category;
+    document.getElementById('editTxAmount').value = tx.amount;
+    document.getElementById('editTxDesc').value = tx.description || '';
+    document.getElementById('editTxPayment').value = (tx.payment || 'Cash').split(' (')[0];
+    // Populate member select
+    const sel = document.getElementById('editTxMember');
+    const allM = familyData.members.length > 0 ? familyData.members : (currentUser ? [currentUser] : []);
+    sel.innerHTML = allM.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
+    sel.value = tx.member || '';
+    document.getElementById('editTransactionModal').classList.add('active');
+  }
+
+  function updateTransaction(e) {
+    e.preventDefault();
+    const txId = document.getElementById('editTxId').value;
+    const idx = familyData.transactions.findIndex(t => t.id === txId);
+    if (idx < 0) { showToast('Transaction not found.', 'error'); return; }
+    familyData.transactions[idx].type = document.getElementById('editTxType').value;
+    familyData.transactions[idx].date = document.getElementById('editTxDate').value;
+    familyData.transactions[idx].category = document.getElementById('editTxCategory').value;
+    familyData.transactions[idx].amount = document.getElementById('editTxAmount').value;
+    familyData.transactions[idx].description = document.getElementById('editTxDesc').value;
+    familyData.transactions[idx].member = document.getElementById('editTxMember').value;
+    familyData.transactions[idx].payment = document.getElementById('editTxPayment').value;
+    // Update in localStorage
+    let all = JSON.parse(localStorage.getItem('ffp_transactions') || '[]');
+    const li = all.findIndex(t => t.id === txId);
+    if (li >= 0) { all[li] = familyData.transactions[idx]; }
+    localStorage.setItem('ffp_transactions', JSON.stringify(all));
+    renderAll();
+    closeModal('editTransactionModal');
+    showToast('Transaction updated!', 'success');
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  LOANS & EMI TRACKER                                       ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function getLocalLoans(familyId) {
+    const all = JSON.parse(localStorage.getItem('ffp_loans') || '[]');
+    return all.filter(l => l.familyId === familyId);
+  }
+  function saveLocalLoans(familyId, loans) {
+    let all = JSON.parse(localStorage.getItem('ffp_loans') || '[]');
+    all = all.filter(l => l.familyId !== familyId);
+    loans.forEach(l => { l.familyId = familyId; all.push(l); });
+    localStorage.setItem('ffp_loans', JSON.stringify(all));
+  }
+  function getLocalEmiPayments(familyId) {
+    const all = JSON.parse(localStorage.getItem('ffp_emi_payments') || '[]');
+    return all.filter(p => p.familyId === familyId);
+  }
+  function saveLocalEmiPayment(familyId, payment) {
+    const all = JSON.parse(localStorage.getItem('ffp_emi_payments') || '[]');
+    payment.familyId = familyId;
+    all.push(payment);
+    localStorage.setItem('ffp_emi_payments', JSON.stringify(all));
+  }
+
+  function calculateEMI() {
+    const P = Number(document.getElementById('loanPrincipal').value);
+    const annualRate = Number(document.getElementById('loanRate').value);
+    const N = Number(document.getElementById('loanTenure').value);
+    if (!P || !annualRate || !N) { showToast('Enter principal, rate & tenure to calculate.', 'error'); return; }
+    const r = annualRate / 12 / 100;
+    const emi = P * r * Math.pow(1 + r, N) / (Math.pow(1 + r, N) - 1);
+    document.getElementById('loanEMI').value = Math.round(emi);
+    showToast('EMI calculated: ' + formatCurrency(Math.round(emi)), 'success');
+  }
+
+  function openLoanModal(editId) {
+    document.getElementById('loanEditId').value = editId || '';
+    document.getElementById('loanModalTitle').textContent = editId ? 'Edit Loan' : 'Add Loan';
+    if (editId) {
+      const loan = familyData.loans.find(l => l.id === editId);
+      if (loan) {
+        document.getElementById('loanType').value = loan.type;
+        document.getElementById('loanLender').value = loan.lender;
+        document.getElementById('loanPrincipal').value = loan.principal;
+        document.getElementById('loanRate').value = loan.rate;
+        document.getElementById('loanTenure').value = loan.tenure;
+        document.getElementById('loanEMI').value = loan.emi;
+        document.getElementById('loanStartDate').value = loan.startDate;
+        document.getElementById('loanEmisPaid').value = loan.emisPaid || 0;
+        document.getElementById('loanNotes').value = loan.notes || '';
+      }
+    } else {
+      document.getElementById('loanModal').querySelector('form').reset();
+      document.getElementById('loanStartDate').value = new Date().toISOString().split('T')[0];
+    }
+    document.getElementById('loanModal').classList.add('active');
+  }
+
+  function saveLoan(e) {
+    e.preventDefault();
+    const editId = document.getElementById('loanEditId').value;
+    const loanData = {
+      id: editId || 'loan_' + Date.now() + '_' + Math.random().toString(36).substr(2,4),
+      type: document.getElementById('loanType').value,
+      lender: document.getElementById('loanLender').value,
+      principal: Number(document.getElementById('loanPrincipal').value),
+      rate: Number(document.getElementById('loanRate').value),
+      tenure: Number(document.getElementById('loanTenure').value),
+      emi: Number(document.getElementById('loanEMI').value),
+      startDate: document.getElementById('loanStartDate').value,
+      emisPaid: Number(document.getElementById('loanEmisPaid').value) || 0,
+      notes: document.getElementById('loanNotes').value,
+      familyId: currentUser.familyId
+    };
+    // Calculate EMI if not provided
+    if (!loanData.emi) {
+      const r = loanData.rate / 12 / 100;
+      loanData.emi = Math.round(loanData.principal * r * Math.pow(1+r, loanData.tenure) / (Math.pow(1+r, loanData.tenure) - 1));
+    }
+    if (editId) {
+      const idx = familyData.loans.findIndex(l => l.id === editId);
+      if (idx >= 0) familyData.loans[idx] = loanData;
+    } else {
+      familyData.loans.push(loanData);
+    }
+    saveLocalLoans(currentUser.familyId, familyData.loans);
+    renderLoans();
+    renderNetWorth();
+    renderUpcomingPayments();
+    closeModal('loanModal');
+    showToast(editId ? 'Loan updated!' : 'Loan added!', 'success');
+  }
+
+  function deleteLoan(loanId) {
+    if (!confirm('Delete this loan?')) return;
+    familyData.loans = familyData.loans.filter(l => l.id !== loanId);
+    saveLocalLoans(currentUser.familyId, familyData.loans);
+    renderLoans(); renderNetWorth();
+    showToast('Loan deleted.', 'info');
+  }
+
+  function getLoanBalance(loan) {
+    const r = loan.rate / 12 / 100;
+    const N = loan.tenure;
+    const n = loan.emisPaid;
+    if (n >= N) return 0;
+    // Outstanding = P * [(1+r)^N - (1+r)^n] / [(1+r)^N - 1]
+    const balance = loan.principal * (Math.pow(1+r, N) - Math.pow(1+r, n)) / (Math.pow(1+r, N) - 1);
+    return Math.max(0, Math.round(balance));
+  }
+
+  function openPayEmiModal(loanId) {
+    const loan = familyData.loans.find(l => l.id === loanId);
+    if (!loan) return;
+    if (loan.emisPaid >= loan.tenure) { showToast('This loan is fully paid!', 'success'); return; }
+    document.getElementById('payEmiLoanId').value = loan.id;
+    document.getElementById('payEmiLoanName').value = loan.type + ' (' + loan.lender + ')';
+    document.getElementById('payEmiAmount').value = loan.emi;
+    document.getElementById('payEmiDate').value = new Date().toISOString().split('T')[0];
+    // Calculate breakdown
+    const balance = getLoanBalance(loan);
+    const r = loan.rate / 12 / 100;
+    const interestPortion = Math.round(balance * r);
+    const principalPortion = loan.emi - interestPortion;
+    const remaining = balance - principalPortion;
+    document.getElementById('payEmiPrincipal').textContent = formatCurrency(principalPortion);
+    document.getElementById('payEmiInterest').textContent = formatCurrency(interestPortion);
+    document.getElementById('payEmiRemaining').textContent = formatCurrency(Math.max(0, remaining));
+    document.getElementById('payEmiModal').classList.add('active');
+  }
+
+  function processEmiPayment(e) {
+    e.preventDefault();
+    const loanId = document.getElementById('payEmiLoanId').value;
+    const loan = familyData.loans.find(l => l.id === loanId);
+    if (!loan) return;
+    const balance = getLoanBalance(loan);
+    const r = loan.rate / 12 / 100;
+    const interestPortion = Math.round(balance * r);
+    const principalPortion = loan.emi - interestPortion;
+    const remaining = Math.max(0, balance - principalPortion);
+    // Record payment
+    const payment = {
+      id: 'emip_' + Date.now(),
+      loanId: loan.id,
+      loanName: loan.type + ' (' + loan.lender + ')',
+      date: document.getElementById('payEmiDate').value,
+      emiAmount: loan.emi,
+      principalPortion: principalPortion,
+      interestPortion: interestPortion,
+      remainingBalance: remaining
+    };
+    saveLocalEmiPayment(currentUser.familyId, payment);
+    familyData.emiPayments.push(payment);
+    // Update loan
+    loan.emisPaid = (loan.emisPaid || 0) + 1;
+    saveLocalLoans(currentUser.familyId, familyData.loans);
+    // Also add as expense transaction
+    const tx = {
+      id: 'tx_emi_' + Date.now(),
+      type: 'expense',
+      date: payment.date,
+      category: 'EMI Payment',
+      amount: loan.emi,
+      description: loan.type + ' EMI - ' + loan.lender,
+      member: currentUser.name,
+      payment: 'Bank Transfer',
+      familyId: currentUser.familyId
+    };
+    familyData.transactions.push(tx);
+    saveLocalTransaction(currentUser.familyId, tx);
+    renderAll();
+    closeModal('payEmiModal');
+    showToast('EMI paid! Balance auto-reduced.', 'success');
+  }
+
+  function renderLoans() {
+    const tbody = document.getElementById('loansTableBody');
+    const histBody = document.getElementById('emiHistoryBody');
+    if (!currentUser) return;
+    familyData.loans = getLocalLoans(currentUser.familyId);
+    familyData.emiPayments = getLocalEmiPayments(currentUser.familyId);
+    if (familyData.loans.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:40px">No loans added yet.</td></tr>';
+    } else {
+      let totalLoan = 0, totalEMI = 0, totalPaid = 0, totalOutstanding = 0;
+      tbody.innerHTML = familyData.loans.map(l => {
+        const balance = getLoanBalance(l);
+        const isPaid = l.emisPaid >= l.tenure;
+        totalLoan += l.principal;
+        totalEMI += isPaid ? 0 : l.emi;
+        totalPaid += l.emisPaid * l.emi;
+        totalOutstanding += balance;
+        return `<tr>
+          <td><strong>${l.type}</strong></td>
+          <td>${l.lender}</td>
+          <td>${formatCurrency(l.principal)}</td>
+          <td>${l.rate}%</td>
+          <td>${l.tenure} mo (${l.emisPaid}/${l.tenure})</td>
+          <td style="font-weight:600">${formatCurrency(l.emi)}</td>
+          <td>${l.emisPaid} of ${l.tenure}</td>
+          <td style="font-weight:600;color:${isPaid?'var(--teal)':'var(--rose)'}">${formatCurrency(balance)}</td>
+          <td><span class="badge ${isPaid?'badge-income':'badge-expense'}">${isPaid?'Paid':'Active'}</span></td>
+          <td>
+            ${!isPaid ? `<button class="btn btn-gold btn-sm" onclick="openPayEmiModal('${l.id}')" style="margin-right:4px">Pay EMI</button>` : ''}
+            <button class="btn-icon" onclick="openLoanModal('${l.id}')" title="Edit">✏️</button>
+            <button class="btn-icon" onclick="deleteLoan('${l.id}')" title="Delete">🗑️</button>
+          </td>
+        </tr>`;
+      }).join('');
+      document.getElementById('statTotalLoan').textContent = formatCurrency(totalLoan);
+      document.getElementById('statTotalEMI').textContent = formatCurrency(totalEMI);
+      document.getElementById('statTotalPaid').textContent = formatCurrency(totalPaid);
+      document.getElementById('statOutstanding').textContent = formatCurrency(totalOutstanding);
+    }
+    // EMI History
+    if (familyData.emiPayments.length === 0) {
+      histBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">No EMI payments yet.</td></tr>';
+    } else {
+      const sorted = [...familyData.emiPayments].sort((a,b) => new Date(b.date) - new Date(a.date));
+      histBody.innerHTML = sorted.slice(0, 20).map(p => `<tr>
+        <td>${formatDate(p.date)}</td>
+        <td>${p.loanName}</td>
+        <td>${formatCurrency(p.emiAmount)}</td>
+        <td style="color:var(--teal)">${formatCurrency(p.principalPortion)}</td>
+        <td style="color:var(--rose)">${formatCurrency(p.interestPortion)}</td>
+        <td style="font-weight:600">${formatCurrency(p.remainingBalance)}</td>
+      </tr>`).join('');
+    }
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  INVESTMENTS PORTFOLIO                                     ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function getLocalInvestments(familyId) {
+    const all = JSON.parse(localStorage.getItem('ffp_investments') || '[]');
+    return all.filter(i => i.familyId === familyId);
+  }
+  function saveLocalInvestments(familyId, investments) {
+    let all = JSON.parse(localStorage.getItem('ffp_investments') || '[]');
+    all = all.filter(i => i.familyId !== familyId);
+    investments.forEach(i => { i.familyId = familyId; all.push(i); });
+    localStorage.setItem('ffp_investments', JSON.stringify(all));
+  }
+
+  function openInvestmentModal(editId) {
+    document.getElementById('investEditId').value = editId || '';
+    document.getElementById('investModalTitle').textContent = editId ? 'Edit Investment' : 'Add Investment';
+    // Populate member select
+    const sel = document.getElementById('investMember');
+    const allM = familyData.members.length > 0 ? familyData.members : (currentUser ? [currentUser] : []);
+    sel.innerHTML = allM.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
+    if (editId) {
+      const inv = familyData.investments.find(i => i.id === editId);
+      if (inv) {
+        document.getElementById('investType').value = inv.type;
+        document.getElementById('investName').value = inv.name;
+        document.getElementById('investAmount').value = inv.amount;
+        document.getElementById('investCurrentValue').value = inv.currentValue;
+        document.getElementById('investStartDate').value = inv.startDate;
+        document.getElementById('investMaturityDate').value = inv.maturityDate || '';
+        document.getElementById('investExpReturn').value = inv.expectedReturn || '';
+        document.getElementById('investNotes').value = inv.notes || '';
+        sel.value = inv.member || '';
+      }
+    } else {
+      document.getElementById('investmentModal').querySelector('form').reset();
+      document.getElementById('investStartDate').value = new Date().toISOString().split('T')[0];
+      sel.innerHTML = allM.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
+    }
+    document.getElementById('investmentModal').classList.add('active');
+  }
+
+  function saveInvestment(e) {
+    e.preventDefault();
+    const editId = document.getElementById('investEditId').value;
+    const data = {
+      id: editId || 'inv_' + Date.now() + '_' + Math.random().toString(36).substr(2,4),
+      type: document.getElementById('investType').value,
+      name: document.getElementById('investName').value,
+      amount: Number(document.getElementById('investAmount').value),
+      currentValue: Number(document.getElementById('investCurrentValue').value),
+      startDate: document.getElementById('investStartDate').value,
+      maturityDate: document.getElementById('investMaturityDate').value || null,
+      expectedReturn: Number(document.getElementById('investExpReturn').value) || 0,
+      member: document.getElementById('investMember').value,
+      notes: document.getElementById('investNotes').value,
+      familyId: currentUser.familyId
+    };
+    if (editId) {
+      const idx = familyData.investments.findIndex(i => i.id === editId);
+      if (idx >= 0) familyData.investments[idx] = data;
+    } else {
+      familyData.investments.push(data);
+    }
+    saveLocalInvestments(currentUser.familyId, familyData.investments);
+    renderInvestments(); renderNetWorth();
+    closeModal('investmentModal');
+    showToast(editId ? 'Investment updated!' : 'Investment added!', 'success');
+  }
+
+  function deleteInvestment(invId) {
+    if (!confirm('Delete this investment?')) return;
+    familyData.investments = familyData.investments.filter(i => i.id !== invId);
+    saveLocalInvestments(currentUser.familyId, familyData.investments);
+    renderInvestments(); renderNetWorth();
+    showToast('Investment deleted.', 'info');
+  }
+
+  function renderInvestments() {
+    if (!currentUser) return;
+    familyData.investments = getLocalInvestments(currentUser.familyId);
+    const tbody = document.getElementById('investmentsTableBody');
+    if (familyData.investments.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:40px">No investments yet.</td></tr>';
+      document.getElementById('statTotalInvested').textContent = formatCurrency(0);
+      document.getElementById('statCurrentValue').textContent = formatCurrency(0);
+      document.getElementById('statTotalReturns').textContent = formatCurrency(0);
+      document.getElementById('statAvgReturn').textContent = '0%';
+      return;
+    }
+    let totalInv = 0, totalCurr = 0;
+    tbody.innerHTML = familyData.investments.map(inv => {
+      totalInv += inv.amount;
+      totalCurr += inv.currentValue;
+      const returns = inv.currentValue - inv.amount;
+      const retPct = inv.amount > 0 ? ((returns / inv.amount) * 100).toFixed(1) : 0;
+      const maturityStr = inv.maturityDate ? formatDate(inv.maturityDate) : 'N/A';
+      const isMatured = inv.maturityDate && new Date(inv.maturityDate) <= new Date();
+      return `<tr>
+        <td><span class="badge" style="background:var(--purple-light);color:var(--purple)">${inv.type}</span></td>
+        <td><strong>${inv.name}</strong>${inv.notes ? '<br><span style="font-size:0.75rem;color:var(--text-muted)">'+inv.notes+'</span>' : ''}</td>
+        <td>${formatCurrency(inv.amount)}</td>
+        <td style="font-weight:600">${formatCurrency(inv.currentValue)}</td>
+        <td style="color:${returns>=0?'var(--teal)':'var(--rose)'};font-weight:600">${returns>=0?'+':''}${formatCurrency(returns)} (${retPct}%)</td>
+        <td>${formatDate(inv.startDate)}</td>
+        <td>${maturityStr}</td>
+        <td><span class="badge ${isMatured?'badge-income':'badge-expense'}">${isMatured?'Matured':'Active'}</span></td>
+        <td>
+          <button class="btn-icon" onclick="openInvestmentModal('${inv.id}')" title="Edit">✏️</button>
+          <button class="btn-icon" onclick="deleteInvestment('${inv.id}')" title="Delete">🗑️</button>
+        </td>
+      </tr>`;
+    }).join('');
+    const totalReturns = totalCurr - totalInv;
+    const avgReturn = totalInv > 0 ? ((totalReturns / totalInv) * 100).toFixed(1) : 0;
+    document.getElementById('statTotalInvested').textContent = formatCurrency(totalInv);
+    document.getElementById('statCurrentValue').textContent = formatCurrency(totalCurr);
+    document.getElementById('statTotalReturns').textContent = (totalReturns>=0?'+':'') + formatCurrency(totalReturns);
+    document.getElementById('statAvgReturn').textContent = avgReturn + '%';
+    renderPortfolioCharts();
+  }
+
+  function renderPortfolioCharts() {
+    // Portfolio allocation by type
+    const ctx1 = document.getElementById('portfolioChart');
+    if (!ctx1) return;
+    if (charts.portfolio) charts.portfolio.destroy();
+    const typeMap = {};
+    familyData.investments.forEach(inv => {
+      typeMap[inv.type] = (typeMap[inv.type] || 0) + inv.currentValue;
+    });
+    const colors = ['#f59e0b','#0d9488','#f43f5e','#0ea5e9','#8b5cf6','#ec4899','#10b981','#6366f1','#f97316','#14b8a6'];
+    charts.portfolio = new Chart(ctx1.getContext('2d'), {
+      type: 'doughnut',
+      data: { labels: Object.keys(typeMap), datasets: [{ data: Object.values(typeMap), backgroundColor: colors.slice(0, Object.keys(typeMap).length), borderWidth: 0 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: 'DM Sans', size: 11 } } } } }
+    });
+    // Growth chart
+    const ctx2 = document.getElementById('investGrowthChart');
+    if (!ctx2) return;
+    if (charts.investGrowth) charts.investGrowth.destroy();
+    const invested = familyData.investments.map(i => i.amount);
+    const current = familyData.investments.map(i => i.currentValue);
+    const names = familyData.investments.map(i => i.name.substring(0,15));
+    charts.investGrowth = new Chart(ctx2.getContext('2d'), {
+      type: 'bar',
+      data: { labels: names, datasets: [
+        { label: 'Invested', data: invested, backgroundColor: '#0ea5e9', borderRadius: 4 },
+        { label: 'Current', data: current, backgroundColor: '#0d9488', borderRadius: 4 }
+      ]},
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
+    });
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  NET WORTH DASHBOARD                                       ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function renderNetWorth() {
+    if (!currentUser) return;
+    // Assets = investments current value + bank balances
+    const investValue = familyData.investments.reduce((s, i) => s + i.currentValue, 0);
+    const balances = getLocalBalances(currentUser.familyId);
+    const bankAssets = balances.reduce((s, b) => s + b.closing, 0);
+    const totalAssets = investValue + bankAssets;
+    // Liabilities = outstanding loans
+    const totalLiabilities = familyData.loans.reduce((s, l) => s + getLoanBalance(l), 0);
+    const netWorth = totalAssets - totalLiabilities;
+    // Upcoming EMIs this month
+    const activeLoans = familyData.loans.filter(l => l.emisPaid < l.tenure);
+    const upcomingEMI = activeLoans.reduce((s, l) => s + l.emi, 0);
+
+    document.getElementById('statTotalAssets').textContent = formatCurrency(totalAssets);
+    document.getElementById('statTotalLiabilities').textContent = formatCurrency(totalLiabilities);
+    document.getElementById('statNetWorth').textContent = formatCurrency(netWorth);
+    document.getElementById('statUpcomingEMI').textContent = formatCurrency(upcomingEMI) + '/mo';
+
+    // Charts
+    const ctx1 = document.getElementById('netWorthChart');
+    if (ctx1) {
+      if (charts.netWorth) charts.netWorth.destroy();
+      charts.netWorth = new Chart(ctx1.getContext('2d'), {
+        type: 'bar',
+        data: { labels: ['Assets', 'Liabilities', 'Net Worth'], datasets: [{ data: [totalAssets, totalLiabilities, netWorth], backgroundColor: ['#0d9488','#f43f5e','#f59e0b'], borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      });
+    }
+    const ctx2 = document.getElementById('assetBreakdownChart');
+    if (ctx2) {
+      if (charts.assetBreakdown) charts.assetBreakdown.destroy();
+      const assetData = {};
+      if (investValue > 0) assetData['Investments'] = investValue;
+      if (bankAssets > 0) assetData['Bank/Cash'] = bankAssets;
+      if (Object.keys(assetData).length === 0) assetData['No Assets'] = 0;
+      charts.assetBreakdown = new Chart(ctx2.getContext('2d'), {
+        type: 'doughnut',
+        data: { labels: Object.keys(assetData), datasets: [{ data: Object.values(assetData), backgroundColor: ['#8b5cf6','#0ea5e9','#10b981'], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      });
+    }
+  }
+
+  function renderUpcomingPayments() {
+    if (!currentUser) return;
+    const container = document.getElementById('upcomingPayments');
+    const activeLoans = familyData.loans.filter(l => l.emisPaid < l.tenure);
+    const maturityInv = familyData.investments.filter(i => {
+      if (!i.maturityDate) return false;
+      const mat = new Date(i.maturityDate);
+      const now = new Date();
+      const diff = (mat - now) / (1000*60*60*24);
+      return diff > 0 && diff <= 30;
+    });
+    if (activeLoans.length === 0 && maturityInv.length === 0) {
+      container.innerHTML = '<p style="color:var(--text-muted)">No upcoming payments or alerts.</p>';
+      return;
+    }
+    let html = '';
+    activeLoans.forEach(l => {
+      const remaining = l.tenure - l.emisPaid;
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--rose-light);border-radius:var(--radius-sm);margin-bottom:8px">
+        <div><strong>🏦 ${l.type}</strong> - ${l.lender}<br><span style="font-size:0.8rem;color:var(--text-muted)">${remaining} EMIs remaining</span></div>
+        <div style="text-align:right"><strong style="color:var(--rose)">${formatCurrency(l.emi)}/mo</strong><br><span style="font-size:0.8rem">Balance: ${formatCurrency(getLoanBalance(l))}</span></div>
+      </div>`;
+    });
+    maturityInv.forEach(inv => {
+      const days = Math.ceil((new Date(inv.maturityDate) - new Date()) / (1000*60*60*24));
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--teal-light);border-radius:var(--radius-sm);margin-bottom:8px">
+        <div><strong>📈 ${inv.name}</strong> maturing<br><span style="font-size:0.8rem;color:var(--text-muted)">${inv.type}</span></div>
+        <div style="text-align:right"><strong style="color:var(--teal)">In ${days} days</strong><br><span style="font-size:0.8rem">Value: ${formatCurrency(inv.currentValue)}</span></div>
+      </div>`;
+    });
+    container.innerHTML = html;
   }
   </script>
 
