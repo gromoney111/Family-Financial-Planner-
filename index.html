@@ -959,9 +959,33 @@
           </div>
           <div class="stat-card">
             <div class="stat-icon balance">💎</div>
-            <div class="stat-info"><h4>Balance</h4><div class="amount" id="statBalance">₹0</div></div>
+            <div class="stat-info"><h4>Net Balance</h4><div class="amount" id="statBalance">₹0</div></div>
           </div>
         </div>
+        <!-- Opening & Closing Balance Section -->
+        <div class="card" style="margin-bottom:28px" id="balanceCard">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 style="font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600">Opening &amp; Closing Balance</h3>
+            <button class="btn btn-gold btn-sm" onclick="openBalanceModal()">+ Set Balance</button>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Vertical / Account</th>
+                  <th>Opening Balance</th>
+                  <th>Closing Balance</th>
+                  <th>Net Change</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="balanceTableBody">
+                <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:30px">No balances set. Click "+ Set Balance" to add opening/closing balance.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div class="charts-grid">
           <div class="chart-card">
             <h3>Income vs Expense (Monthly)</h3>
@@ -1202,7 +1226,7 @@
         </div>
         <div class="form-group" id="bankNameGroup" style="display:none">
           <label>Bank / Card Name</label>
-          <select id="txBankName">
+          <select id="txBankName" onchange="toggleCustomBank()">
             <option value="">Select bank</option>
             <option value="SBI">State Bank of India (SBI)</option>
             <option value="HDFC">HDFC Bank</option>
@@ -1211,8 +1235,18 @@
             <option value="PNB">Punjab National Bank</option>
             <option value="BOB">Bank of Baroda</option>
             <option value="Kotak">Kotak Mahindra Bank</option>
-            <option value="Other">Other</option>
+            <option value="IndusInd">IndusInd Bank</option>
+            <option value="Yes">Yes Bank</option>
+            <option value="Union">Union Bank of India</option>
+            <option value="Canara">Canara Bank</option>
+            <option value="IOB">Indian Overseas Bank</option>
+            <option value="Other">Other (Enter manually)</option>
           </select>
+        </div>
+        <div class="form-group" id="customBankGroup" style="display:none">
+          <label>Enter Bank / Card Name</label>
+          <input type="text" id="txCustomBankName" placeholder="Enter your bank or card name">
+          <button type="button" class="btn btn-outline btn-sm" style="margin-top:8px" onclick="saveCustomBank()">+ Save as permanent option</button>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-outline" onclick="closeModal('transactionModal')">Cancel</button>
@@ -1336,6 +1370,56 @@
     </div>
   </div>
 
+  <!-- ===== BALANCE MODAL ===== -->
+  <div class="modal-overlay" id="balanceModal">
+    <div class="modal">
+      <h3>Set Opening &amp; Closing Balance</h3>
+      <form onsubmit="saveBalance(event)">
+        <div class="form-group">
+          <label>Vertical / Account Name</label>
+          <select id="balanceVertical" required>
+            <option value="">Select vertical</option>
+            <option value="Cash">Cash</option>
+            <option value="Bank - SBI">Bank - SBI</option>
+            <option value="Bank - HDFC">Bank - HDFC</option>
+            <option value="Bank - ICICI">Bank - ICICI</option>
+            <option value="Bank - Axis">Bank - Axis</option>
+            <option value="Bank - PNB">Bank - PNB</option>
+            <option value="Bank - Kotak">Bank - Kotak</option>
+            <option value="Credit Card">Credit Card</option>
+            <option value="UPI Wallet">UPI Wallet</option>
+            <option value="Investment">Investment</option>
+            <option value="Fixed Deposit">Fixed Deposit</option>
+            <option value="Gold/Jewellery">Gold/Jewellery</option>
+            <option value="Other">Other (Enter manually)</option>
+          </select>
+        </div>
+        <div class="form-group" id="customVerticalGroup" style="display:none">
+          <label>Custom Vertical Name</label>
+          <input type="text" id="customVerticalName" placeholder="Enter account/vertical name">
+        </div>
+        <div class="form-group">
+          <label>Month</label>
+          <input type="month" id="balanceMonth" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Opening Balance</label>
+            <input type="number" id="balanceOpening" placeholder="0.00" required min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Closing Balance</label>
+            <input type="number" id="balanceClosing" placeholder="0.00" required min="0" step="0.01">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('balanceModal')">Cancel</button>
+          <button type="submit" class="btn btn-gold">Save Balance</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- ==================== JAVASCRIPT ==================== -->
   <script>
   // ╔══════════════════════════════════════════════════════════╗
@@ -1385,6 +1469,8 @@
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('txDate').value = today;
     populateMonthFilter();
+    // Load custom banks into dropdown
+    loadCustomBanks();
   }
 
   // reCAPTCHA callback - called by Google's script
@@ -1472,19 +1558,19 @@
     switch(data.action) {
       case 'register': {
         const users = getLocalUsers();
-        if (users.find(u => u.email === data.email)) {
-          return { success: false, message: 'Email already registered.' };
+        if (users.find(u => u.email.toLowerCase() === data.email.toLowerCase().trim())) {
+          return { success: false, message: 'Email already registered. Please login instead.' };
         }
-        if (users.find(u => u.phone === data.phone)) {
-          return { success: false, message: 'Phone number already registered.' };
+        if (users.find(u => u.phone === data.phone.trim())) {
+          return { success: false, message: 'Phone number already registered. Please login instead.' };
         }
         const familyId = 'fam_' + Date.now();
         const userId = 'usr_' + Date.now();
         const user = {
           id: userId,
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
+          name: data.name.trim(),
+          email: data.email.toLowerCase().trim(),
+          phone: data.phone.trim(),
           passwordHash: localSha256(data.password),
           role: 'admin',
           familyId: familyId,
@@ -1492,16 +1578,23 @@
         };
         users.push(user);
         saveLocalUsers(users);
-        return { success: true, user: { id: userId, name: data.name, email: data.email, phone: data.phone, role: 'admin', familyId, relation: 'Self' } };
+        return { success: true, user: { id: userId, name: data.name.trim(), email: data.email.toLowerCase().trim(), phone: data.phone.trim(), role: 'admin', familyId, relation: 'Self' } };
       }
       case 'login': {
         const users = getLocalUsers();
+        const identifierLower = data.identifier.toLowerCase().trim();
         const hash = localSha256(data.password);
-        const found = users.find(u => (u.email === data.identifier || u.phone === data.identifier) && u.passwordHash === hash);
+        // First check if user exists at all
+        const userExists = users.find(u => (u.email.toLowerCase() === identifierLower || u.phone === data.identifier.trim()));
+        if (!userExists) {
+          return { success: false, message: 'User not registered. Please create an account first.' };
+        }
+        // Now check password
+        const found = users.find(u => (u.email.toLowerCase() === identifierLower || u.phone === data.identifier.trim()) && u.passwordHash === hash);
         if (found) {
           return { success: true, user: { id: found.id, name: found.name, email: found.email, phone: found.phone, role: found.role, familyId: found.familyId, relation: found.relation } };
         }
-        return { success: false, message: 'Invalid email/phone or password.' };
+        return { success: false, message: 'Incorrect password. Please try again or use Forgot Password.' };
       }
       case 'addMember': {
         const users = getLocalUsers();
@@ -1509,15 +1602,15 @@
         if (familyMembers.length >= CONFIG.MAX_MEMBERS) {
           return { success: false, message: 'Maximum ' + CONFIG.MAX_MEMBERS + ' members allowed.' };
         }
-        if (users.find(u => u.email === data.email)) {
+        if (users.find(u => u.email.toLowerCase() === data.email.toLowerCase().trim())) {
           return { success: false, message: 'Email already in use.' };
         }
         const memberId = 'usr_' + Date.now();
         users.push({
           id: memberId,
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
+          name: data.name.trim(),
+          email: data.email.toLowerCase().trim(),
+          phone: data.phone.trim(),
           passwordHash: localSha256(data.password),
           role: data.role || 'member',
           familyId: data.familyId,
@@ -1537,11 +1630,12 @@
       case 'loadData': {
         const users = getLocalUsers();
         const members = users.filter(u => u.familyId === data.familyId).map(u => ({
-          id: u.id, name: u.name, email: u.email, phone: u.phone, role: u.role, familyId: u.familyId, relation: u.relation
+          id: u.id, name: u.name, email: u.email, phone: u.phone, role: u.role, familyId: u.familyId, relation: u.relation || 'Self'
         }));
         const transactions = getLocalTransactions(data.familyId);
         const budgets = getLocalBudgets(data.familyId);
-        return { success: true, members, transactions, budgets };
+        // Always ensure at least the current user is in members list
+        return { success: true, members: members.length > 0 ? members : [], transactions, budgets };
       }
       case 'saveBudget': {
         saveLocalBudgets(data.familyId, data.budgets || []);
@@ -1795,10 +1889,23 @@
         familyData.transactions = result.transactions || [];
         familyData.members = result.members || [];
         familyData.budgets = result.budgets || [];
+        
+        // Ensure current user is always in members list
+        if (familyData.members.length === 0) {
+          familyData.members = [currentUser];
+        } else if (!familyData.members.find(m => m.id === currentUser.id || m.email === currentUser.email)) {
+          familyData.members.unshift(currentUser);
+        }
+        
         renderAll();
       }
     } catch(err) {
       console.error('Failed to load data:', err);
+      // Still render with whatever we have
+      if (familyData.members.length === 0 && currentUser) {
+        familyData.members = [currentUser];
+      }
+      renderAll();
     }
   }
 
@@ -1808,6 +1915,7 @@
     renderTransactions();
     renderBudgets();
     renderMembers();
+    renderBalances();
     updateMemberSelect();
     renderReport();
   }
@@ -1972,17 +2080,80 @@
   function toggleBankName() {
     const payment = document.getElementById('txPayment').value;
     const bankGroup = document.getElementById('bankNameGroup');
+    const customGroup = document.getElementById('customBankGroup');
     if (payment === 'Bank Transfer' || payment === 'Credit Card') {
       bankGroup.style.display = 'block';
     } else {
       bankGroup.style.display = 'none';
+      customGroup.style.display = 'none';
+    }
+  }
+
+  function toggleCustomBank() {
+    const bankSelect = document.getElementById('txBankName');
+    const customGroup = document.getElementById('customBankGroup');
+    if (bankSelect.value === 'Other') {
+      customGroup.style.display = 'block';
+    } else {
+      customGroup.style.display = 'none';
+    }
+  }
+
+  function saveCustomBank() {
+    const customName = document.getElementById('txCustomBankName').value.trim();
+    if (!customName) {
+      showToast('Please enter a bank/card name.', 'error');
+      return;
+    }
+    // Save to localStorage permanently
+    let customBanks = JSON.parse(localStorage.getItem('ffp_custom_banks') || '[]');
+    if (!customBanks.includes(customName)) {
+      customBanks.push(customName);
+      localStorage.setItem('ffp_custom_banks', JSON.stringify(customBanks));
+    }
+    // Add to the select dropdown permanently
+    const select = document.getElementById('txBankName');
+    const otherOption = select.querySelector('option[value="Other"]');
+    const newOption = document.createElement('option');
+    newOption.value = customName;
+    newOption.textContent = customName;
+    select.insertBefore(newOption, otherOption);
+    // Select the new option
+    select.value = customName;
+    document.getElementById('customBankGroup').style.display = 'none';
+    document.getElementById('txCustomBankName').value = '';
+    showToast(`"${customName}" added as permanent bank option!`, 'success');
+  }
+
+  function loadCustomBanks() {
+    const customBanks = JSON.parse(localStorage.getItem('ffp_custom_banks') || '[]');
+    if (customBanks.length > 0) {
+      const select = document.getElementById('txBankName');
+      const otherOption = select.querySelector('option[value="Other"]');
+      customBanks.forEach(bank => {
+        if (!select.querySelector(`option[value="${bank}"]`)) {
+          const newOption = document.createElement('option');
+          newOption.value = bank;
+          newOption.textContent = bank;
+          select.insertBefore(newOption, otherOption);
+        }
+      });
     }
   }
 
   async function saveTransaction(e) {
     e.preventDefault();
     const paymentMethod = document.getElementById('txPayment').value;
-    const bankName = document.getElementById('txBankName').value;
+    let bankName = document.getElementById('txBankName').value;
+    // If "Other" is selected, use custom bank name
+    if (bankName === 'Other') {
+      const customName = document.getElementById('txCustomBankName').value.trim();
+      if (customName) {
+        bankName = customName;
+      } else {
+        bankName = '';
+      }
+    }
     const transaction = {
       id: 'tx_' + Date.now() + '_' + Math.random().toString(36).substr(2,5),
       type: document.getElementById('txType').value,
@@ -2003,6 +2174,7 @@
         showToast('Transaction saved!', 'success');
         e.target.reset();
         document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('customBankGroup').style.display = 'none';
       } else {
         showToast(result.message || 'Failed to save.', 'error');
       }
@@ -2094,17 +2266,140 @@
   }
 
   // ╔══════════════════════════════════════════════════════════╗
+  // ║  OPENING & CLOSING BALANCE                                 ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function getLocalBalances(familyId) {
+    const all = JSON.parse(localStorage.getItem('ffp_balances') || '[]');
+    return all.filter(b => b.familyId === familyId);
+  }
+
+  function saveLocalBalances(familyId, balances) {
+    let all = JSON.parse(localStorage.getItem('ffp_balances') || '[]');
+    all = all.filter(b => b.familyId !== familyId);
+    balances.forEach(b => { b.familyId = familyId; all.push(b); });
+    localStorage.setItem('ffp_balances', JSON.stringify(all));
+  }
+
+  function openBalanceModal() {
+    const monthInput = document.getElementById('balanceMonth');
+    monthInput.value = new Date().toISOString().slice(0, 7);
+    // Handle vertical select change
+    document.getElementById('balanceVertical').onchange = function() {
+      document.getElementById('customVerticalGroup').style.display = this.value === 'Other' ? 'block' : 'none';
+    };
+    document.getElementById('balanceModal').classList.add('active');
+  }
+
+  function saveBalance(e) {
+    e.preventDefault();
+    let vertical = document.getElementById('balanceVertical').value;
+    if (vertical === 'Other') {
+      vertical = document.getElementById('customVerticalName').value.trim();
+      if (!vertical) {
+        showToast('Please enter a vertical/account name.', 'error');
+        return;
+      }
+    }
+    const month = document.getElementById('balanceMonth').value;
+    const opening = Number(document.getElementById('balanceOpening').value);
+    const closing = Number(document.getElementById('balanceClosing').value);
+
+    if (!currentUser || !currentUser.familyId) return;
+
+    let balances = getLocalBalances(currentUser.familyId);
+    
+    // Check if this vertical+month already exists, update if so
+    const existingIdx = balances.findIndex(b => b.vertical === vertical && b.month === month);
+    if (existingIdx >= 0) {
+      balances[existingIdx].opening = opening;
+      balances[existingIdx].closing = closing;
+    } else {
+      balances.push({
+        id: 'bal_' + Date.now(),
+        vertical,
+        month,
+        opening,
+        closing,
+        familyId: currentUser.familyId
+      });
+    }
+
+    saveLocalBalances(currentUser.familyId, balances);
+    renderBalances();
+    closeModal('balanceModal');
+    showToast('Balance saved successfully!', 'success');
+    e.target.reset();
+  }
+
+  function deleteBalance(balId) {
+    if (!confirm('Delete this balance entry?')) return;
+    let balances = getLocalBalances(currentUser.familyId);
+    balances = balances.filter(b => b.id !== balId);
+    saveLocalBalances(currentUser.familyId, balances);
+    renderBalances();
+    showToast('Balance entry deleted.', 'info');
+  }
+
+  function renderBalances() {
+    const tbody = document.getElementById('balanceTableBody');
+    if (!currentUser || !currentUser.familyId) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:30px">Please login to view balances.</td></tr>';
+      return;
+    }
+    
+    const balances = getLocalBalances(currentUser.familyId);
+    
+    if (balances.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:30px">No balances set. Click "+ Set Balance" to add opening/closing balance.</td></tr>';
+      return;
+    }
+
+    // Sort by month descending, then vertical
+    balances.sort((a, b) => b.month.localeCompare(a.month) || a.vertical.localeCompare(b.vertical));
+
+    tbody.innerHTML = balances.map(b => {
+      const netChange = b.closing - b.opening;
+      const changeColor = netChange >= 0 ? 'var(--teal)' : 'var(--rose)';
+      const changeSign = netChange >= 0 ? '+' : '';
+      return `
+        <tr>
+          <td><strong>${b.vertical}</strong><br><span style="font-size:0.75rem;color:var(--text-muted)">${b.month}</span></td>
+          <td>${formatCurrency(b.opening)}</td>
+          <td>${formatCurrency(b.closing)}</td>
+          <td style="font-weight:600;color:${changeColor}">${changeSign}${formatCurrency(netChange)}</td>
+          <td><button class="btn-icon" onclick="deleteBalance('${b.id}')" title="Delete">🗑️</button></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
   // ║  FAMILY MEMBERS                                            ║
   // ╚══════════════════════════════════════════════════════════╝
   function renderMembers() {
     const grid = document.getElementById('membersGrid');
-    const allMembers = familyData.members.length > 0 ? familyData.members : (currentUser ? [currentUser] : []);
+    // Always include currentUser if members list is empty
+    let allMembers = familyData.members.length > 0 ? familyData.members : (currentUser ? [currentUser] : []);
+    
+    // If current user is not in the members list, add them
+    if (currentUser && allMembers.length > 0 && !allMembers.find(m => m.id === currentUser.id || m.email === currentUser.email)) {
+      allMembers = [currentUser, ...allMembers];
+    }
+
+    if (allMembers.length === 0) {
+      grid.innerHTML = '<div class="member-card" style="text-align:center;color:var(--text-muted);padding:40px">No members found.</div>';
+      return;
+    }
+
+    const isAdmin = currentUser && currentUser.role === 'admin';
 
     grid.innerHTML = allMembers.map(m => `
       <div class="member-card">
         <div class="member-avatar">${(m.name || '?').charAt(0).toUpperCase()}</div>
         <h4>${m.name}</h4>
         <div class="relation">${m.relation || 'Self'}</div>
+        ${isAdmin ? `<p style="font-size:0.75rem;color:var(--text-muted);margin-top:6px">${m.email || ''}</p>
+        <p style="font-size:0.75rem;color:var(--text-muted)">${m.phone || ''}</p>` : ''}
         <span class="role-badge ${m.role === 'admin' ? 'admin' : 'member'}">${m.role || 'member'}</span>
       </div>
     `).join('');
