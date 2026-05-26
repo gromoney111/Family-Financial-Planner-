@@ -812,6 +812,89 @@
       background: var(--teal-light);
       border-color: var(--teal);
     }
+
+    /* ======= UPCOMING PAYMENT HIGHLIGHTING ======= */
+    .due-7days {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      animation: pulse7 2s infinite;
+    }
+    .due-2days {
+      background: #fed7aa;
+      color: #c2410c;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      animation: pulse2 1.5s infinite;
+    }
+    .due-1day {
+      background: #fecaca;
+      color: #dc2626;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      animation: pulse1 1s infinite;
+    }
+    .due-today {
+      background: #dc2626;
+      color: #ffffff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      animation: pulseToday 0.8s infinite;
+      box-shadow: 0 0 8px rgba(220,38,38,0.4);
+    }
+    .due-safe {
+      background: var(--teal-light);
+      color: var(--teal);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .due-overdue {
+      background: #7f1d1d;
+      color: #ffffff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .member-highlight {
+      font-weight: 700;
+      color: var(--navy);
+      background: var(--gold-pale);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+    }
+    @keyframes pulse7 {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    @keyframes pulse2 {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.02); }
+    }
+    @keyframes pulse1 {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.04); }
+    }
+    @keyframes pulseToday {
+      0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 8px rgba(220,38,38,0.4); }
+      50% { opacity: 0.9; transform: scale(1.05); box-shadow: 0 0 16px rgba(220,38,38,0.6); }
+    }
+    .upcoming-row-7days { background: #fffbeb !important; }
+    .upcoming-row-2days { background: #fff7ed !important; }
+    .upcoming-row-1day { background: #fef2f2 !important; }
+    .upcoming-row-today { background: #fee2e2 !important; border-left: 4px solid #dc2626; }
   </style>
 </head>
 
@@ -1004,8 +1087,40 @@
             <div class="stat-info"><h4>Savings</h4><div class="amount" id="statSavings">₹0</div></div>
           </div>
           <div class="stat-card">
+            <div class="stat-icon" style="background:#fee2e2;color:#dc2626">🏦</div>
+            <div class="stat-info"><h4>Active Loans</h4><div class="amount" id="statDashLoans">₹0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#ede9fe;color:#7c3aed">📊</div>
+            <div class="stat-info"><h4>Investments</h4><div class="amount" id="statDashInvest">₹0</div></div>
+          </div>
+          <div class="stat-card">
             <div class="stat-icon balance">💎</div>
             <div class="stat-info"><h4>Net Balance</h4><div class="amount" id="statBalance">₹0</div></div>
+          </div>
+        </div>
+
+        <!-- Upcoming EMI / LIC / MF Payments Dashboard Section -->
+        <div class="card" style="margin-bottom:28px" id="dashUpcomingCard">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 style="font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600">🔔 Upcoming EMI, LIC & Mutual Fund Payments</h3>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Name / Scheme</th>
+                  <th>Member</th>
+                  <th>Due Date</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="dashUpcomingBody">
+                <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">No upcoming payments. Add Loans or Investments to track due dates.</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
         <!-- Opening & Closing Balance Section -->
@@ -1715,6 +1830,10 @@
           </div>
         </div>
         <div class="form-group">
+          <label>Member (whose loan)</label>
+          <select id="loanMember" required></select>
+        </div>
+        <div class="form-group">
           <label>Notes (optional)</label>
           <input type="text" id="loanNotes" placeholder="Any additional details">
         </div>
@@ -1776,7 +1895,7 @@
               <option value="Mutual Fund - Debt">Mutual Fund - Debt</option>
               <option value="Mutual Fund - Hybrid">Mutual Fund - Hybrid</option>
               <option value="SIP">SIP (Systematic Investment)</option>
-              <option value="Life Insurance">Life Insurance</option>
+              <option value="Life Insurance">Life Insurance (LIC)</option>
               <option value="Health Insurance">Health Insurance</option>
               <option value="Term Insurance">Term Insurance</option>
               <option value="ULIP">ULIP</option>
@@ -2054,6 +2173,9 @@
         if (users.find(u => u.phone === data.phone.trim())) {
           return { success: false, message: 'Phone number already registered. Please login instead.' };
         }
+        if (users.find(u => u.name.toLowerCase().trim() === data.name.toLowerCase().trim() && u.phone === data.phone.trim())) {
+          return { success: false, message: 'An account with this name and phone already exists. Please login.' };
+        }
         // Use custom family ID if provided, otherwise auto-generate
         let familyId;
         if (data.customFamilyId) {
@@ -2194,8 +2316,12 @@
     const identifier = document.getElementById('loginIdentifier').value.trim();
     const password = document.getElementById('loginPassword').value;
 
-    // Validate reCAPTCHA
-    if (typeof grecaptcha !== 'undefined') {
+    if (!identifier) { showAuthError('Please enter email or phone.'); return; }
+    if (!password) { showAuthError('Please enter password.'); return; }
+
+    // Skip reCAPTCHA in local mode (no backend configured)
+    const isLocalMode = CONFIG.APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
+    if (!isLocalMode && typeof grecaptcha !== 'undefined' && loginRecaptchaWidget !== null) {
       const response = grecaptcha.getResponse(loginRecaptchaWidget);
       if (!response) {
         showAuthError('Please complete the reCAPTCHA verification.');
@@ -2206,6 +2332,7 @@
     const btn = document.getElementById('loginBtn');
     btn.disabled = true;
     btn.innerHTML = '<div class="spinner"></div> Logging in...';
+    document.getElementById('authError').classList.remove('show');
 
     try {
       const result = await apiCall({ action: 'login', identifier, password });
@@ -2216,14 +2343,14 @@
         showApp();
         loadFamilyData();
       } else {
-        showAuthError(result.message || 'Invalid credentials.');
+        showAuthError(result.message || 'Invalid credentials. Please check email/phone and password.');
       }
     } catch(err) {
       showAuthError('Login failed. Please try again.');
     }
     btn.disabled = false;
     btn.innerHTML = '<span>Login</span>';
-    if (typeof grecaptcha !== 'undefined') grecaptcha.reset(loginRecaptchaWidget);
+    if (!isLocalMode && typeof grecaptcha !== 'undefined' && loginRecaptchaWidget !== null) grecaptcha.reset(loginRecaptchaWidget);
   }
 
   async function handleRegister(e) {
@@ -2235,6 +2362,10 @@
     const confirm = document.getElementById('regConfirm').value;
     const customFamilyId = document.getElementById('regFamilyId').value.trim();
 
+    if (!name || !email || !phone) {
+      showAuthError('Please fill all required fields.');
+      return;
+    }
     if (password !== confirm) {
       showAuthError('Passwords do not match.');
       return;
@@ -2249,8 +2380,19 @@
       return;
     }
 
-    // Validate reCAPTCHA
-    if (typeof grecaptcha !== 'undefined') {
+    // Check if user already exists locally - prompt to login instead
+    const existingUsers = getLocalUsers();
+    const emailExists = existingUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+    const phoneExists = existingUsers.find(u => u.phone === phone);
+    const nameAndEmailExists = existingUsers.find(u => u.name.toLowerCase() === name.toLowerCase() && u.email.toLowerCase() === email.toLowerCase());
+    if (emailExists || phoneExists || nameAndEmailExists) {
+      showAuthError('Account already exists with this email or phone. Please login instead.');
+      return;
+    }
+
+    // Skip reCAPTCHA in local mode
+    const isLocalMode = CONFIG.APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
+    if (!isLocalMode && typeof grecaptcha !== 'undefined' && registerRecaptchaWidget !== null) {
       const response = grecaptcha.getResponse(registerRecaptchaWidget);
       if (!response) {
         showAuthError('Please complete the reCAPTCHA verification.');
@@ -2307,7 +2449,7 @@
     }
     btn.disabled = false;
     btn.innerHTML = '<span>Create Account</span>';
-    if (typeof grecaptcha !== 'undefined') grecaptcha.reset(registerRecaptchaWidget);
+    if (!isLocalMode && typeof grecaptcha !== 'undefined' && registerRecaptchaWidget !== null) grecaptcha.reset(registerRecaptchaWidget);
   }
 
   async function handleForgotPassword(e) {
@@ -2429,6 +2571,7 @@
     renderInvestments();
     renderNetWorth();
     renderUpcomingPayments();
+    renderDashboardUpcoming();
     updateMemberSelect();
     renderReport();
   }
@@ -2461,10 +2604,161 @@
     document.getElementById('statExpense').textContent = formatCurrency(expense);
     document.getElementById('statSavings').textContent = formatCurrency(savings > 0 ? savings : 0);
     document.getElementById('statBalance').textContent = formatCurrency(savings);
+
+    // Loans total (outstanding balance)
+    const activeLoans = familyData.loans.filter(l => l.emisPaid < l.tenure);
+    const totalLoanOutstanding = activeLoans.reduce((s, l) => s + getLoanBalance(l), 0);
+    document.getElementById('statDashLoans').textContent = formatCurrency(totalLoanOutstanding);
+
+    // Investments total (current value)
+    const totalInvestValue = familyData.investments.reduce((s, i) => s + Number(i.currentValue || i.amount || 0), 0);
+    document.getElementById('statDashInvest').textContent = formatCurrency(totalInvestValue);
   }
 
   function formatCurrency(amount) {
     return CONFIG.CURRENCY + Number(amount).toLocaleString(CONFIG.LOCALE);
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  DASHBOARD UPCOMING EMI / LIC / MF TRACKER                 ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function getDueDateStatus(dueDate) {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const due = new Date(dueDate);
+    due.setHours(0,0,0,0);
+    const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) return { label: 'OVERDUE', class: 'due-overdue', rowClass: 'upcoming-row-today', priority: 0 };
+    if (diffDays === 0) return { label: 'DUE TODAY!', class: 'due-today', rowClass: 'upcoming-row-today', priority: 1 };
+    if (diffDays === 1) return { label: '1 DAY LEFT', class: 'due-1day', rowClass: 'upcoming-row-1day', priority: 2 };
+    if (diffDays <= 2) return { label: '2 DAYS LEFT', class: 'due-2days', rowClass: 'upcoming-row-2days', priority: 3 };
+    if (diffDays <= 7) return { label: diffDays + ' DAYS LEFT', class: 'due-7days', rowClass: 'upcoming-row-7days', priority: 4 };
+    return { label: diffDays + ' days away', class: 'due-safe', rowClass: '', priority: 5 };
+  }
+
+  function getNextEmiDate(loan) {
+    // Calculate next EMI due date based on start date and EMIs paid
+    const start = new Date(loan.startDate);
+    const nextEmiMonth = loan.emisPaid; // 0-indexed: if 3 paid, next is month 3 (4th payment)
+    const nextDate = new Date(start.getFullYear(), start.getMonth() + nextEmiMonth + 1, start.getDate());
+    return nextDate;
+  }
+
+  function renderDashboardUpcoming() {
+    if (!currentUser) return;
+    const tbody = document.getElementById('dashUpcomingBody');
+    const upcomingItems = [];
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    // 1. Active Loans - EMI due dates
+    const activeLoans = familyData.loans.filter(l => l.emisPaid < l.tenure);
+    activeLoans.forEach(loan => {
+      const nextDue = getNextEmiDate(loan);
+      const memberName = loan.member || currentUser.name;
+      upcomingItems.push({
+        type: 'EMI',
+        typeIcon: '🏦',
+        name: loan.type + ' - ' + loan.lender,
+        member: memberName,
+        dueDate: nextDue,
+        amount: loan.emi,
+        status: getDueDateStatus(nextDue)
+      });
+    });
+
+    // 2. Investments - LIC, MF, etc. with maturity or SIP dates
+    familyData.investments.forEach(inv => {
+      // Check maturity date
+      if (inv.maturityDate) {
+        const matDate = new Date(inv.maturityDate);
+        const diffDays = Math.ceil((matDate - today) / (1000*60*60*24));
+        if (diffDays <= 60 && diffDays >= -7) { // Show within 60 days or overdue up to 7 days
+          const memberName = inv.member || currentUser.name;
+          let typeLabel = inv.type;
+          if (inv.type === 'LIC' || inv.type === 'Insurance' || inv.type === 'Life Insurance' || inv.type === 'Term Insurance' || inv.type === 'Health Insurance' || inv.type === 'ULIP') typeLabel = 'LIC';
+          else if (inv.type.startsWith('Mutual Fund') || inv.type === 'SIP' || inv.type === 'MF') typeLabel = 'MF';
+          else if (inv.type === 'FD' || inv.type === 'Fixed Deposit' || inv.type === 'Recurring Deposit') typeLabel = 'FD';
+          
+          upcomingItems.push({
+            type: typeLabel,
+            typeIcon: typeLabel === 'LIC' ? '🛡️' : typeLabel === 'MF' ? '📊' : '📈',
+            name: inv.name,
+            member: memberName,
+            dueDate: matDate,
+            amount: inv.currentValue || inv.amount,
+            status: getDueDateStatus(matDate)
+          });
+        }
+      }
+      
+      // For SIP/MF - assume monthly payment on same date as start
+      if ((inv.type.startsWith('Mutual Fund') || inv.type === 'SIP' || inv.type === 'MF') && inv.startDate) {
+        const startDay = new Date(inv.startDate).getDate();
+        let nextSipDate = new Date(today.getFullYear(), today.getMonth(), startDay);
+        if (nextSipDate <= today) {
+          nextSipDate = new Date(today.getFullYear(), today.getMonth() + 1, startDay);
+        }
+        const diffDays = Math.ceil((nextSipDate - today) / (1000*60*60*24));
+        if (diffDays <= 30) {
+          const memberName = inv.member || currentUser.name;
+          upcomingItems.push({
+            type: 'MF SIP',
+            typeIcon: '📊',
+            name: inv.name + ' (SIP)',
+            member: memberName,
+            dueDate: nextSipDate,
+            amount: inv.amount,
+            status: getDueDateStatus(nextSipDate)
+          });
+        }
+      }
+
+      // For LIC - assume monthly premium on same date
+      if ((inv.type === 'LIC' || inv.type === 'Life Insurance' || inv.type === 'Term Insurance' || inv.type === 'Health Insurance' || inv.type === 'ULIP') && inv.startDate) {
+        const startDay = new Date(inv.startDate).getDate();
+        const startMonth = new Date(inv.startDate).getMonth();
+        // Assume monthly premium
+        let nextPremiumDate = new Date(today.getFullYear(), today.getMonth(), startDay);
+        if (nextPremiumDate <= today) {
+          nextPremiumDate = new Date(today.getFullYear(), today.getMonth() + 1, startDay);
+        }
+        const diffDays = Math.ceil((nextPremiumDate - today) / (1000*60*60*24));
+        if (diffDays <= 30) {
+          const memberName = inv.member || currentUser.name;
+          upcomingItems.push({
+            type: 'LIC',
+            typeIcon: '🛡️',
+            name: inv.name + ' (Premium)',
+            member: memberName,
+            dueDate: nextPremiumDate,
+            amount: inv.amount,
+            status: getDueDateStatus(nextPremiumDate)
+          });
+        }
+      }
+    });
+
+    // Sort by priority (most urgent first)
+    upcomingItems.sort((a, b) => a.status.priority - b.status.priority || a.dueDate - b.dueDate);
+
+    if (upcomingItems.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">No upcoming payments. Add Loans or Investments to track due dates.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = upcomingItems.map(item => {
+      const dateStr = item.dueDate.toLocaleDateString(CONFIG.LOCALE, { day: '2-digit', month: 'short', year: 'numeric' });
+      return `<tr class="${item.status.rowClass}">
+        <td><span style="font-size:1.1rem">${item.typeIcon}</span> <strong>${item.type}</strong></td>
+        <td>${item.name}</td>
+        <td><span class="member-highlight">${item.member}</span></td>
+        <td><strong>${dateStr}</strong></td>
+        <td style="font-weight:600">${formatCurrency(item.amount)}</td>
+        <td><span class="${item.status.class}">${item.status.label}</span></td>
+      </tr>`;
+    }).join('');
   }
 
   // ╔══════════════════════════════════════════════════════════╗
@@ -3305,6 +3599,10 @@
   function openLoanModal(editId) {
     document.getElementById('loanEditId').value = editId || '';
     document.getElementById('loanModalTitle').textContent = editId ? 'Edit Loan' : 'Add Loan';
+    // Populate member select
+    const sel = document.getElementById('loanMember');
+    const allM = familyData.members.length > 0 ? familyData.members : (currentUser ? [currentUser] : []);
+    sel.innerHTML = allM.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
     if (editId) {
       const loan = familyData.loans.find(l => l.id === editId);
       if (loan) {
@@ -3317,10 +3615,12 @@
         document.getElementById('loanStartDate').value = loan.startDate;
         document.getElementById('loanEmisPaid').value = loan.emisPaid || 0;
         document.getElementById('loanNotes').value = loan.notes || '';
+        sel.value = loan.member || currentUser.name;
       }
     } else {
       document.getElementById('loanModal').querySelector('form').reset();
       document.getElementById('loanStartDate').value = new Date().toISOString().split('T')[0];
+      sel.innerHTML = allM.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
     }
     document.getElementById('loanModal').classList.add('active');
   }
@@ -3338,6 +3638,7 @@
       emi: Number(document.getElementById('loanEMI').value),
       startDate: document.getElementById('loanStartDate').value,
       emisPaid: Number(document.getElementById('loanEmisPaid').value) || 0,
+      member: document.getElementById('loanMember').value,
       notes: document.getElementById('loanNotes').value,
       familyId: currentUser.familyId
     };
