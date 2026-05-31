@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const User = require('../models/User');
 const Family = require('../models/Family');
 const { authenticate, generateToken } = require('../middleware/auth');
+const { sendVerificationEmail, sendWelcomeEmail, sendPasswordResetEmail } = require('../utils/email');
 
 // ============ REGISTER (Creates Admin + Family) ============
 router.post('/register', async (req, res) => {
@@ -107,10 +108,21 @@ router.post('/register', async (req, res) => {
     family.members.push(user._id);
     await family.save();
 
+    // Send verification email
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    user.emailVerificationToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
+    user.emailVerificationExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+    await user.save();
+
+    // Send email (non-blocking - don't fail registration if email fails)
+    sendVerificationEmail(user, verificationToken).catch(err => {
+      console.log('Verification email could not be sent:', err);
+    });
+
     const token = generateToken(user._id);
     res.status(201).json({
       success: true,
-      message: 'Account created successfully!',
+      message: 'Account created successfully! Please check your email to verify your account.',
       token,
       user: user.toSafeObject(),
       familyCode: family.familyCode
@@ -264,6 +276,80 @@ router.post('/change-password', authenticate, async (req, res) => {
     res.json({ success: true, message: 'Password changed successfully.' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to change password.' });
+  }
+});
+
+// ============ VERIFY EMAIL ============
+router.get('/verify-email', async (req, res) => {
+  try {
+    const { token, email } = req.query;
+
+    if (!token || !email) {
+      return res.status(400).send('<h2>Invalid verification link.</h2>');
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+      emailVerificationToken: hashedToken,
+      emailVerificationExpiry: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).send(`
+        <div style="font-family:Arial,sans-serif;text-align:center;padding:60px 20px;">
+          <h2 style="color:#dc2626;">❌ Verification Failed</h2>
+          <p>This link is invalid or has expired. Please request a new verification email.</p>
+          <a href="${process.env.FRONTEND_URL || '/'}" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#f59e0b;color:#fff;border-radius:8px;text-decoration:none;">Go to Login</a>
+        </div>
+      `);
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpiry = undefined;
+    await user.save();
+
+    // Send welcome email
+    sendWelcomeEmail(user).catch(err => console.log('Welcome email error:', err));
+
+    res.send(`
+      <div style="font-family:Arial,sans-serif;text-align:center;padding:60px 20px;">
+        <h2 style="color:#0d9488;">✅ Email Verified Successfully!</h2>
+        <p style="color:#475569;font-size:16px;">Hi ${user.name}, your email is now verified. You can use all features of GromoFinance.</p>
+        <a href="${process.env.FRONTEND_URL || '/'}" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#f59e0b;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">Go to Dashboard →</a>
+      </div>
+    `);
+  } catch (error) {
+    console.error('Verify email error:', error);
+    res.status(500).send('<h2>Something went wrong. Please try again.</h2>');
+  }
+});
+
+// ============ RESEND VERIFICATION EMAIL ============
+router.post('/resend-verification', authenticate, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+    if (user.isEmailVerified) {
+      return res.json({ success: true, message: 'Email is already verified.' });
+    }
+
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    user.emailVerificationToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
+    user.emailVerificationExpiry = Date.now() + 24 * 60 * 60 * 1000;
+    await user.save();
+
+    const result = await sendVerificationEmail(user, verificationToken);
+    if (result.success) {
+      res.json({ success: true, message: 'Verification email sent! Check your inbox.' });
+    } else {
+      res.status(500).json({ success: false, message: 'Failed to send email. Please try again later.' });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to resend verification.' });
   }
 });
 

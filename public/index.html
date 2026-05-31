@@ -940,7 +940,10 @@
             </div>
             <div class="form-group">
               <label>Password</label>
-              <input type="password" id="loginPassword" placeholder="Enter password" required>
+              <div style="position:relative">
+                <input type="password" id="loginPassword" placeholder="Enter password" required>
+                <button type="button" class="toggle-password" onclick="togglePasswordVisibility('loginPassword', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text-muted)">👁️</button>
+              </div>
             </div>
             <span class="forgot-link" onclick="showForgotPassword()">Forgot Password?</span>
             <div class="recaptcha-box">
@@ -969,11 +972,17 @@
             </div>
             <div class="form-group">
               <label>Password</label>
-              <input type="password" id="regPassword" placeholder="Min 6 characters" required minlength="6">
+              <div style="position:relative">
+                <input type="password" id="regPassword" placeholder="Min 6 characters" required minlength="6">
+                <button type="button" class="toggle-password" onclick="togglePasswordVisibility('regPassword', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text-muted)">👁️</button>
+              </div>
             </div>
             <div class="form-group">
               <label>Confirm Password</label>
-              <input type="password" id="regConfirm" placeholder="Re-enter password" required>
+              <div style="position:relative">
+                <input type="password" id="regConfirm" placeholder="Re-enter password" required>
+                <button type="button" class="toggle-password" onclick="togglePasswordVisibility('regConfirm', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text-muted)">👁️</button>
+              </div>
             </div>
             <div class="form-group">
               <label>Family ID (optional - choose your own)</label>
@@ -1666,7 +1675,10 @@
         </div>
         <div class="form-group">
           <label>Password (for their login)</label>
-          <input type="password" id="memberPassword" placeholder="Min 6 characters" required minlength="6">
+          <div style="position:relative">
+            <input type="password" id="memberPassword" placeholder="Min 6 characters" required minlength="6">
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('memberPassword', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text-muted)">👁️</button>
+          </div>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -3536,6 +3548,17 @@
   // ╔══════════════════════════════════════════════════════════╗
   // ║  UTILITY FUNCTIONS                                         ║
   // ╚══════════════════════════════════════════════════════════╝
+  function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.textContent = '🙈';
+    } else {
+      input.type = 'password';
+      btn.textContent = '👁️';
+    }
+  }
+
   function closeModal(id) {
     document.getElementById(id).classList.remove('active');
   }
