@@ -1,29 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" fill="none">
-  <!-- Background pill shape -->
-  <rect x="0" y="0" width="240" height="60" rx="12" fill="#0f172a"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 60" fill="none">
+  <!-- Icon: Rounded square with growth arrow -->
+  <rect x="4" y="4" width="52" height="52" rx="12" fill="#0f172a"/>
+  <rect x="7" y="7" width="46" height="46" rx="9" fill="#0f172a" stroke="#f59e0b" stroke-width="2"/>
   
-  <!-- Coin/Shield icon -->
-  <circle cx="30" cy="30" r="18" fill="#f59e0b"/>
-  <circle cx="30" cy="30" r="14" fill="#0f172a" stroke="#f59e0b" stroke-width="1.5"/>
-  <!-- Family silhouette inside coin -->
-  <path d="M24 36 L24 30 C24 27 26 25 28 25 L32 25 C34 25 36 27 36 30 L36 36" stroke="#f59e0b" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-  <circle cx="30" cy="22" r="3" fill="#f59e0b"/>
-  <!-- Small person left -->
-  <circle cx="24" cy="26" r="2" fill="#fcd34d"/>
-  <path d="M22 33 L22 29 C22 28 23 27 24 27 L24 27" stroke="#fcd34d" stroke-width="1" fill="none" stroke-linecap="round"/>
-  <!-- Small person right -->
-  <circle cx="36" cy="26" r="2" fill="#fcd34d"/>
-  <path d="M38 33 L38 29 C38 28 37 27 36 27 L36 27" stroke="#fcd34d" stroke-width="1" fill="none" stroke-linecap="round"/>
-  <!-- Rupee symbol -->
-  <path d="M28 30 L32 30 M28 33 L30 33 L32 37 M29 27 L31 27" stroke="#f59e0b" stroke-width="1" stroke-linecap="round"/>
+  <!-- Growth arrow inside icon -->
+  <path d="M16 40 L24 28 L32 33 L42 20" stroke="#f59e0b" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="39,18 44,18 44,23" fill="#f59e0b"/>
   
-  <!-- Text: Family -->
-  <text x="56" y="28" font-family="Georgia, serif" font-size="18" font-weight="700" fill="#ffffff">Family</text>
-  <!-- Text: Fin -->
-  <text x="118" y="28" font-family="Georgia, serif" font-size="18" font-weight="700" fill="#f59e0b">Fin</text>
-  <!-- Text: Plan -->
-  <text x="146" y="28" font-family="Georgia, serif" font-size="18" font-weight="700" fill="#ffffff">Plan</text>
+  <!-- Family dots below arrow -->
+  <circle cx="22" cy="46" r="2.5" fill="#fcd34d"/>
+  <circle cx="30" cy="46" r="2.5" fill="#f59e0b"/>
+  <circle cx="38" cy="46" r="2.5" fill="#fcd34d"/>
+  
+  <!-- Text: Gromo -->
+  <text x="64" y="32" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#ffffff">Gromo</text>
+  <!-- Text: Finance -->
+  <text x="138" y="32" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#f59e0b">Finance</text>
   
   <!-- Tagline -->
-  <text x="56" y="44" font-family="Arial, sans-serif" font-size="9" fill="#94a3b8">Smart Family Budget Planner</text>
+  <text x="64" y="48" font-family="Arial, sans-serif" font-size="10" fill="#94a3b8">Smart Family Budget Planner</text>
 </svg>
