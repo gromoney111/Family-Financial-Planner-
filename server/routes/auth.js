@@ -32,14 +32,19 @@ router.post('/register', async (req, res) => {
 
     let family;
 
-    // Case 1: Joining via invite code
+    // Case 1: Joining via invite code or familyId
     if (inviteCode) {
+      // Try finding by invite code first, then by familyId directly
       family = await Family.findOne({ inviteCode });
       if (!family) {
-        return res.status(400).json({ success: false, message: 'Invalid invite code.' });
+        // Try as a direct familyId (from invite link that embeds familyId)
+        const mongoose = require('mongoose');
+        if (mongoose.Types.ObjectId.isValid(inviteCode)) {
+          family = await Family.findById(inviteCode);
+        }
       }
-      if (!family.isInviteValid()) {
-        return res.status(400).json({ success: false, message: 'Invite code has expired. Ask admin for a new one.' });
+      if (!family) {
+        return res.status(400).json({ success: false, message: 'Invalid invite code.' });
       }
       if (family.isFull()) {
         return res.status(400).json({ success: false, message: 'Family has reached maximum members (6).' });

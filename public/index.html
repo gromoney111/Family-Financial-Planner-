@@ -2516,8 +2516,8 @@
       let joiningFamily = false;
       
       if (pendingInvite && inviteFamilyId) {
-        // User came via invite link - register as MEMBER of that family
-        actionData = { action: 'addMember', familyId: inviteFamilyId, name, email, phone, password, role: 'member', relation: 'Other' };
+        // User came via invite link - use register with inviteCode (backend handles linking)
+        actionData = { action: 'register', name, email, phone, password, inviteCode: inviteFamilyId };
         joiningFamily = true;
         sessionStorage.removeItem('ffp_pending_invite');
         sessionStorage.removeItem('ffp_invite_familyId');
@@ -2525,16 +2525,9 @@
       
       const result = await apiCall(actionData);
       if (result.success) {
-        if (joiningFamily) {
-          // Member joined via invite - login them
-          const loginResult = await apiCall({ action: 'login', identifier: email, password });
-          if (loginResult.success) {
-            currentUser = loginResult.user;
-          } else {
-            currentUser = { id: result.memberId, name, email, phone, role: 'member', familyId: inviteFamilyId, relation: 'Other' };
-          }
-        } else {
-          currentUser = result.user;
+        currentUser = result.user;
+        if (result.token) {
+          localStorage.setItem('ffp_token', result.token);
         }
         localStorage.setItem('ffp_session', JSON.stringify(currentUser));
         localStorage.setItem('ffp_user', JSON.stringify(currentUser));
