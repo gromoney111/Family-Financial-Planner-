@@ -19,10 +19,15 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
-      return res.status(400).json({ success: false, message: 'Email already registered. Please login.' });
+    // Check if user already exists (email OR phone - must be unique across ALL families)
+    const existingEmail = await User.findOne({ email: email.toLowerCase() });
+    if (existingEmail) {
+      return res.status(400).json({ success: false, message: 'This email is already registered. Each person can only have one account.' });
+    }
+
+    const existingPhone = await User.findOne({ phone: phone.trim() });
+    if (existingPhone) {
+      return res.status(400).json({ success: false, message: 'This phone number is already registered. Each person can only have one account.' });
     }
 
     let family;

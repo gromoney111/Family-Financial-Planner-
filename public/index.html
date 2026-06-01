@@ -3387,22 +3387,27 @@
 
   function generateInviteLink() {
     const familyId = currentUser.familyId;
-    const inviteCode = familyId.replace('fam_', '');
+    // Create unique invite code with prefix: GF-FAMILYID-TIMESTAMP
+    const uniqueId = 'GF-' + familyId.toString().slice(-6) + '-' + Date.now().toString(36).toUpperCase();
     const baseUrl = window.location.href.split('?')[0].split('#')[0];
-    const inviteLink = baseUrl + '?invite=' + inviteCode;
+    const inviteLink = baseUrl + '?invite=' + uniqueId;
 
     document.getElementById('inviteLinkInput').value = inviteLink;
-    document.getElementById('modalInviteLink').value = inviteLink;
-    document.getElementById('familyCodeDisplay').textContent = inviteCode;
+    if (document.getElementById('modalInviteLink')) document.getElementById('modalInviteLink').value = inviteLink;
+    if (document.getElementById('familyCodeDisplay')) document.getElementById('familyCodeDisplay').textContent = uniqueId;
     document.getElementById('inviteLinkBox').style.display = 'block';
 
-    // Save invite code locally
-    localStorage.setItem('ffp_invite_' + inviteCode, JSON.stringify({
+    // Save invite code locally with family info
+    localStorage.setItem('ffp_invite_' + uniqueId, JSON.stringify({
       familyId: familyId,
       adminName: currentUser.name,
+      adminEmail: currentUser.email,
+      inviteCode: uniqueId,
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
     }));
+
+    showToast('Unique invite link generated! Share only with your family members.', 'success');
   }
 
   function copyInviteLink() {
@@ -3420,26 +3425,26 @@
 
   function shareInviteWhatsApp() {
     const link = document.getElementById('modalInviteLink').value || document.getElementById('inviteLinkInput').value;
-    const text = encodeURIComponent(`Join our family budget planner on FamilyFinPlan! Click here to register: ${link}`);
+    const text = encodeURIComponent(`${currentUser.name} has invited you to join GromoFinance - Smart Family Budget Planner! Register here: ${link}`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
   }
 
   function shareInviteEmail() {
     const link = document.getElementById('modalInviteLink').value || document.getElementById('inviteLinkInput').value;
-    const subject = encodeURIComponent('Join our Family Budget Planner');
-    const body = encodeURIComponent(`Hi,\n\n${currentUser.name} has invited you to join their family on FamilyFinPlan - a smart family budget planner.\n\nClick here to register and join: ${link}\n\nOnce registered, you can add your income & expenses and help manage the family budget together.\n\nBest,\n${currentUser.name}`);
+    const subject = encodeURIComponent('Join our Family on GromoFinance');
+    const body = encodeURIComponent(`Hi,\n\n${currentUser.name} has invited you to join their family on GromoFinance - a smart family budget planner.\n\nClick here to register and join: ${link}\n\nOnce registered, you can add your income & expenses and help manage the family budget together.\n\nBest,\n${currentUser.name}`);
     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
   }
 
   function shareInviteTelegram() {
     const link = document.getElementById('modalInviteLink').value || document.getElementById('inviteLinkInput').value;
-    const text = encodeURIComponent(`Join our family budget on FamilyFinPlan: ${link}`);
+    const text = encodeURIComponent(`Join our family budget on GromoFinance: ${link}`);
     window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${text}`, '_blank');
   }
 
   function shareInviteSMS() {
     const link = document.getElementById('modalInviteLink').value || document.getElementById('inviteLinkInput').value;
-    const text = encodeURIComponent(`Join our family budget planner: ${link}`);
+    const text = encodeURIComponent(`${currentUser.name} invited you to GromoFinance family budget planner: ${link}`);
     window.open(`sms:?body=${text}`, '_blank');
   }
 
@@ -3448,13 +3453,18 @@
     const params = new URLSearchParams(window.location.search);
     const inviteCode = params.get('invite');
     if (inviteCode) {
-      // Switch to register tab
-      switchAuthTab('register');
-      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.auth-tab')[1].classList.add('active');
+      // Hide login form, show register form
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('registerForm').style.display = 'block';
+      // Update tabs
+      var tabs = document.querySelectorAll('.auth-tab');
+      if (tabs.length >= 2) {
+        tabs[0].classList.remove('active');
+        tabs[1].classList.add('active');
+      }
       // Store invite code for registration
       sessionStorage.setItem('ffp_pending_invite', inviteCode);
-      showToast('You have been invited! Register to join the family.', 'info');
+      showToast('You have been invited! Register below to join the family.', 'info');
     }
   }
 

@@ -56,10 +56,16 @@ router.post('/members', authenticate, requireAdmin, async (req, res) => {
       return res.status(400).json({ success: false, message: `Maximum ${family.maxMembers} members allowed.` });
     }
 
-    // Check if email already exists
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
-      return res.status(400).json({ success: false, message: 'Email already registered.' });
+    // Check if email already exists (globally unique)
+    const existingEmail = await User.findOne({ email: email.toLowerCase() });
+    if (existingEmail) {
+      return res.status(400).json({ success: false, message: 'This email is already registered by another user. Each email must be unique.' });
+    }
+
+    // Check if phone already exists (globally unique)
+    const existingPhone = await User.findOne({ phone: phone.trim() });
+    if (existingPhone) {
+      return res.status(400).json({ success: false, message: 'This phone number is already registered by another user. Each phone must be unique.' });
     }
 
     // Create new member
