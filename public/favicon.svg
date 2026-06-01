@@ -1,15 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Solid gold circle background -->
-  <circle cx="32" cy="32" r="30" fill="#f59e0b"/>
-  
-  <!-- Navy inner circle -->
-  <circle cx="32" cy="32" r="24" fill="#0f172a"/>
-  
-  <!-- Bold G letter -->
-  <path d="M38 26 L30 26 C26.7 26 24 28.7 24 32 C24 35.3 26.7 38 30 38 L38 38 L38 33 L33 33" 
-        stroke="#f59e0b" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  
-  <!-- Small upward arrow inside G -->
-  <path d="M35 36 L35 30 M33 32 L35 30 L37 32" 
-        stroke="#fcd34d" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Solid gold rounded square -->
+  <rect width="32" height="32" rx="6" fill="#f59e0b"/>
+  <!-- Bold G letter in navy -->
+  <path d="M19.5 11H14C11.8 11 10 12.8 10 15V17C10 19.2 11.8 21 14 21H19.5V16.5H16" 
+        stroke="#0f172a" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

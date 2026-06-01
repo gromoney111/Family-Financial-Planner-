@@ -738,8 +738,12 @@
     @media (max-width: 1024px) {
       .charts-grid { grid-template-columns: 1fr; }
     }
+    /* Hide mobile logo on desktop */
+    .mobile-logo { display: none; }
+    
     @media (max-width: 768px) {
       .login-hero { display: none; }
+      .mobile-logo { display: block !important; }
       .login-form-section { max-width: 100%; }
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
@@ -925,6 +929,12 @@
     </div>
     <div class="login-form-section">
       <div class="login-form-container">
+        <!-- Logo for mobile (hidden on desktop since login-hero shows it) -->
+        <div style="text-align:center;margin-bottom:24px;" class="mobile-logo">
+          <img src="/favicon.svg" alt="GromoFinance" style="width:48px;height:48px;margin-bottom:8px;">
+          <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin:0;">Gromo<span style="color:#f59e0b;">Finance</span></h2>
+          <p style="font-size:0.8rem;color:#94a3b8;margin-top:4px;">Smart Family Budget Planner</p>
+        </div>
         <!-- Auth Tabs -->
         <div class="login-forms" id="loginForms">
           <div class="auth-tabs">
@@ -943,7 +953,7 @@
               <label>Password</label>
               <div style="position:relative">
                 <input type="password" id="loginPassword" placeholder="Enter password" required>
-                <button type="button" class="toggle-password" onclick="togglePasswordVisibility('loginPassword', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text-muted)">👁️</button>
+                <span onclick="togglePasswordVisibility('loginPassword', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.1rem;color:var(--text-muted);user-select:none;">&#128065;&#65039;</span>
               </div>
             </div>
             <span class="forgot-link" onclick="showForgotPassword()">Forgot Password?</span>
@@ -975,14 +985,14 @@
               <label>Password</label>
               <div style="position:relative">
                 <input type="password" id="regPassword" placeholder="Min 6 characters" required minlength="6">
-                <button type="button" class="toggle-password" onclick="togglePasswordVisibility('regPassword', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text-muted)">👁️</button>
+                <span onclick="togglePasswordVisibility('regPassword', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.1rem;color:var(--text-muted);user-select:none;">&#128065;&#65039;</span>
               </div>
             </div>
             <div class="form-group">
               <label>Confirm Password</label>
               <div style="position:relative">
                 <input type="password" id="regConfirm" placeholder="Re-enter password" required>
-                <button type="button" class="toggle-password" onclick="togglePasswordVisibility('regConfirm', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text-muted)">👁️</button>
+                <span onclick="togglePasswordVisibility('regConfirm', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.1rem;color:var(--text-muted);user-select:none;">&#128065;&#65039;</span>
               </div>
             </div>
             <div class="form-group">
@@ -1679,7 +1689,7 @@
           <label>Password (for their login)</label>
           <div style="position:relative">
             <input type="password" id="memberPassword" placeholder="Min 6 characters" required minlength="6">
-            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('memberPassword', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text-muted)">👁️</button>
+            <span onclick="togglePasswordVisibility('memberPassword', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.1rem;color:var(--text-muted);user-select:none;">&#128065;&#65039;</span>
           </div>
         </div>
         <div class="form-row">
@@ -3551,13 +3561,14 @@
   // ║  UTILITY FUNCTIONS                                         ║
   // ╚══════════════════════════════════════════════════════════╝
   function togglePasswordVisibility(inputId, btn) {
-    const input = document.getElementById(inputId);
+    var input = document.getElementById(inputId);
+    if (!input) return;
     if (input.type === 'password') {
       input.type = 'text';
-      btn.textContent = '🙈';
+      btn.innerHTML = '&#128584;'; // 🙈
     } else {
       input.type = 'password';
-      btn.textContent = '👁️';
+      btn.innerHTML = '&#128065;&#65039;'; // 👁️
     }
   }
 
