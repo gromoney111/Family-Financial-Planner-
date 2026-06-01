@@ -1,25 +1,23 @@
 {
   "name": "family-financial-planner",
   "version": "1.0.0",
-  "description": "Smart monthly family budget planner for up to 6 members",
-  "main": "index.html",
+  "description": "GromoFinance - Smart Family Budget Planner",
+  "main": "server/server.js",
   "scripts": {
-    "dev": "python -m http.server 8000",
-    "build": "npm run minify",
-    "minify": "echo 'Ready to minify with build tools'"
+    "start": "node server/server.js",
+    "build": "cd server && npm install",
+    "dev": "cd server && node server.js"
   },
   "keywords": [
     "family budget",
     "financial planner",
     "expense tracker",
-    "income tracker",
-    "budget app",
-    "personal finance"
+    "gromofinance"
   ],
-  "author": "FamilyFinPlan",
+  "author": "GromoFinance",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/family-financial-planner"
+    "url": "https://github.com/gromoney111/Family-Financial-Planner-"
   }
 }
