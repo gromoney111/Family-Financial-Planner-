@@ -79,20 +79,12 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Family code already taken. Please choose another.' });
     }
 
-    // Create family first (without admin reference)
-    family = new Family({
-      familyCode: code.toLowerCase(),
-      familyName: `${name}'s Family`,
-      adminId: null, // Will update after user creation
-      members: [],
-      settings: { currency: '₹', locale: 'en-IN' }
-    });
-
-    // Temporarily save without adminId validation
+    // Create family with placeholder adminId
+    const mongoose = require('mongoose');
     family = await Family.create({
       familyCode: code.toLowerCase(),
       familyName: `${name}'s Family`,
-      adminId: new require('mongoose').Types.ObjectId(), // Placeholder
+      adminId: new mongoose.Types.ObjectId(),
       members: [],
       settings: { currency: '₹', locale: 'en-IN' }
     });
