@@ -1,22 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 60" fill="none">
-  <!-- Icon: Rounded square with growth arrow -->
-  <rect x="4" y="4" width="52" height="52" rx="12" fill="#0f172a"/>
-  <rect x="7" y="7" width="46" height="46" rx="9" fill="#0f172a" stroke="#f59e0b" stroke-width="2"/>
-  
-  <!-- Growth arrow inside icon -->
-  <path d="M16 40 L24 28 L32 33 L42 20" stroke="#f59e0b" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <polygon points="39,18 44,18 44,23" fill="#f59e0b"/>
-  
-  <!-- Family dots below arrow -->
-  <circle cx="22" cy="46" r="2.5" fill="#fcd34d"/>
-  <circle cx="30" cy="46" r="2.5" fill="#f59e0b"/>
-  <circle cx="38" cy="46" r="2.5" fill="#fcd34d"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" fill="none">
+  <!-- Icon: Gold circle with navy G -->
+  <circle cx="32" cy="32" r="28" fill="#f59e0b"/>
+  <circle cx="32" cy="32" r="22" fill="#0f172a"/>
+  <path d="M38 26 L30 26 C26.7 26 24 28.7 24 32 C24 35.3 26.7 38 30 38 L38 38 L38 33 L33 33" 
+        stroke="#f59e0b" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M35 36 L35 30 M33 32 L35 30 L37 32" 
+        stroke="#fcd34d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
   
   <!-- Text: Gromo -->
-  <text x="64" y="32" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#ffffff">Gromo</text>
+  <text x="68" y="36" font-family="Georgia, serif" font-size="24" font-weight="700" fill="#ffffff">Gromo</text>
   <!-- Text: Finance -->
-  <text x="138" y="32" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#f59e0b">Finance</text>
+  <text x="145" y="36" font-family="Georgia, serif" font-size="24" font-weight="700" fill="#f59e0b">Finance</text>
   
   <!-- Tagline -->
-  <text x="64" y="48" font-family="Arial, sans-serif" font-size="10" fill="#94a3b8">Smart Family Budget Planner</text>
+  <text x="68" y="54" font-family="Arial, sans-serif" font-size="10" fill="#94a3b8">Smart Family Budget Planner</text>
 </svg>
