@@ -2086,12 +2086,28 @@
   });
 
   function initApp() {
+    // Check if user arrived via invite link FIRST
+    const params = new URLSearchParams(window.location.search);
+    const inviteCode = params.get('invite');
+    if (inviteCode) {
+      // Don't auto-login — show registration for invite
+      showLogin();
+      // Set today's date for transaction form
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('txDate').value = today;
+      populateMonthFilter();
+      loadCustomBanks();
+      return; // Let checkInviteLink handle the rest
+    }
+
     // Check for existing session (token-based)
     const token = localStorage.getItem('ffp_token');
     const session = localStorage.getItem('ffp_user') || localStorage.getItem('ffp_session');
     if (token && session) {
       try {
         currentUser = JSON.parse(session);
+        // Set token in API client
+        if (window.API) API.token = token;
         showApp();
         loadFamilyData();
       } catch(e) {
@@ -2441,6 +2457,9 @@
       const result = await apiCall({ action: 'login', identifier, password });
       if (result.success) {
         currentUser = result.user;
+        if (result.token) {
+          localStorage.setItem('ffp_token', result.token);
+        }
         localStorage.setItem('ffp_session', JSON.stringify(currentUser));
         localStorage.setItem('ffp_user', JSON.stringify(currentUser));
         showToast('Welcome back, ' + currentUser.name + '!', 'success');
@@ -3301,16 +3320,20 @@
 
     const isAdmin = currentUser && currentUser.role === 'admin';
 
-    grid.innerHTML = allMembers.map(m => `
-      <div class="member-card">
-        <div class="member-avatar">${(m.name || '?').charAt(0).toUpperCase()}</div>
-        <h4>${m.name}</h4>
-        <div class="relation">${m.relation || 'Self'}</div>
+    grid.innerHTML = allMembers.map(m => {
+      const isThisAdmin = m.role === 'admin';
+      const relationText = isThisAdmin ? 'Admin (Head of Family)' : (m.relation || 'Member');
+      return `
+      <div class="member-card" style="${isThisAdmin ? 'border:2px solid var(--gold);' : ''}">
+        <div class="member-avatar" style="${isThisAdmin ? 'background:linear-gradient(135deg, var(--gold), #d97706);' : ''}">${(m.name || '?').charAt(0).toUpperCase()}</div>
+        <h4>${m.name}${isThisAdmin ? ' 👑' : ''}</h4>
+        <div class="relation" style="font-weight:${isThisAdmin ? '600' : '400'};color:${isThisAdmin ? 'var(--gold)' : 'var(--text-muted)'}">${relationText}</div>
         ${isAdmin ? `<p style="font-size:0.75rem;color:var(--text-muted);margin-top:6px">${m.email || ''}</p>
         <p style="font-size:0.75rem;color:var(--text-muted)">${m.phone || ''}</p>` : ''}
         <span class="role-badge ${m.role === 'admin' ? 'admin' : 'member'}">${m.role || 'member'}</span>
+        ${!isThisAdmin && isAdmin ? `<p style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;font-style:italic">Relation to Admin: ${m.relation || 'Other'}</p>` : ''}
       </div>
-    `).join('');
+    `}).join('');
   }
 
   function openMemberModal() {
