@@ -8,16 +8,18 @@
   <meta name="author" content="FamilyFinPlan Team">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#0f172a">
-  <meta property="og:title" content="FamilyFinPlan – Smart Family Budget Planner">
-  <meta property="og:description" content="Plan your family finances together. Track income, expenses, savings for every member. Free forever.">
+  <meta property="og:title" content="GromoFinance – Smart Family Budget Planner">
+  <meta property="og:description" content="Plan your family finances together. Track income, expenses, savings for every member.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://familyfinplan.com">
-  <meta property="og:image" content="https://familyfinplan.com/og-image.jpg">
+  <meta property="og:url" content="https://gromofinance.com">
+  <meta property="og:image" content="https://gromofinance.com/logo.svg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="FamilyFinPlan – Family Budget Planner">
-  <meta name="twitter:description" content="Free budget planner for Indian families. Track income, expenses, and savings together.">
-  <meta name="twitter:image" content="https://familyfinplan.com/og-image.jpg">
-  <title>FamilyFinPlan – Smart Monthly Family Budget Planner | Free Income &amp; Expense Tracker</title>
+  <meta name="twitter:title" content="GromoFinance – Family Budget Planner">
+  <meta name="twitter:description" content="Smart budget planner for Indian families. Track income, expenses, and savings together.">
+  <meta name="twitter:image" content="https://gromofinance.com/logo.svg">
+  <title>GromoFinance – Smart Family Budget Planner | Track Income &amp; Expenses</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -736,8 +738,12 @@
     @media (max-width: 1024px) {
       .charts-grid { grid-template-columns: 1fr; }
     }
+    /* Hide mobile logo on desktop */
+    .mobile-logo { display: none; }
+    
     @media (max-width: 768px) {
       .login-hero { display: none; }
+      .mobile-logo { display: block !important; }
       .login-form-section { max-width: 100%; }
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
@@ -910,7 +916,8 @@
   <!-- ==================== LOGIN PAGE ==================== -->
   <div class="login-wrapper" id="loginPage">
     <div class="login-hero">
-      <h1>Family<span>Fin</span>Plan</h1>
+      <img src="/logo.svg" alt="GromoFinance Logo" style="width:240px;height:auto;margin-bottom:20px;position:relative;z-index:1;">
+      <h1 style="position:relative;z-index:1;">Gromo<span>Finance</span></h1>
       <p>Smart financial planning for your entire family. Track, budget, and grow together.</p>
       <ul class="login-features">
         <li>Track income &amp; expenses for up to 6 members</li>
@@ -922,6 +929,12 @@
     </div>
     <div class="login-form-section">
       <div class="login-form-container">
+        <!-- Logo for mobile (hidden on desktop since login-hero shows it) -->
+        <div style="text-align:center;margin-bottom:24px;" class="mobile-logo">
+          <img src="/favicon.svg" alt="GromoFinance" style="width:48px;height:48px;margin-bottom:8px;">
+          <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin:0;">Gromo<span style="color:#f59e0b;">Finance</span></h2>
+          <p style="font-size:0.8rem;color:#94a3b8;margin-top:4px;">Smart Family Budget Planner</p>
+        </div>
         <!-- Auth Tabs -->
         <div class="login-forms" id="loginForms">
           <div class="auth-tabs">
@@ -938,7 +951,10 @@
             </div>
             <div class="form-group">
               <label>Password</label>
-              <input type="password" id="loginPassword" placeholder="Enter password" required>
+              <div style="position:relative">
+                <input type="password" id="loginPassword" placeholder="Enter password" required>
+                <span onclick="togglePasswordVisibility('loginPassword', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.1rem;color:var(--text-muted);user-select:none;">&#128065;&#65039;</span>
+              </div>
             </div>
             <span class="forgot-link" onclick="showForgotPassword()">Forgot Password?</span>
             <div class="recaptcha-box">
@@ -967,11 +983,17 @@
             </div>
             <div class="form-group">
               <label>Password</label>
-              <input type="password" id="regPassword" placeholder="Min 6 characters" required minlength="6">
+              <div style="position:relative">
+                <input type="password" id="regPassword" placeholder="Min 6 characters" required minlength="6">
+                <span onclick="togglePasswordVisibility('regPassword', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.1rem;color:var(--text-muted);user-select:none;">&#128065;&#65039;</span>
+              </div>
             </div>
             <div class="form-group">
               <label>Confirm Password</label>
-              <input type="password" id="regConfirm" placeholder="Re-enter password" required>
+              <div style="position:relative">
+                <input type="password" id="regConfirm" placeholder="Re-enter password" required>
+                <span onclick="togglePasswordVisibility('regConfirm', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.1rem;color:var(--text-muted);user-select:none;">&#128065;&#65039;</span>
+              </div>
             </div>
             <div class="form-group">
               <label>Family ID (optional - choose your own)</label>
@@ -1015,7 +1037,8 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
-        <h2>Family<span>Fin</span>Plan</h2>
+        <img src="/favicon.svg" alt="GromoFinance" style="width:32px;height:32px;margin-right:10px;vertical-align:middle;display:inline-block;">
+        <h2 style="display:inline-block;vertical-align:middle;">Gromo<span>Finance</span></h2>
       </div>
       <nav class="sidebar-nav">
         <div class="nav-item active" onclick="navigateTo('dashboard')">
@@ -1664,7 +1687,10 @@
         </div>
         <div class="form-group">
           <label>Password (for their login)</label>
-          <input type="password" id="memberPassword" placeholder="Min 6 characters" required minlength="6">
+          <div style="position:relative">
+            <input type="password" id="memberPassword" placeholder="Min 6 characters" required minlength="6">
+            <span onclick="togglePasswordVisibility('memberPassword', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.1rem;color:var(--text-muted);user-select:none;">&#128065;&#65039;</span>
+          </div>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -2060,14 +2086,17 @@
   });
 
   function initApp() {
-    // Check for existing session
-    const session = localStorage.getItem('ffp_session');
-    if (session) {
+    // Check for existing session (token-based)
+    const token = localStorage.getItem('ffp_token');
+    const session = localStorage.getItem('ffp_user') || localStorage.getItem('ffp_session');
+    if (token && session) {
       try {
         currentUser = JSON.parse(session);
         showApp();
         loadFamilyData();
       } catch(e) {
+        localStorage.removeItem('ffp_token');
+        localStorage.removeItem('ffp_user');
         localStorage.removeItem('ffp_session');
         showLogin();
       }
@@ -2272,24 +2301,95 @@
   }
 
   async function apiCall(data) {
-    // If Google Sheets is not configured, use LOCAL storage mode
-    if (CONFIG.APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
-      return handleLocalAction(data);
-    }
+    // Use Node.js backend API
     showLoading(true);
     try {
-      const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(data)
-      });
-      const result = await response.json();
+      let result;
+      switch(data.action) {
+        case 'register':
+          result = await API.register({
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            password: data.password,
+            familyCode: data.customFamilyId || undefined,
+            inviteCode: data.inviteCode || undefined
+          });
+          break;
+        case 'login':
+          result = await API.login(data.identifier, data.password);
+          break;
+        case 'addMember':
+          result = await API.addMember({
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            password: data.password,
+            role: data.role || 'member',
+            relation: data.relation || 'Other'
+          });
+          if (result.success && result.member) {
+            result.memberId = result.member.id;
+          }
+          break;
+        case 'saveTransaction':
+          const tx = data.transaction;
+          result = await API.addTransaction({
+            type: tx.type,
+            category: tx.category,
+            amount: tx.amount,
+            description: tx.description,
+            date: tx.date,
+            memberName: tx.member,
+            paymentMethod: (tx.payment || 'Cash').split(' (')[0],
+            bankName: tx.bankName || ''
+          });
+          break;
+        case 'deleteTransaction':
+          result = await API.deleteTransaction(data.txId);
+          break;
+        case 'loadData':
+          const [membersRes, txRes, budgetsRes] = await Promise.all([
+            API.getMembers(),
+            API.getTransactions(),
+            API.getBudgets()
+          ]);
+          result = {
+            success: true,
+            members: membersRes.members || [],
+            transactions: (txRes.transactions || []).map(t => ({
+              id: t._id,
+              type: t.type,
+              category: t.category,
+              amount: t.amount,
+              description: t.description,
+              date: t.date ? t.date.split('T')[0] : '',
+              member: t.memberName,
+              payment: t.paymentMethod + (t.bankName ? ` (${t.bankName})` : ''),
+              bankName: t.bankName
+            })),
+            budgets: (budgetsRes.budgets || []).map(b => ({
+              category: b.category,
+              limit: b.limit
+            }))
+          };
+          break;
+        case 'saveBudget':
+          result = await API.saveBudgets(data.budgets || []);
+          break;
+        case 'forgotPassword':
+          result = await API.forgotPassword(data.email);
+          break;
+        default:
+          result = { success: false, message: 'Unknown action.' };
+      }
       showLoading(false);
       return result;
     } catch (error) {
       showLoading(false);
+      console.error('API call error:', error);
       // Fallback to local mode on network error
-      showToast('Cloud sync failed. Using local storage.', 'info');
+      showToast('Server unavailable. Using local storage.', 'info');
       return handleLocalAction(data);
     }
   }
@@ -2339,6 +2439,7 @@
       if (result.success) {
         currentUser = result.user;
         localStorage.setItem('ffp_session', JSON.stringify(currentUser));
+        localStorage.setItem('ffp_user', JSON.stringify(currentUser));
         showToast('Welcome back, ' + currentUser.name + '!', 'success');
         showApp();
         loadFamilyData();
@@ -2491,6 +2592,9 @@
     currentUser = null;
     familyData = { transactions: [], members: [], budgets: [] };
     localStorage.removeItem('ffp_session');
+    localStorage.removeItem('ffp_user');
+    localStorage.removeItem('ffp_token');
+    if (window.API) API.logout();
     showLogin();
     showToast('Logged out successfully.', 'info');
   }
@@ -3283,22 +3387,27 @@
 
   function generateInviteLink() {
     const familyId = currentUser.familyId;
-    const inviteCode = familyId.replace('fam_', '');
+    // Create unique invite code with prefix: GF-FAMILYID-TIMESTAMP
+    const uniqueId = 'GF-' + familyId.toString().slice(-6) + '-' + Date.now().toString(36).toUpperCase();
     const baseUrl = window.location.href.split('?')[0].split('#')[0];
-    const inviteLink = baseUrl + '?invite=' + inviteCode;
+    const inviteLink = baseUrl + '?invite=' + uniqueId;
 
     document.getElementById('inviteLinkInput').value = inviteLink;
-    document.getElementById('modalInviteLink').value = inviteLink;
-    document.getElementById('familyCodeDisplay').textContent = inviteCode;
+    if (document.getElementById('modalInviteLink')) document.getElementById('modalInviteLink').value = inviteLink;
+    if (document.getElementById('familyCodeDisplay')) document.getElementById('familyCodeDisplay').textContent = uniqueId;
     document.getElementById('inviteLinkBox').style.display = 'block';
 
-    // Save invite code locally
-    localStorage.setItem('ffp_invite_' + inviteCode, JSON.stringify({
+    // Save invite code locally with family info
+    localStorage.setItem('ffp_invite_' + uniqueId, JSON.stringify({
       familyId: familyId,
       adminName: currentUser.name,
+      adminEmail: currentUser.email,
+      inviteCode: uniqueId,
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
     }));
+
+    showToast('Unique invite link generated! Share only with your family members.', 'success');
   }
 
   function copyInviteLink() {
@@ -3316,26 +3425,26 @@
 
   function shareInviteWhatsApp() {
     const link = document.getElementById('modalInviteLink').value || document.getElementById('inviteLinkInput').value;
-    const text = encodeURIComponent(`Join our family budget planner on FamilyFinPlan! Click here to register: ${link}`);
+    const text = encodeURIComponent(`${currentUser.name} has invited you to join GromoFinance - Smart Family Budget Planner! Register here: ${link}`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
   }
 
   function shareInviteEmail() {
     const link = document.getElementById('modalInviteLink').value || document.getElementById('inviteLinkInput').value;
-    const subject = encodeURIComponent('Join our Family Budget Planner');
-    const body = encodeURIComponent(`Hi,\n\n${currentUser.name} has invited you to join their family on FamilyFinPlan - a smart family budget planner.\n\nClick here to register and join: ${link}\n\nOnce registered, you can add your income & expenses and help manage the family budget together.\n\nBest,\n${currentUser.name}`);
+    const subject = encodeURIComponent('Join our Family on GromoFinance');
+    const body = encodeURIComponent(`Hi,\n\n${currentUser.name} has invited you to join their family on GromoFinance - a smart family budget planner.\n\nClick here to register and join: ${link}\n\nOnce registered, you can add your income & expenses and help manage the family budget together.\n\nBest,\n${currentUser.name}`);
     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
   }
 
   function shareInviteTelegram() {
     const link = document.getElementById('modalInviteLink').value || document.getElementById('inviteLinkInput').value;
-    const text = encodeURIComponent(`Join our family budget on FamilyFinPlan: ${link}`);
+    const text = encodeURIComponent(`Join our family budget on GromoFinance: ${link}`);
     window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${text}`, '_blank');
   }
 
   function shareInviteSMS() {
     const link = document.getElementById('modalInviteLink').value || document.getElementById('inviteLinkInput').value;
-    const text = encodeURIComponent(`Join our family budget planner: ${link}`);
+    const text = encodeURIComponent(`${currentUser.name} invited you to GromoFinance family budget planner: ${link}`);
     window.open(`sms:?body=${text}`, '_blank');
   }
 
@@ -3344,13 +3453,18 @@
     const params = new URLSearchParams(window.location.search);
     const inviteCode = params.get('invite');
     if (inviteCode) {
-      // Switch to register tab
-      switchAuthTab('register');
-      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.auth-tab')[1].classList.add('active');
+      // Hide login form, show register form
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('registerForm').style.display = 'block';
+      // Update tabs
+      var tabs = document.querySelectorAll('.auth-tab');
+      if (tabs.length >= 2) {
+        tabs[0].classList.remove('active');
+        tabs[1].classList.add('active');
+      }
       // Store invite code for registration
       sessionStorage.setItem('ffp_pending_invite', inviteCode);
-      showToast('You have been invited! Register to join the family.', 'info');
+      showToast('You have been invited! Register below to join the family.', 'info');
     }
   }
 
@@ -3456,6 +3570,18 @@
   // ╔══════════════════════════════════════════════════════════╗
   // ║  UTILITY FUNCTIONS                                         ║
   // ╚══════════════════════════════════════════════════════════╝
+  function togglePasswordVisibility(inputId, btn) {
+    var input = document.getElementById(inputId);
+    if (!input) return;
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.innerHTML = '&#128584;'; // 🙈
+    } else {
+      input.type = 'password';
+      btn.innerHTML = '&#128065;&#65039;'; // 👁️
+    }
+  }
+
   function closeModal(id) {
     document.getElementById(id).classList.remove('active');
   }
@@ -4506,5 +4632,6 @@ function handleForgotPassword(data) {
 // ============================================================
 
 -->
+<script src="/api.js"></script>
 </body>
 </html>
