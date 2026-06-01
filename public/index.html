@@ -995,7 +995,7 @@
                 <span onclick="togglePasswordVisibility('regConfirm', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.1rem;color:var(--text-muted);user-select:none;">&#128065;&#65039;</span>
               </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="familyIdGroup">
               <label>Family ID (optional - choose your own)</label>
               <input type="text" id="regFamilyId" placeholder="e.g., sharma_family, gupta2024 (leave blank for auto)">
               <span style="font-size:0.75rem;color:var(--text-muted)">Letters, numbers & underscores only. This is your unique family identifier.</span>
@@ -3452,6 +3452,9 @@
         tabs[0].classList.remove('active');
         tabs[1].classList.add('active');
       }
+      // Hide Family ID field (not needed when joining via invite)
+      var familyIdGroup = document.getElementById('familyIdGroup');
+      if (familyIdGroup) familyIdGroup.style.display = 'none';
       // Store the familyId from invite for registration (inviteCode IS the familyId)
       sessionStorage.setItem('ffp_pending_invite', inviteCode);
       sessionStorage.setItem('ffp_invite_familyId', inviteCode);
