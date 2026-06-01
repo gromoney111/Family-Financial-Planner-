@@ -2254,7 +2254,10 @@
           return { success: false, message: 'Maximum ' + CONFIG.MAX_MEMBERS + ' members allowed.' };
         }
         if (users.find(u => u.email.toLowerCase() === data.email.toLowerCase().trim())) {
-          return { success: false, message: 'Email already in use.' };
+          return { success: false, message: 'This email is already registered. Each person can only have one account.' };
+        }
+        if (users.find(u => u.phone === data.phone.trim())) {
+          return { success: false, message: 'This phone number is already registered. Each person can only have one account.' };
         }
         const memberId = 'usr_' + Date.now();
         users.push({
@@ -2263,7 +2266,7 @@
           email: data.email.toLowerCase().trim(),
           phone: data.phone.trim(),
           passwordHash: localSha256(data.password),
-          role: data.role || 'member',
+          role: 'member',
           familyId: data.familyId,
           relation: data.relation || 'Other'
         });
@@ -2506,38 +2509,36 @@
     btn.innerHTML = '<div class="spinner"></div> Creating account...';
 
     try {
-      // Check if user has an invite code (joining existing family)
+      // Check if user has an invite code (joining existing family as MEMBER)
       const pendingInvite = sessionStorage.getItem('ffp_pending_invite');
+      const inviteFamilyId = sessionStorage.getItem('ffp_invite_familyId');
       let actionData = { action: 'register', name, email, phone, password, customFamilyId };
+      let joiningFamily = false;
       
-      if (pendingInvite) {
-        // Look up family ID from invite code
-        const inviteInfo = localStorage.getItem('ffp_invite_' + pendingInvite);
-        if (inviteInfo) {
-          const invite = JSON.parse(inviteInfo);
-          // Check expiration
-          if (new Date() < new Date(invite.expiresAt)) {
-            actionData = { action: 'addMember', familyId: invite.familyId, name, email, phone, password, role: 'member', relation: 'Other' };
-          }
-        }
+      if (pendingInvite && inviteFamilyId) {
+        // User came via invite link - register as MEMBER of that family
+        actionData = { action: 'addMember', familyId: inviteFamilyId, name, email, phone, password, role: 'member', relation: 'Other' };
+        joiningFamily = true;
         sessionStorage.removeItem('ffp_pending_invite');
+        sessionStorage.removeItem('ffp_invite_familyId');
       }
       
       const result = await apiCall(actionData);
       if (result.success) {
-        if (actionData.action === 'addMember') {
+        if (joiningFamily) {
           // Member joined via invite - login them
           const loginResult = await apiCall({ action: 'login', identifier: email, password });
           if (loginResult.success) {
             currentUser = loginResult.user;
           } else {
-            currentUser = { id: result.memberId, name, email, phone, role: 'member', familyId: actionData.familyId, relation: 'Other' };
+            currentUser = { id: result.memberId, name, email, phone, role: 'member', familyId: inviteFamilyId, relation: 'Other' };
           }
         } else {
           currentUser = result.user;
         }
         localStorage.setItem('ffp_session', JSON.stringify(currentUser));
-        showToast('Account created successfully!' + (actionData.action === 'addMember' ? ' You joined the family.' : ' You are the family admin.'), 'success');
+        localStorage.setItem('ffp_user', JSON.stringify(currentUser));
+        showToast(joiningFamily ? 'Welcome! You joined the family as a member.' : 'Account created! You are the family admin.', 'success');
         showApp();
         loadFamilyData();
         // Clean URL
@@ -3387,27 +3388,16 @@
 
   function generateInviteLink() {
     const familyId = currentUser.familyId;
-    // Create unique invite code with prefix: GF-FAMILYID-TIMESTAMP
-    const uniqueId = 'GF-' + familyId.toString().slice(-6) + '-' + Date.now().toString(36).toUpperCase();
+    // Encode full familyId in invite link so it works across browsers/devices
     const baseUrl = window.location.href.split('?')[0].split('#')[0];
-    const inviteLink = baseUrl + '?invite=' + uniqueId;
+    const inviteLink = baseUrl + '?invite=' + encodeURIComponent(familyId);
 
     document.getElementById('inviteLinkInput').value = inviteLink;
     if (document.getElementById('modalInviteLink')) document.getElementById('modalInviteLink').value = inviteLink;
-    if (document.getElementById('familyCodeDisplay')) document.getElementById('familyCodeDisplay').textContent = uniqueId;
+    if (document.getElementById('familyCodeDisplay')) document.getElementById('familyCodeDisplay').textContent = familyId;
     document.getElementById('inviteLinkBox').style.display = 'block';
 
-    // Save invite code locally with family info
-    localStorage.setItem('ffp_invite_' + uniqueId, JSON.stringify({
-      familyId: familyId,
-      adminName: currentUser.name,
-      adminEmail: currentUser.email,
-      inviteCode: uniqueId,
-      createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-    }));
-
-    showToast('Unique invite link generated! Share only with your family members.', 'success');
+    showToast('Invite link generated! Share only with your family members.', 'success');
   }
 
   function copyInviteLink() {
@@ -3462,8 +3452,9 @@
         tabs[0].classList.remove('active');
         tabs[1].classList.add('active');
       }
-      // Store invite code for registration
+      // Store the familyId from invite for registration (inviteCode IS the familyId)
       sessionStorage.setItem('ffp_pending_invite', inviteCode);
+      sessionStorage.setItem('ffp_invite_familyId', inviteCode);
       showToast('You have been invited! Register below to join the family.', 'info');
     }
   }
