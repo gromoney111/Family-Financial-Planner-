@@ -995,11 +995,17 @@
                 <span onclick="togglePasswordVisibility('regConfirm', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.1rem;color:var(--text-muted);user-select:none;">&#128065;&#65039;</span>
               </div>
             </div>
-            <div class="form-group" id="familyIdGroup">
+            <div class="form-group" id="familyIdGroup" style="display:none;">
               <label>Family ID (optional - choose your own)</label>
               <input type="text" id="regFamilyId" placeholder="e.g., sharma_family, gupta2024 (leave blank for auto)">
               <span style="font-size:0.75rem;color:var(--text-muted)">Letters, numbers & underscores only. This is your unique family identifier.</span>
             </div>
+            <script>
+              // Show Family ID field ONLY when there's no invite code in URL
+              if (!window.location.search.includes('invite=')) {
+                document.getElementById('familyIdGroup').style.display = 'block';
+              }
+            </script>
             <div class="recaptcha-box">
               <div class="g-recaptcha" id="registerRecaptcha"></div>
             </div>
