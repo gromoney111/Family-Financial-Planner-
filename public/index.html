@@ -24,6 +24,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit" async defer></script>
+  <!-- Google Identity Services for OAuth Login -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <!-- Schema.org Structured Data -->
   <script type="application/ld+json">
@@ -963,6 +965,14 @@
             <button type="submit" class="btn-primary" id="loginBtn">
               <span>Login</span>
             </button>
+            <!-- Google Sign-In Divider -->
+            <div style="display:flex;align-items:center;margin:20px 0;gap:12px">
+              <div style="flex:1;height:1px;background:var(--border)"></div>
+              <span style="font-size:0.8rem;color:var(--text-muted)">OR</span>
+              <div style="flex:1;height:1px;background:var(--border)"></div>
+            </div>
+            <!-- Google Sign-In Button -->
+            <div id="google-signin-btn-login" style="display:flex;justify-content:center;"></div>
           </form>
 
           <!-- Register Form -->
@@ -1012,6 +1022,14 @@
             <button type="submit" class="btn-primary" id="registerBtn">
               <span>Create Account</span>
             </button>
+            <!-- Google Sign-In Divider -->
+            <div style="display:flex;align-items:center;margin:20px 0;gap:12px">
+              <div style="flex:1;height:1px;background:var(--border)"></div>
+              <span style="font-size:0.8rem;color:var(--text-muted)">OR</span>
+              <div style="flex:1;height:1px;background:var(--border)"></div>
+            </div>
+            <!-- Google Sign-In Button -->
+            <div id="google-signin-btn-register" style="display:flex;justify-content:center;"></div>
           </form>
         </div>
 
@@ -3586,6 +3604,76 @@
   // ╔══════════════════════════════════════════════════════════╗
   // ║  UTILITY FUNCTIONS                                         ║
   // ╚══════════════════════════════════════════════════════════╝
+
+  // ============ GOOGLE SIGN-IN ============
+  const GOOGLE_CLIENT_ID = '699119480465-k5p2p39b9o5ps6fvs3brj5qqi0qjahjp.apps.googleusercontent.com';
+
+  function handleGoogleCredentialResponse(response) {
+    // Send Google credential to our backend
+    showLoading(true);
+    fetch(window.location.origin + '/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: response.credential })
+    })
+    .then(res => res.json())
+    .then(data => {
+      showLoading(false);
+      if (data.success) {
+        currentUser = data.user;
+        if (data.token) {
+          localStorage.setItem('ffp_token', data.token);
+          if (window.API) API.token = data.token;
+        }
+        localStorage.setItem('ffp_session', JSON.stringify(currentUser));
+        localStorage.setItem('ffp_user', JSON.stringify(currentUser));
+        showToast(data.isNewUser ? 'Account created with Google! You are the family admin.' : 'Welcome back, ' + currentUser.name + '!', 'success');
+        showApp();
+        loadFamilyData();
+      } else {
+        showAuthError(data.message || 'Google login failed.');
+        showToast(data.message || 'Google login failed.', 'error');
+      }
+    })
+    .catch(err => {
+      showLoading(false);
+      console.error('Google login error:', err);
+      showAuthError('Google login failed. Please try again.');
+    });
+  }
+
+  // Initialize Google Sign-In buttons when library loads
+  window.addEventListener('load', function() {
+    if (typeof google !== 'undefined' && google.accounts) {
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredentialResponse
+      });
+      // Render button on login form
+      var loginBtn = document.getElementById('google-signin-btn-login');
+      if (loginBtn) {
+        google.accounts.id.renderButton(loginBtn, {
+          theme: 'outline',
+          size: 'large',
+          width: 320,
+          text: 'signin_with',
+          shape: 'rectangular'
+        });
+      }
+      // Render button on register form
+      var registerBtn = document.getElementById('google-signin-btn-register');
+      if (registerBtn) {
+        google.accounts.id.renderButton(registerBtn, {
+          theme: 'outline',
+          size: 'large',
+          width: 320,
+          text: 'signup_with',
+          shape: 'rectangular'
+        });
+      }
+    }
+  });
+
   function togglePasswordVisibility(inputId, btn) {
     var input = document.getElementById(inputId);
     if (!input) return;

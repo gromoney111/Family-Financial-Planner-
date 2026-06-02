@@ -355,4 +355,95 @@ router.post('/resend-verification', authenticate, async (req, res) => {
   }
 });
 
+// ============ GOOGLE OAUTH LOGIN ============
+router.post('/google', async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ success: false, message: 'Google credential required.' });
+    }
+
+    // Verify Google token
+    const { OAuth2Client } = require('google-auth-library');
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+
+    const payload = ticket.getPayload();
+    const { email, name, picture, sub: googleId } = payload;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Could not get email from Google.' });
+    }
+
+    // Check if user already exists
+    let user = await User.findOne({ email: email.toLowerCase() });
+
+    if (user) {
+      // Existing user — login them
+      user.lastLogin = new Date();
+      await user.save();
+
+      const family = await Family.findById(user.familyId);
+      const token = generateToken(user._id);
+
+      return res.json({
+        success: true,
+        message: 'Login successful!',
+        token,
+        user: user.toSafeObject(),
+        familyCode: family?.familyCode || ''
+      });
+    }
+
+    // New user — create account (as admin with new family)
+    const mongoose = require('mongoose');
+    const familyCode = `family_${Date.now().toString(36)}`;
+
+    const family = await Family.create({
+      familyCode: familyCode,
+      familyName: `${name}'s Family`,
+      adminId: new mongoose.Types.ObjectId(),
+      members: [],
+      settings: { currency: '₹', locale: 'en-IN' }
+    });
+
+    // Create user with random password (they'll use Google login)
+    const randomPassword = crypto.randomBytes(16).toString('hex');
+    user = await User.create({
+      name: name || email.split('@')[0],
+      email: email.toLowerCase(),
+      phone: googleId.slice(-10), // Placeholder phone from Google ID
+      password: randomPassword,
+      role: 'admin',
+      relation: 'Self',
+      familyId: family._id,
+      isEmailVerified: true // Google already verified email
+    });
+
+    // Update family
+    family.adminId = user._id;
+    family.members.push(user._id);
+    await family.save();
+
+    const token = generateToken(user._id);
+
+    res.status(201).json({
+      success: true,
+      message: 'Account created with Google!',
+      token,
+      user: user.toSafeObject(),
+      familyCode: family.familyCode,
+      isNewUser: true
+    });
+  } catch (error) {
+    console.error('Google OAuth error:', error);
+    res.status(500).json({ success: false, message: 'Google login failed. Please try again.' });
+  }
+});
+
 module.exports = router;
