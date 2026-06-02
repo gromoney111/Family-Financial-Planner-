@@ -281,6 +281,44 @@ router.post('/change-password', authenticate, async (req, res) => {
   }
 });
 
+// ============ DELETE ACCOUNT ============
+router.delete('/delete-account', authenticate, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    // If admin, check if family has other members
+    if (user.role === 'admin') {
+      const family = await Family.findById(user.familyId).populate('members');
+      if (family && family.members.length > 1) {
+        return res.status(400).json({
+          success: false,
+          message: 'You are the admin. Please transfer admin role to another member first, or remove all members before deleting your account.'
+        });
+      }
+      // Delete family if admin is the only member
+      if (family) {
+        await Family.findByIdAndDelete(family._id);
+      }
+    } else {
+      // Remove member from family
+      await Family.findByIdAndUpdate(user.familyId, {
+        $pull: { members: user._id }
+      });
+    }
+
+    // Delete user
+    await User.findByIdAndDelete(req.userId);
+
+    res.json({ success: true, message: 'Account deleted successfully.' });
+  } catch (error) {
+    console.error('Delete account error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete account.' });
+  }
+});
+
 // ============ VERIFY EMAIL ============
 router.get('/verify-email', async (req, res) => {
   try {

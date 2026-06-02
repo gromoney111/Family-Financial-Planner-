@@ -968,11 +968,15 @@
             <!-- Google Sign-In Divider -->
             <div style="display:flex;align-items:center;margin:20px 0;gap:12px">
               <div style="flex:1;height:1px;background:var(--border)"></div>
-              <span style="font-size:0.8rem;color:var(--text-muted)">OR</span>
+              <span style="font-size:0.8rem;color:var(--text-muted);font-weight:500">or continue with</span>
               <div style="flex:1;height:1px;background:var(--border)"></div>
             </div>
-            <!-- Google Sign-In Button -->
-            <div id="google-signin-btn-login" style="display:flex;justify-content:center;"></div>
+            <!-- Custom Google Sign-In Button -->
+            <button type="button" onclick="googleSignInClick()" style="width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--white);display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;font-size:0.9rem;font-weight:500;color:var(--text);transition:all 0.2s;" onmouseover="this.style.borderColor='#4285f4';this.style.background='#f8fafc'" onmouseout="this.style.borderColor='';this.style.background=''">
+              <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.462.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+              Sign in with Google
+            </button>
+            <div id="google-signin-btn-login" style="display:none;"></div>
           </form>
 
           <!-- Register Form -->
@@ -1025,11 +1029,15 @@
             <!-- Google Sign-In Divider -->
             <div style="display:flex;align-items:center;margin:20px 0;gap:12px">
               <div style="flex:1;height:1px;background:var(--border)"></div>
-              <span style="font-size:0.8rem;color:var(--text-muted)">OR</span>
+              <span style="font-size:0.8rem;color:var(--text-muted);font-weight:500">or continue with</span>
               <div style="flex:1;height:1px;background:var(--border)"></div>
             </div>
-            <!-- Google Sign-In Button -->
-            <div id="google-signin-btn-register" style="display:flex;justify-content:center;"></div>
+            <!-- Custom Google Sign-Up Button -->
+            <button type="button" onclick="googleSignInClick()" style="width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--white);display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;font-size:0.9rem;font-weight:500;color:var(--text);transition:all 0.2s;" onmouseover="this.style.borderColor='#4285f4';this.style.background='#f8fafc'" onmouseout="this.style.borderColor='';this.style.background=''">
+              <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.462.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+              Sign up with Google
+            </button>
+            <div id="google-signin-btn-register" style="display:none;"></div>
           </form>
         </div>
 
@@ -1559,6 +1567,12 @@
             </div>
           </div>
           <button class="btn btn-gold" onclick="saveSettings()" style="margin-top:12px">Save Settings</button>
+        </div>
+        <!-- Delete Account Section -->
+        <div class="settings-card" style="border:1px solid var(--rose);background:#fff5f5;">
+          <h3 style="color:var(--rose)">Danger Zone</h3>
+          <p style="font-size:0.85rem;color:var(--text-mid);margin-bottom:16px">Permanently delete your account and all associated data. This action cannot be undone.</p>
+          <button class="btn btn-danger" onclick="deleteMyAccount()">Delete My Account</button>
         </div>
       </section>
     </main>
@@ -3642,35 +3656,22 @@
     });
   }
 
-  // Initialize Google Sign-In buttons when library loads
+  // Trigger Google One Tap / popup sign-in
+  function googleSignInClick() {
+    if (typeof google !== 'undefined' && google.accounts) {
+      google.accounts.id.prompt(); // Shows the One Tap popup
+    } else {
+      showToast('Google Sign-In is loading. Please try again in a moment.', 'info');
+    }
+  }
+
+  // Initialize Google Sign-In when library loads
   window.addEventListener('load', function() {
     if (typeof google !== 'undefined' && google.accounts) {
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleGoogleCredentialResponse
       });
-      // Render button on login form
-      var loginBtn = document.getElementById('google-signin-btn-login');
-      if (loginBtn) {
-        google.accounts.id.renderButton(loginBtn, {
-          theme: 'outline',
-          size: 'large',
-          width: 320,
-          text: 'signin_with',
-          shape: 'rectangular'
-        });
-      }
-      // Render button on register form
-      var registerBtn = document.getElementById('google-signin-btn-register');
-      if (registerBtn) {
-        google.accounts.id.renderButton(registerBtn, {
-          theme: 'outline',
-          size: 'large',
-          width: 320,
-          text: 'signup_with',
-          shape: 'rectangular'
-        });
-      }
     }
   });
 
@@ -3679,11 +3680,46 @@
     if (!input) return;
     if (input.type === 'password') {
       input.type = 'text';
-      btn.innerHTML = '&#128584;'; // 🙈
+      btn.innerHTML = '&#128584;'; // hide icon
     } else {
       input.type = 'password';
-      btn.innerHTML = '&#128065;&#65039;'; // 👁️
+      btn.innerHTML = '&#128065;&#65039;'; // eye icon
     }
+  }
+
+  // Delete Account
+  function deleteMyAccount() {
+    if (!confirm('Are you sure you want to delete your account? This CANNOT be undone. All your data will be permanently lost.')) return;
+    var confirmText = prompt('Type "DELETE" to confirm account deletion:');
+    if (confirmText !== 'DELETE') {
+      showToast('Account deletion cancelled.', 'info');
+      return;
+    }
+    showLoading(true);
+    fetch(window.location.origin + '/api/auth/delete-account', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + (localStorage.getItem('ffp_token') || '')
+      }
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      showLoading(false);
+      if (data.success) {
+        showToast('Account deleted successfully.', 'success');
+        localStorage.clear();
+        sessionStorage.clear();
+        currentUser = null;
+        showLogin();
+      } else {
+        showToast(data.message || 'Failed to delete account.', 'error');
+      }
+    })
+    .catch(function(err) {
+      showLoading(false);
+      showToast('Failed to delete account. Please try again.', 'error');
+    });
   }
 
   function closeModal(id) {
