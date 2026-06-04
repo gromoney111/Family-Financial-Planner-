@@ -87,12 +87,32 @@ subscriptionSchema.methods.generateReferralCode = function() {
   return this.referralCode;
 };
 
-// Check if subscription is active
+// Check if subscription is active (includes trial)
 subscriptionSchema.methods.isValid = function() {
   if (this.plan === 'free') return true;
+  if (this.status === 'trial') {
+    return this.trialEndDate && new Date() <= this.trialEndDate;
+  }
   if (this.status !== 'active') return false;
   if (this.nextBillingDate && new Date() > this.nextBillingDate) return false;
   return true;
+};
+
+// Check if user is on active trial
+subscriptionSchema.methods.isOnTrial = function() {
+  return this.status === 'trial' && this.trialEndDate && new Date() <= this.trialEndDate;
+};
+
+// Get days remaining in trial
+subscriptionSchema.methods.trialDaysRemaining = function() {
+  if (!this.trialEndDate) return 0;
+  const diff = this.trialEndDate - new Date();
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+};
+
+// Check if trial has been used
+subscriptionSchema.methods.hasUsedTrial = function() {
+  return !!this.trialStartDate;
 };
 
 // Static method: Plan definitions

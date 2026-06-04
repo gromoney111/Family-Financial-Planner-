@@ -149,6 +149,55 @@ router.post('/upgrade', authenticate, async (req, res) => {
   }
 });
 
+// ============ START FREE TRIAL (7 days Pro) ============
+router.post('/start-trial', authenticate, async (req, res) => {
+  try {
+    let subscription = await Subscription.findOne({ familyId: req.familyId });
+    
+    if (!subscription) {
+      subscription = new Subscription({ familyId: req.familyId, plan: 'free', status: 'active' });
+    }
+
+    // Check if trial already used
+    if (subscription.trialStartDate) {
+      return res.status(400).json({ success: false, message: 'Free trial already used for this family.' });
+    }
+
+    // Activate 7-day Pro trial
+    const trialDays = 7;
+    const planDetails = Subscription.PLANS['pro'];
+
+    subscription.plan = 'pro';
+    subscription.status = 'trial';
+    subscription.trialStartDate = new Date();
+    subscription.trialEndDate = new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000);
+    subscription.maxMembers = planDetails.maxMembers;
+    subscription.maxTransactionsPerMonth = planDetails.maxTransactionsPerMonth;
+    subscription.features = planDetails.features;
+    subscription.billingCycle = 'free';
+
+    await Family.findByIdAndUpdate(req.familyId, { maxMembers: planDetails.maxMembers });
+    if (!subscription.referralCode) subscription.generateReferralCode();
+    await subscription.save();
+
+    res.json({
+      success: true,
+      message: `🎉 ${trialDays}-day Pro trial activated! Enjoy all premium features.`,
+      subscription: {
+        plan: 'pro',
+        status: 'trial',
+        trialEndDate: subscription.trialEndDate,
+        trialDaysRemaining: trialDays,
+        features: subscription.features,
+        maxMembers: subscription.maxMembers
+      }
+    });
+  } catch (error) {
+    console.error('Start trial error:', error);
+    res.status(500).json({ success: false, message: 'Failed to start trial.' });
+  }
+});
+
 // ============ CANCEL SUBSCRIPTION ============
 router.post('/cancel', authenticate, async (req, res) => {
   try {
@@ -202,6 +251,131 @@ router.post('/referral', authenticate, async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to apply referral.' });
+  }
+});
+
+// ============ RAZORPAY: CREATE ORDER ============
+router.post('/create-order', authenticate, async (req, res) => {
+  try {
+    const { plan, billingCycle } = req.body;
+
+    if (!plan || !['basic', 'pro', 'enterprise'].includes(plan)) {
+      return res.status(400).json({ success: false, message: 'Invalid plan.' });
+    }
+
+    const planDetails = Subscription.PLANS[plan];
+    const cycle = billingCycle || 'monthly';
+    let amount = cycle === 'yearly' ? planDetails.priceYearly : planDetails.priceMonthly;
+
+    // Check for referral discount
+    const subscription = await Subscription.findOne({ familyId: req.familyId });
+    if (subscription && subscription.referredBy && subscription.paymentHistory.length === 0) {
+      amount = Math.round(amount * 0.8); // 20% off first payment for referred users
+    }
+
+    const Razorpay = require('razorpay');
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET
+    });
+
+    const order = await razorpay.orders.create({
+      amount: amount * 100, // Razorpay expects paise
+      currency: 'INR',
+      receipt: `order_${req.familyId}_${Date.now()}`,
+      notes: {
+        familyId: req.familyId.toString(),
+        plan: plan,
+        billingCycle: cycle
+      }
+    });
+
+    res.json({
+      success: true,
+      order: {
+        id: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        plan: plan,
+        planName: planDetails.name,
+        billingCycle: cycle
+      },
+      razorpayKeyId: process.env.RAZORPAY_KEY_ID
+    });
+  } catch (error) {
+    console.error('Create order error:', error);
+    res.status(500).json({ success: false, message: 'Failed to create payment order.' });
+  }
+});
+
+// ============ RAZORPAY: VERIFY PAYMENT ============
+router.post('/verify-payment', authenticate, async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan, billingCycle } = req.body;
+
+    // Verify signature
+    const crypto = require('crypto');
+    const expectedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(razorpay_order_id + '|' + razorpay_payment_id)
+      .digest('hex');
+
+    if (expectedSignature !== razorpay_signature) {
+      return res.status(400).json({ success: false, message: 'Payment verification failed.' });
+    }
+
+    // Payment verified - activate plan
+    const planDetails = Subscription.PLANS[plan];
+    const cycle = billingCycle || 'monthly';
+    const amount = cycle === 'yearly' ? planDetails.priceYearly : planDetails.priceMonthly;
+
+    let subscription = await Subscription.findOne({ familyId: req.familyId });
+    if (!subscription) {
+      subscription = new Subscription({ familyId: req.familyId });
+    }
+
+    subscription.plan = plan;
+    subscription.status = 'active';
+    subscription.maxMembers = planDetails.maxMembers;
+    subscription.maxTransactionsPerMonth = planDetails.maxTransactionsPerMonth;
+    subscription.features = planDetails.features;
+    subscription.priceMonthly = planDetails.priceMonthly;
+    subscription.priceYearly = planDetails.priceYearly;
+    subscription.billingCycle = cycle;
+    subscription.lastPaymentDate = new Date();
+
+    if (cycle === 'monthly') {
+      subscription.nextBillingDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    } else {
+      subscription.nextBillingDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    }
+
+    subscription.paymentHistory.push({
+      amount: amount,
+      date: new Date(),
+      method: 'upi',
+      transactionId: razorpay_payment_id,
+      status: 'success'
+    });
+
+    await Family.findByIdAndUpdate(req.familyId, { maxMembers: planDetails.maxMembers });
+    if (!subscription.referralCode) subscription.generateReferralCode();
+    await subscription.save();
+
+    res.json({
+      success: true,
+      message: `🎉 Payment successful! ${planDetails.name} plan activated.`,
+      subscription: {
+        plan: subscription.plan,
+        status: 'active',
+        maxMembers: subscription.maxMembers,
+        features: subscription.features,
+        nextBillingDate: subscription.nextBillingDate
+      }
+    });
+  } catch (error) {
+    console.error('Verify payment error:', error);
+    res.status(500).json({ success: false, message: 'Payment verification failed.' });
   }
 });
 

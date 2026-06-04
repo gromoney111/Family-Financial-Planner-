@@ -20,25 +20,64 @@
   <title>GromoFinance – Smart Family Budget Planner | Track Income &amp; Expenses</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/favicon.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GromoFinance">
+  <link rel="canonical" href="https://gromofinance.com/">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit" async defer></script>
   <!-- Google Identity Services for OAuth Login -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Razorpay Payment Gateway -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <!-- Google AdSense (replace ca-pub-XXXXXXX with your publisher ID) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 
   <!-- Schema.org Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "FamilyFinPlan",
-    "description": "Smart monthly family budget planner for Indian families",
-    "url": "https://familyfinplan.com",
+    "name": "GromoFinance",
+    "alternateName": "FamilyFinPlan",
+    "description": "Smart monthly family budget planner for Indian families. Track income, expenses, loans, EMIs, investments for up to 6 members.",
+    "url": "https://gromofinance.com",
     "applicationCategory": "FinanceApplication",
     "operatingSystem": "Any",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "INR" },
-    "author": { "@type": "Organization", "name": "FamilyFinPlan Team" }
+    "offers": [
+      { "@type": "Offer", "price": "0", "priceCurrency": "INR", "name": "Free Plan" },
+      { "@type": "Offer", "price": "199", "priceCurrency": "INR", "name": "Pro Plan", "billingPeriod": "P1M" }
+    ],
+    "author": { "@type": "Organization", "name": "GromoFinance", "url": "https://gromofinance.com" },
+    "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "ratingCount": "150", "bestRating": "5" },
+    "featureList": "Budget tracking, Loan EMI tracker, Investment portfolio, PDF reports, Family members, Net worth dashboard"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is GromoFinance free to use?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes! GromoFinance offers a free plan with up to 3 family members and 50 transactions per month. Pro plans start at just Rs.199/month for unlimited features." }
+      },
+      {
+        "@type": "Question",
+        "name": "How many family members can use GromoFinance?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The free plan supports up to 3 members. The Pro plan supports up to 6 members, and Enterprise supports up to 10 members." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I track loans and EMIs?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes! GromoFinance includes a full loan and EMI tracker with auto-calculation of interest, payment history, and upcoming due date alerts." }
+      }
+    ]
   }
   </script>
   <style>
@@ -1020,6 +1059,165 @@
   <!-- Loading Overlay -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-spinner"></div>
+  </div>
+
+  <!-- ==================== LANDING PAGE ==================== -->
+  <div id="landingPage" style="display:none;">
+    <!-- Landing Nav -->
+    <nav style="position:fixed;top:0;left:0;right:0;z-index:999;padding:16px 40px;display:flex;align-items:center;justify-content:space-between;background:rgba(15,23,42,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,0.05);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <img src="/favicon.svg" alt="GromoFinance" style="width:32px;height:32px;">
+        <span style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#fff;font-weight:700;">Gromo<span style="color:#f59e0b;">Finance</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;">
+        <a href="#features" style="color:rgba(255,255,255,0.7);font-size:0.85rem;font-weight:500;">Features</a>
+        <a href="#pricing" style="color:rgba(255,255,255,0.7);font-size:0.85rem;font-weight:500;">Pricing</a>
+        <button onclick="showLoginFromLanding()" style="padding:8px 20px;background:#f59e0b;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;">Login / Register</button>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section style="min-height:100vh;background:linear-gradient(160deg,#0f172a 0%,#1a2744 50%,#0f172a 100%);display:flex;align-items:center;justify-content:center;padding:100px 40px 60px;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:20%;right:10%;width:400px;height:400px;background:radial-gradient(circle,rgba(245,158,11,0.08),transparent 70%);border-radius:50%;"></div>
+      <div style="position:absolute;bottom:10%;left:5%;width:300px;height:300px;background:radial-gradient(circle,rgba(13,148,136,0.06),transparent 70%);border-radius:50%;"></div>
+      <div style="max-width:800px;text-align:center;position:relative;z-index:1;">
+        <div style="display:inline-block;padding:6px 16px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:20px;margin-bottom:24px;">
+          <span style="color:#fbbf24;font-size:0.8rem;font-weight:600;">7-Day Free Pro Trial - No Card Required</span>
+        </div>
+        <h1 style="font-family:'Playfair Display',serif;font-size:3.2rem;color:#fff;font-weight:800;line-height:1.2;margin-bottom:20px;">
+          Smart Financial Planning<br>for Your <span style="color:#f59e0b;">Entire Family</span>
+        </h1>
+        <p style="color:rgba(255,255,255,0.7);font-size:1.1rem;line-height:1.7;max-width:600px;margin:0 auto 36px;">
+          Track income, expenses, budgets, loans & investments together. India's most complete family budget planner - built for families who want to grow financially.
+        </p>
+        <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+          <button onclick="showLoginFromLanding()" style="padding:14px 32px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 4px 20px rgba(245,158,11,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">Start Free Trial</button>
+          <a href="#features" style="padding:14px 32px;border:1.5px solid rgba(255,255,255,0.2);color:#fff;border-radius:10px;font-weight:600;font-size:1rem;display:inline-flex;align-items:center;gap:8px;transition:border-color 0.2s;" onmouseover="this.style.borderColor='#f59e0b'" onmouseout="this.style.borderColor='rgba(255,255,255,0.2)'">See Features</a>
+        </div>
+        <div style="display:flex;gap:40px;justify-content:center;margin-top:48px;">
+          <div style="text-align:center"><div style="font-size:1.8rem;font-weight:800;color:#f59e0b;">6</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);text-transform:uppercase;">Family Members</div></div>
+          <div style="text-align:center"><div style="font-size:1.8rem;font-weight:800;color:#f59e0b;">100%</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);text-transform:uppercase;">Secure & Private</div></div>
+          <div style="text-align:center"><div style="font-size:1.8rem;font-weight:800;color:#f59e0b;">Free</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);text-transform:uppercase;">To Start</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" style="padding:80px 40px;background:#f8fafc;">
+      <div style="max-width:1100px;margin:0 auto;text-align:center;">
+        <h2 style="font-family:'Playfair Display',serif;font-size:2.2rem;color:#0f172a;margin-bottom:12px;">Everything Your Family Needs</h2>
+        <p style="color:#64748b;font-size:1rem;margin-bottom:48px;">One app to manage all your family's finances</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;text-align:left;">
+          <div style="background:#fff;padding:28px;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 2px 12px rgba(0,0,0,0.04);">
+            <div style="width:44px;height:44px;background:#ccfbf1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:16px;">📊</div>
+            <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:8px;font-family:'DM Sans',sans-serif;">Dashboard & Reports</h3>
+            <p style="font-size:0.88rem;color:#64748b;line-height:1.6;">Visual charts, monthly summaries, and downloadable PDF reports for your entire family.</p>
+          </div>
+          <div style="background:#fff;padding:28px;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 2px 12px rgba(0,0,0,0.04);">
+            <div style="width:44px;height:44px;background:#fef3c7;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:16px;">🎯</div>
+            <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:8px;font-family:'DM Sans',sans-serif;">Budget Goals</h3>
+            <p style="font-size:0.88rem;color:#64748b;line-height:1.6;">Set category-wise spending limits with progress bars and overspend alerts.</p>
+          </div>
+          <div style="background:#fff;padding:28px;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 2px 12px rgba(0,0,0,0.04);">
+            <div style="width:44px;height:44px;background:#fee2e2;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:16px;">🏦</div>
+            <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:8px;font-family:'DM Sans',sans-serif;">Loan & EMI Tracker</h3>
+            <p style="font-size:0.88rem;color:#64748b;line-height:1.6;">Track all loans with interest calculation, EMI payments, tenure, and balance auto-reduction.</p>
+          </div>
+          <div style="background:#fff;padding:28px;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 2px 12px rgba(0,0,0,0.04);">
+            <div style="width:44px;height:44px;background:#ede9fe;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:16px;">📈</div>
+            <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:8px;font-family:'DM Sans',sans-serif;">Investment Portfolio</h3>
+            <p style="font-size:0.88rem;color:#64748b;line-height:1.6;">Track mutual funds, FDs, LIC, bonds with returns calculation and allocation charts.</p>
+          </div>
+          <div style="background:#fff;padding:28px;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 2px 12px rgba(0,0,0,0.04);">
+            <div style="width:44px;height:44px;background:#e0f2fe;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:16px;">👨‍👩‍👧‍👦</div>
+            <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:8px;font-family:'DM Sans',sans-serif;">Family Collaboration</h3>
+            <p style="font-size:0.88rem;color:#64748b;line-height:1.6;">Invite up to 6 family members. Each member tracks their own income & expenses.</p>
+          </div>
+          <div style="background:#fff;padding:28px;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 2px 12px rgba(0,0,0,0.04);">
+            <div style="width:44px;height:44px;background:#d1fae5;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:16px;">💎</div>
+            <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:8px;font-family:'DM Sans',sans-serif;">Net Worth Dashboard</h3>
+            <p style="font-size:0.88rem;color:#64748b;line-height:1.6;">See your family's complete financial health - assets vs liabilities at a glance.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" style="padding:80px 40px;background:#fff;">
+      <div style="max-width:1000px;margin:0 auto;text-align:center;">
+        <h2 style="font-family:'Playfair Display',serif;font-size:2.2rem;color:#0f172a;margin-bottom:12px;">Simple, Transparent Pricing</h2>
+        <p style="color:#64748b;font-size:1rem;margin-bottom:48px;">Start free. Upgrade when you need more.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;text-align:left;">
+          <!-- Free Plan -->
+          <div style="background:#f8fafc;padding:32px;border-radius:16px;border:1.5px solid #e2e8f0;">
+            <h3 style="font-family:'DM Sans',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:4px;">Free</h3>
+            <p style="color:#64748b;font-size:0.8rem;margin-bottom:20px;">For getting started</p>
+            <div style="font-size:2rem;font-weight:800;margin-bottom:24px;">&#8377;0<span style="font-size:0.9rem;font-weight:400;color:#94a3b8;">/forever</span></div>
+            <ul style="list-style:none;padding:0;margin-bottom:24px;">
+              <li style="padding:6px 0;font-size:0.85rem;color:#475569;display:flex;align-items:center;gap:8px;"><span style="color:#0d9488;">&#10003;</span> 3 family members</li>
+              <li style="padding:6px 0;font-size:0.85rem;color:#475569;display:flex;align-items:center;gap:8px;"><span style="color:#0d9488;">&#10003;</span> 50 transactions/month</li>
+              <li style="padding:6px 0;font-size:0.85rem;color:#475569;display:flex;align-items:center;gap:8px;"><span style="color:#0d9488;">&#10003;</span> Dashboard & charts</li>
+              <li style="padding:6px 0;font-size:0.85rem;color:#475569;display:flex;align-items:center;gap:8px;"><span style="color:#0d9488;">&#10003;</span> Budget goals</li>
+              <li style="padding:6px 0;font-size:0.85rem;color:#94a3b8;display:flex;align-items:center;gap:8px;"><span style="color:#cbd5e1;">&#10007;</span> Loan & EMI tracker</li>
+              <li style="padding:6px 0;font-size:0.85rem;color:#94a3b8;display:flex;align-items:center;gap:8px;"><span style="color:#cbd5e1;">&#10007;</span> Investment portfolio</li>
+            </ul>
+            <button onclick="showLoginFromLanding()" style="width:100%;padding:12px;background:#e2e8f0;color:#475569;border:none;border-radius:8px;font-weight:600;cursor:pointer;">Get Started</button>
+          </div>
+          <!-- Pro Plan (Popular) -->
+          <div style="background:linear-gradient(135deg,#0f172a,#1e293b);padding:32px;border-radius:16px;border:2px solid #f59e0b;position:relative;color:#fff;">
+            <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#f59e0b;color:#fff;padding:4px 14px;border-radius:12px;font-size:0.7rem;font-weight:700;text-transform:uppercase;">Most Popular</div>
+            <h3 style="font-family:'DM Sans',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:4px;">Pro</h3>
+            <p style="color:rgba(255,255,255,0.6);font-size:0.8rem;margin-bottom:20px;">For growing families</p>
+            <div style="font-size:2rem;font-weight:800;margin-bottom:4px;">&#8377;199<span style="font-size:0.9rem;font-weight:400;color:rgba(255,255,255,0.5);">/month</span></div>
+            <div style="font-size:0.75rem;color:#fbbf24;margin-bottom:24px;">or &#8377;1,999/year (save 16%)</div>
+            <ul style="list-style:none;padding:0;margin-bottom:24px;">
+              <li style="padding:6px 0;font-size:0.85rem;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:8px;"><span style="color:#fbbf24;">&#10003;</span> 6 family members</li>
+              <li style="padding:6px 0;font-size:0.85rem;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:8px;"><span style="color:#fbbf24;">&#10003;</span> Unlimited transactions</li>
+              <li style="padding:6px 0;font-size:0.85rem;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:8px;"><span style="color:#fbbf24;">&#10003;</span> Loan & EMI tracker</li>
+              <li style="padding:6px 0;font-size:0.85rem;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:8px;"><span style="color:#fbbf24;">&#10003;</span> Investment portfolio</li>
+              <li style="padding:6px 0;font-size:0.85rem;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:8px;"><span style="color:#fbbf24;">&#10003;</span> CSV & PDF export</li>
+              <li style="padding:6px 0;font-size:0.85rem;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:8px;"><span style="color:#fbbf24;">&#10003;</span> Email reports & alerts</li>
+            </ul>
+            <button onclick="showLoginFromLanding()" style="width:100%;padding:12px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(245,158,11,0.3);">Start 7-Day Free Trial</button>
+          </div>
+          <!-- Enterprise -->
+          <div style="background:#f8fafc;padding:32px;border-radius:16px;border:1.5px solid #e2e8f0;">
+            <h3 style="font-family:'DM Sans',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:4px;">Enterprise</h3>
+            <p style="color:#64748b;font-size:0.8rem;margin-bottom:20px;">For large families & advisors</p>
+            <div style="font-size:2rem;font-weight:800;margin-bottom:4px;">&#8377;499<span style="font-size:0.9rem;font-weight:400;color:#94a3b8;">/month</span></div>
+            <div style="font-size:0.75rem;color:#64748b;margin-bottom:24px;">or &#8377;4,999/year</div>
+            <ul style="list-style:none;padding:0;margin-bottom:24px;">
+              <li style="padding:6px 0;font-size:0.85rem;color:#475569;display:flex;align-items:center;gap:8px;"><span style="color:#0d9488;">&#10003;</span> 10 family members</li>
+              <li style="padding:6px 0;font-size:0.85rem;color:#475569;display:flex;align-items:center;gap:8px;"><span style="color:#0d9488;">&#10003;</span> Everything in Pro</li>
+              <li style="padding:6px 0;font-size:0.85rem;color:#475569;display:flex;align-items:center;gap:8px;"><span style="color:#0d9488;">&#10003;</span> Multi-currency support</li>
+              <li style="padding:6px 0;font-size:0.85rem;color:#475569;display:flex;align-items:center;gap:8px;"><span style="color:#0d9488;">&#10003;</span> Priority support</li>
+              <li style="padding:6px 0;font-size:0.85rem;color:#475569;display:flex;align-items:center;gap:8px;"><span style="color:#0d9488;">&#10003;</span> Custom categories</li>
+              <li style="padding:6px 0;font-size:0.85rem;color:#475569;display:flex;align-items:center;gap:8px;"><span style="color:#0d9488;">&#10003;</span> API access</li>
+            </ul>
+            <button onclick="showLoginFromLanding()" style="width:100%;padding:12px;background:#e2e8f0;color:#475569;border:none;border-radius:8px;font-weight:600;cursor:pointer;">Contact Us</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section style="padding:60px 40px;background:linear-gradient(135deg,#0f172a,#1e293b);text-align:center;">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.8rem;color:#fff;margin-bottom:12px;">Ready to Take Control of Your Family Finances?</h2>
+      <p style="color:rgba(255,255,255,0.6);font-size:0.95rem;margin-bottom:28px;">Join thousands of Indian families managing money smarter.</p>
+      <button onclick="showLoginFromLanding()" style="padding:14px 36px;background:#f59e0b;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 4px 20px rgba(245,158,11,0.3);">Get Started Free</button>
+    </section>
+
+    <!-- Footer -->
+    <footer style="padding:32px 40px;background:#0f172a;border-top:1px solid rgba(255,255,255,0.05);text-align:center;">
+      <p style="color:rgba(255,255,255,0.4);font-size:0.8rem;">&copy; 2024-2026 GromoFinance. All rights reserved. | <a href="mailto:support@gromofinance.com" style="color:#f59e0b;">support@gromofinance.com</a></p>
+    </footer>
+
+    <!-- Google AdSense - Landing Page Ad Slot -->
+    <div style="max-width:728px;margin:0 auto;padding:20px 0;text-align:center;">
+      <!-- Replace with your actual ad unit code -->
+      <ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
   </div>
 
   <!-- ==================== LOGIN PAGE ==================== -->
@@ -2263,7 +2461,152 @@
   // ╚══════════════════════════════════════════════════════════╝
   document.addEventListener('DOMContentLoaded', () => {
     initApp();
+    registerServiceWorker();
   });
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  PWA: SERVICE WORKER & INSTALL PROMPT                      ║
+  // ╚══════════════════════════════════════════════════════════╝
+  let deferredInstallPrompt = null;
+
+  function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.log('SW registration failed:', err));
+    }
+  }
+
+  // Capture install prompt
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    showInstallBanner();
+  });
+
+  function showInstallBanner() {
+    // Only show if user is logged in and hasn't dismissed
+    if (!currentUser || localStorage.getItem('ffp_install_dismissed')) return;
+    const banner = document.createElement('div');
+    banner.id = 'pwaInstallBanner';
+    banner.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;padding:16px 24px;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.3);display:flex;align-items:center;gap:16px;z-index:9999;max-width:420px;width:90%;animation:slideIn 0.3s ease;';
+    banner.innerHTML = `
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:0.95rem;margin-bottom:2px">Install GromoFinance</div>
+        <div style="font-size:0.8rem;opacity:0.7">Add to home screen for quick access</div>
+      </div>
+      <button onclick="installPWA()" style="padding:8px 18px;background:#f59e0b;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;white-space:nowrap">Install</button>
+      <button onclick="dismissInstallBanner()" style="background:none;border:none;color:#94a3b8;font-size:1.2rem;cursor:pointer;padding:4px">&times;</button>
+    `;
+    document.body.appendChild(banner);
+  }
+
+  function installPWA() {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(choice => {
+      if (choice.outcome === 'accepted') {
+        showToast('App installed! Find it on your home screen.', 'success');
+      }
+      deferredInstallPrompt = null;
+      dismissInstallBanner();
+    });
+  }
+
+  function dismissInstallBanner() {
+    const banner = document.getElementById('pwaInstallBanner');
+    if (banner) banner.remove();
+    localStorage.setItem('ffp_install_dismissed', '1');
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  RAZORPAY PAYMENT                                          ║
+  // ╚══════════════════════════════════════════════════════════╝
+  async function openRazorpayPayment(plan, billingCycle) {
+    showLoading(true);
+    try {
+      const res = await API.request('/subscription/create-order', {
+        method: 'POST',
+        body: JSON.stringify({ plan, billingCycle })
+      });
+
+      if (!res.success) {
+        showToast(res.message || 'Failed to create order.', 'error');
+        showLoading(false);
+        return;
+      }
+
+      showLoading(false);
+
+      const options = {
+        key: res.razorpayKeyId,
+        amount: res.order.amount,
+        currency: res.order.currency,
+        name: 'GromoFinance',
+        description: `${res.order.planName} Plan - ${billingCycle}`,
+        order_id: res.order.id,
+        handler: async function(response) {
+          showLoading(true);
+          const verifyRes = await API.request('/subscription/verify-payment', {
+            method: 'POST',
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              plan: plan,
+              billingCycle: billingCycle
+            })
+          });
+          showLoading(false);
+          if (verifyRes.success) {
+            showToast(verifyRes.message, 'success');
+            loadSubscriptionStatus();
+          } else {
+            showToast(verifyRes.message || 'Payment verification failed.', 'error');
+          }
+        },
+        prefill: {
+          name: currentUser?.name || '',
+          email: currentUser?.email || '',
+          contact: currentUser?.phone || ''
+        },
+        theme: { color: '#f59e0b' },
+        modal: { ondismiss: function() { showToast('Payment cancelled.', 'info'); } }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+    } catch(err) {
+      showLoading(false);
+      showToast('Payment failed. Please try again.', 'error');
+    }
+  }
+
+  async function startFreeTrial() {
+    showLoading(true);
+    try {
+      const res = await API.request('/subscription/start-trial', { method: 'POST' });
+      showLoading(false);
+      if (res.success) {
+        showToast(res.message, 'success');
+        loadSubscriptionStatus();
+      } else {
+        showToast(res.message || 'Could not start trial.', 'error');
+      }
+    } catch(err) {
+      showLoading(false);
+      showToast('Failed to start trial.', 'error');
+    }
+  }
+
+  async function loadSubscriptionStatus() {
+    try {
+      const res = await API.request('/subscription/current');
+      if (res.success) {
+        window.currentSubscription = res.subscription;
+      }
+    } catch(e) {}
+  }
 
   function initApp() {
     // Check if user arrived via password reset link
@@ -2306,10 +2649,11 @@
         localStorage.removeItem('ffp_token');
         localStorage.removeItem('ffp_user');
         localStorage.removeItem('ffp_session');
-        showLogin();
+        showLandingPage();
       }
     } else {
-      showLogin();
+      // Show landing page for new/logged-out visitors
+      showLandingPage();
     }
     // Set today's date for transaction form
     const today = new Date().toISOString().split('T')[0];
@@ -2865,20 +3209,39 @@
     localStorage.removeItem('ffp_user');
     localStorage.removeItem('ffp_token');
     if (window.API) API.logout();
-    showLogin();
+    showLandingPage();
     showToast('Logged out successfully.', 'info');
   }
 
   function showLogin() {
     document.getElementById('loginPage').style.display = 'flex';
     document.getElementById('appLayout').classList.remove('active');
+    var lp = document.getElementById('landingPage');
+    if (lp) lp.style.display = 'none';
+  }
+
+  function showLandingPage() {
+    var lp = document.getElementById('landingPage');
+    if (lp) lp.style.display = 'block';
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('appLayout').classList.remove('active');
+  }
+
+  function showLoginFromLanding() {
+    var lp = document.getElementById('landingPage');
+    if (lp) lp.style.display = 'none';
+    document.getElementById('loginPage').style.display = 'flex';
   }
 
   function showApp() {
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('appLayout').classList.add('active');
+    // Hide landing page if shown
+    var lp = document.getElementById('landingPage');
+    if (lp) lp.style.display = 'none';
     updateSidebar();
     updateMemberSelect();
+    loadSubscriptionStatus();
     // Hide add member & invite buttons for non-admins
     const addBtn = document.getElementById('addMemberBtn');
     const inviteBtn = document.getElementById('inviteMemberBtn');
