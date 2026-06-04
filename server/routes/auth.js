@@ -116,9 +116,14 @@ router.post('/register', async (req, res) => {
     user.emailVerificationExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
     await user.save();
 
-    // Send email (non-blocking - don't fail registration if email fails)
+    // Send verification email (non-blocking - don't fail registration if email fails)
     sendVerificationEmail(user, verificationToken).catch(err => {
       console.log('Verification email could not be sent:', err);
+    });
+
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(user).catch(err => {
+      console.log('Welcome email could not be sent:', err);
     });
 
     const token = generateToken(user._id);
@@ -211,7 +216,7 @@ router.post('/forgot-password', async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase() });
 
     if (!user) {
-      // Don't reveal if email exists
+      // Don't reveal if email exists - still return success
       return res.json({ success: true, message: 'If this email is registered, a reset link will be sent.' });
     }
 
@@ -221,15 +226,16 @@ router.post('/forgot-password', async (req, res) => {
     user.resetTokenExpiry = Date.now() + 60 * 60 * 1000; // 1 hour
     await user.save();
 
-    // TODO: Send email with reset link
-    // For now, return token (in production, send via email only)
-    res.json({
-      success: true,
-      message: 'Password reset instructions sent to your email.',
-      // Remove this in production - only for development
-      ...(process.env.NODE_ENV !== 'production' && { resetToken })
-    });
+    // Send password reset email
+    const emailResult = await sendPasswordResetEmail(user, resetToken);
+    if (emailResult.success) {
+      res.json({ success: true, message: 'Password reset link sent to your email.' });
+    } else {
+      console.error('Failed to send reset email:', emailResult.error);
+      res.json({ success: true, message: 'If this email is registered, a reset link will be sent.' });
+    }
   } catch (error) {
+    console.error('Forgot password error:', error);
     res.status(500).json({ success: false, message: 'Failed to process reset request.' });
   }
 });
@@ -422,8 +428,17 @@ router.post('/google', async (req, res) => {
     let user = await User.findOne({ email: email.toLowerCase() });
 
     if (user) {
-      // Existing user — login them
+      // Existing user — check if active
+      if (!user.isActive) {
+        return res.status(401).json({ success: false, message: 'Account is deactivated. Contact your family admin.' });
+      }
+
+      // Login them in
       user.lastLogin = new Date();
+      // Mark email as verified since Google has verified it
+      if (!user.isEmailVerified) {
+        user.isEmailVerified = true;
+      }
       await user.save();
 
       const family = await Family.findById(user.familyId);
@@ -451,11 +466,13 @@ router.post('/google', async (req, res) => {
     });
 
     // Create user with random password (they'll use Google login)
+    // Use unique placeholder phone to avoid conflicts
     const randomPassword = crypto.randomBytes(16).toString('hex');
+    const placeholderPhone = `G${Date.now().toString().slice(-9)}`;
     user = await User.create({
       name: name || email.split('@')[0],
       email: email.toLowerCase(),
-      phone: googleId.slice(-10), // Placeholder phone from Google ID
+      phone: placeholderPhone,
       password: randomPassword,
       role: 'admin',
       relation: 'Self',
