@@ -254,7 +254,7 @@ router.post('/referral', authenticate, async (req, res) => {
   }
 });
 
-// ============ RAZORPAY: CREATE ORDER ============
+// ============ CASHFREE: CREATE ORDER ============
 router.post('/create-order', authenticate, async (req, res) => {
   try {
     const { plan, billingCycle } = req.body;
@@ -273,34 +273,60 @@ router.post('/create-order', authenticate, async (req, res) => {
       amount = Math.round(amount * 0.8); // 20% off first payment for referred users
     }
 
-    const Razorpay = require('razorpay');
-    const razorpay = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID,
-      key_secret: process.env.RAZORPAY_KEY_SECRET
+    const orderId = `order_${req.familyId.toString().slice(-8)}_${Date.now()}`;
+    const user = req.user;
+
+    // Cashfree API - Create Order
+    const cashfreeHost = process.env.CASHFREE_ENV === 'production' 
+      ? 'https://api.cashfree.com' 
+      : 'https://sandbox.cashfree.com';
+
+    const fetch = require('node-fetch') || globalThis.fetch;
+    const response = await fetch(`${cashfreeHost}/pg/orders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-version': '2025-01-01',
+        'x-client-id': process.env.CASHFREE_APP_ID,
+        'x-client-secret': process.env.CASHFREE_SECRET_KEY
+      },
+      body: JSON.stringify({
+        order_id: orderId,
+        order_amount: amount,
+        order_currency: 'INR',
+        customer_details: {
+          customer_id: req.familyId.toString(),
+          customer_name: user.name,
+          customer_email: user.email,
+          customer_phone: user.phone
+        },
+        order_meta: {
+          return_url: `${process.env.FRONTEND_URL || 'https://gromofinance.com'}?payment=success&order_id=${orderId}`,
+          notify_url: `${process.env.FRONTEND_URL || 'https://gromofinance.com'}/api/subscription/webhook`
+        },
+        order_note: `${planDetails.name} Plan - ${cycle}`
+      })
     });
 
-    const order = await razorpay.orders.create({
-      amount: amount * 100, // Razorpay expects paise
-      currency: 'INR',
-      receipt: `order_${req.familyId}_${Date.now()}`,
-      notes: {
-        familyId: req.familyId.toString(),
-        plan: plan,
-        billingCycle: cycle
-      }
-    });
+    const orderData = await response.json();
+
+    if (!response.ok || !orderData.payment_session_id) {
+      console.error('Cashfree create order error:', orderData);
+      return res.status(500).json({ success: false, message: 'Failed to create payment order.' });
+    }
 
     res.json({
       success: true,
       order: {
-        id: order.id,
-        amount: order.amount,
-        currency: order.currency,
+        orderId: orderData.order_id,
+        paymentSessionId: orderData.payment_session_id,
+        amount: amount,
+        currency: 'INR',
         plan: plan,
         planName: planDetails.name,
         billingCycle: cycle
       },
-      razorpayKeyId: process.env.RAZORPAY_KEY_ID
+      cashfreeEnv: process.env.CASHFREE_ENV || 'sandbox'
     });
   } catch (error) {
     console.error('Create order error:', error);
@@ -308,20 +334,37 @@ router.post('/create-order', authenticate, async (req, res) => {
   }
 });
 
-// ============ RAZORPAY: VERIFY PAYMENT ============
+// ============ CASHFREE: VERIFY PAYMENT ============
 router.post('/verify-payment', authenticate, async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan, billingCycle } = req.body;
+    const { orderId, plan, billingCycle } = req.body;
 
-    // Verify signature
-    const crypto = require('crypto');
-    const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-      .update(razorpay_order_id + '|' + razorpay_payment_id)
-      .digest('hex');
+    if (!orderId) {
+      return res.status(400).json({ success: false, message: 'Order ID required.' });
+    }
 
-    if (expectedSignature !== razorpay_signature) {
-      return res.status(400).json({ success: false, message: 'Payment verification failed.' });
+    // Verify order status with Cashfree
+    const cashfreeHost = process.env.CASHFREE_ENV === 'production' 
+      ? 'https://api.cashfree.com' 
+      : 'https://sandbox.cashfree.com';
+
+    const fetch = require('node-fetch') || globalThis.fetch;
+    const response = await fetch(`${cashfreeHost}/pg/orders/${orderId}`, {
+      method: 'GET',
+      headers: {
+        'x-api-version': '2025-01-01',
+        'x-client-id': process.env.CASHFREE_APP_ID,
+        'x-client-secret': process.env.CASHFREE_SECRET_KEY
+      }
+    });
+
+    const orderData = await response.json();
+
+    if (!response.ok || orderData.order_status !== 'PAID') {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Payment not completed. Status: ${orderData.order_status || 'unknown'}` 
+      });
     }
 
     // Payment verified - activate plan
@@ -354,7 +397,7 @@ router.post('/verify-payment', authenticate, async (req, res) => {
       amount: amount,
       date: new Date(),
       method: 'upi',
-      transactionId: razorpay_payment_id,
+      transactionId: orderId,
       status: 'success'
     });
 
@@ -364,7 +407,7 @@ router.post('/verify-payment', authenticate, async (req, res) => {
 
     res.json({
       success: true,
-      message: `🎉 Payment successful! ${planDetails.name} plan activated.`,
+      message: `Payment successful! ${planDetails.name} plan activated.`,
       subscription: {
         plan: subscription.plan,
         status: 'active',
@@ -376,6 +419,20 @@ router.post('/verify-payment', authenticate, async (req, res) => {
   } catch (error) {
     console.error('Verify payment error:', error);
     res.status(500).json({ success: false, message: 'Payment verification failed.' });
+  }
+});
+
+// ============ CASHFREE: WEBHOOK (auto-confirm payments) ============
+router.post('/webhook', async (req, res) => {
+  try {
+    // Cashfree sends payment updates here
+    const { data } = req.body;
+    if (data && data.order && data.order.order_id) {
+      console.log('Cashfree webhook received for order:', data.order.order_id, 'Status:', data.order.order_status);
+    }
+    res.status(200).json({ success: true });
+  } catch (error) {
+    res.status(200).json({ success: true }); // Always return 200 to webhooks
   }
 });
 

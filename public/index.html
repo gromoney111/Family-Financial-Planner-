@@ -32,8 +32,8 @@
   <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit" async defer></script>
   <!-- Google Identity Services for OAuth Login -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <!-- Razorpay Payment Gateway -->
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <!-- Cashfree Payment Gateway -->
+  <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
   <!-- Google AdSense (replace ca-pub-XXXXXXX with your publisher ID) -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 
@@ -2520,9 +2520,9 @@
   }
 
   // ╔══════════════════════════════════════════════════════════╗
-  // ║  RAZORPAY PAYMENT                                          ║
+  // ║  CASHFREE PAYMENT                                          ║
   // ╚══════════════════════════════════════════════════════════╝
-  async function openRazorpayPayment(plan, billingCycle) {
+  async function openPayment(plan, billingCycle) {
     showLoading(true);
     try {
       const res = await API.request('/subscription/create-order', {
@@ -2538,49 +2538,68 @@
 
       showLoading(false);
 
-      const options = {
-        key: res.razorpayKeyId,
-        amount: res.order.amount,
-        currency: res.order.currency,
-        name: 'GromoFinance',
-        description: `${res.order.planName} Plan - ${billingCycle}`,
-        order_id: res.order.id,
-        handler: async function(response) {
-          showLoading(true);
-          const verifyRes = await API.request('/subscription/verify-payment', {
-            method: 'POST',
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              plan: plan,
-              billingCycle: billingCycle
-            })
-          });
-          showLoading(false);
-          if (verifyRes.success) {
-            showToast(verifyRes.message, 'success');
-            loadSubscriptionStatus();
-          } else {
-            showToast(verifyRes.message || 'Payment verification failed.', 'error');
-          }
-        },
-        prefill: {
-          name: currentUser?.name || '',
-          email: currentUser?.email || '',
-          contact: currentUser?.phone || ''
-        },
-        theme: { color: '#f59e0b' },
-        modal: { ondismiss: function() { showToast('Payment cancelled.', 'info'); } }
+      // Initialize Cashfree checkout
+      const cashfree = Cashfree({ mode: res.cashfreeEnv === 'production' ? 'production' : 'sandbox' });
+      
+      const checkoutOptions = {
+        paymentSessionId: res.order.paymentSessionId,
+        redirectTarget: '_modal' // Opens in popup modal
       };
 
-      const rzp = new Razorpay(options);
-      rzp.open();
+      cashfree.checkout(checkoutOptions).then(function(result) {
+        if (result.error) {
+          showToast('Payment failed: ' + (result.error.message || 'Unknown error'), 'error');
+          return;
+        }
+        if (result.redirect) {
+          // Payment page opened, will redirect back
+          return;
+        }
+        if (result.paymentDetails) {
+          // Payment completed - verify on backend
+          verifyPayment(res.order.orderId, plan, billingCycle);
+        }
+      });
+
     } catch(err) {
       showLoading(false);
       showToast('Payment failed. Please try again.', 'error');
     }
   }
+
+  async function verifyPayment(orderId, plan, billingCycle) {
+    showLoading(true);
+    try {
+      const res = await API.request('/subscription/verify-payment', {
+        method: 'POST',
+        body: JSON.stringify({ orderId, plan, billingCycle })
+      });
+      showLoading(false);
+      if (res.success) {
+        showToast(res.message, 'success');
+        loadSubscriptionStatus();
+      } else {
+        showToast(res.message || 'Payment verification failed.', 'error');
+      }
+    } catch(err) {
+      showLoading(false);
+      showToast('Verification failed. Contact support.', 'error');
+    }
+  }
+
+  // Check if user came back from payment redirect
+  (function checkPaymentReturn() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success' && params.get('order_id')) {
+      // User returned from payment - verify it
+      setTimeout(function() {
+        if (currentUser) {
+          verifyPayment(params.get('order_id'), 'pro', 'monthly');
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      }, 1500);
+    }
+  })();
 
   async function startFreeTrial() {
     showLoading(true);
