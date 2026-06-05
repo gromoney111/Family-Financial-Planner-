@@ -410,14 +410,21 @@ router.post('/google', async (req, res) => {
 
     // Verify Google token
     const { OAuth2Client } = require('google-auth-library');
-    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '699119480465-k5p2p39b9o5ps6fvs3brj5qqi0qjahjp.apps.googleusercontent.com';
+    const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
-    const ticket = await client.verifyIdToken({
-      idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID
-    });
+    let payload;
+    try {
+      const ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: GOOGLE_CLIENT_ID
+      });
+      payload = ticket.getPayload();
+    } catch (verifyError) {
+      console.error('Google token verification failed:', verifyError.message);
+      return res.status(401).json({ success: false, message: 'Google authentication failed. Please try again.' });
+    }
 
-    const payload = ticket.getPayload();
     const { email, name, picture, sub: googleId } = payload;
 
     if (!email) {

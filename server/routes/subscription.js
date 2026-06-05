@@ -149,6 +149,55 @@ router.post('/upgrade', authenticate, async (req, res) => {
   }
 });
 
+// ============ START FREE TRIAL (7 days Pro) ============
+router.post('/start-trial', authenticate, async (req, res) => {
+  try {
+    let subscription = await Subscription.findOne({ familyId: req.familyId });
+    
+    if (!subscription) {
+      subscription = new Subscription({ familyId: req.familyId, plan: 'free', status: 'active' });
+    }
+
+    // Check if trial already used
+    if (subscription.trialStartDate) {
+      return res.status(400).json({ success: false, message: 'Free trial already used for this family.' });
+    }
+
+    // Activate 7-day Pro trial
+    const trialDays = 7;
+    const planDetails = Subscription.PLANS['pro'];
+
+    subscription.plan = 'pro';
+    subscription.status = 'trial';
+    subscription.trialStartDate = new Date();
+    subscription.trialEndDate = new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000);
+    subscription.maxMembers = planDetails.maxMembers;
+    subscription.maxTransactionsPerMonth = planDetails.maxTransactionsPerMonth;
+    subscription.features = planDetails.features;
+    subscription.billingCycle = 'free';
+
+    await Family.findByIdAndUpdate(req.familyId, { maxMembers: planDetails.maxMembers });
+    if (!subscription.referralCode) subscription.generateReferralCode();
+    await subscription.save();
+
+    res.json({
+      success: true,
+      message: `🎉 ${trialDays}-day Pro trial activated! Enjoy all premium features.`,
+      subscription: {
+        plan: 'pro',
+        status: 'trial',
+        trialEndDate: subscription.trialEndDate,
+        trialDaysRemaining: trialDays,
+        features: subscription.features,
+        maxMembers: subscription.maxMembers
+      }
+    });
+  } catch (error) {
+    console.error('Start trial error:', error);
+    res.status(500).json({ success: false, message: 'Failed to start trial.' });
+  }
+});
+
 // ============ CANCEL SUBSCRIPTION ============
 router.post('/cancel', authenticate, async (req, res) => {
   try {
@@ -202,6 +251,188 @@ router.post('/referral', authenticate, async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to apply referral.' });
+  }
+});
+
+// ============ CASHFREE: CREATE ORDER ============
+router.post('/create-order', authenticate, async (req, res) => {
+  try {
+    const { plan, billingCycle } = req.body;
+
+    if (!plan || !['basic', 'pro', 'enterprise'].includes(plan)) {
+      return res.status(400).json({ success: false, message: 'Invalid plan.' });
+    }
+
+    const planDetails = Subscription.PLANS[plan];
+    const cycle = billingCycle || 'monthly';
+    let amount = cycle === 'yearly' ? planDetails.priceYearly : planDetails.priceMonthly;
+
+    // Check for referral discount
+    const subscription = await Subscription.findOne({ familyId: req.familyId });
+    if (subscription && subscription.referredBy && subscription.paymentHistory.length === 0) {
+      amount = Math.round(amount * 0.8); // 20% off first payment for referred users
+    }
+
+    const orderId = `order_${req.familyId.toString().slice(-8)}_${Date.now()}`;
+    const user = req.user;
+
+    // Cashfree API - Create Order
+    const cashfreeHost = process.env.CASHFREE_ENV === 'production' 
+      ? 'https://api.cashfree.com' 
+      : 'https://sandbox.cashfree.com';
+
+    const fetch = require('node-fetch') || globalThis.fetch;
+    const response = await fetch(`${cashfreeHost}/pg/orders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-version': '2025-01-01',
+        'x-client-id': process.env.CASHFREE_APP_ID,
+        'x-client-secret': process.env.CASHFREE_SECRET_KEY
+      },
+      body: JSON.stringify({
+        order_id: orderId,
+        order_amount: amount,
+        order_currency: 'INR',
+        customer_details: {
+          customer_id: req.familyId.toString(),
+          customer_name: user.name,
+          customer_email: user.email,
+          customer_phone: user.phone
+        },
+        order_meta: {
+          return_url: `${process.env.FRONTEND_URL || 'https://gromofinance.com'}?payment=success&order_id=${orderId}`,
+          notify_url: `${process.env.FRONTEND_URL || 'https://gromofinance.com'}/api/subscription/webhook`
+        },
+        order_note: `${planDetails.name} Plan - ${cycle}`
+      })
+    });
+
+    const orderData = await response.json();
+
+    if (!response.ok || !orderData.payment_session_id) {
+      console.error('Cashfree create order error:', orderData);
+      return res.status(500).json({ success: false, message: 'Failed to create payment order.' });
+    }
+
+    res.json({
+      success: true,
+      order: {
+        orderId: orderData.order_id,
+        paymentSessionId: orderData.payment_session_id,
+        amount: amount,
+        currency: 'INR',
+        plan: plan,
+        planName: planDetails.name,
+        billingCycle: cycle
+      },
+      cashfreeEnv: process.env.CASHFREE_ENV || 'sandbox'
+    });
+  } catch (error) {
+    console.error('Create order error:', error);
+    res.status(500).json({ success: false, message: 'Failed to create payment order.' });
+  }
+});
+
+// ============ CASHFREE: VERIFY PAYMENT ============
+router.post('/verify-payment', authenticate, async (req, res) => {
+  try {
+    const { orderId, plan, billingCycle } = req.body;
+
+    if (!orderId) {
+      return res.status(400).json({ success: false, message: 'Order ID required.' });
+    }
+
+    // Verify order status with Cashfree
+    const cashfreeHost = process.env.CASHFREE_ENV === 'production' 
+      ? 'https://api.cashfree.com' 
+      : 'https://sandbox.cashfree.com';
+
+    const fetch = require('node-fetch') || globalThis.fetch;
+    const response = await fetch(`${cashfreeHost}/pg/orders/${orderId}`, {
+      method: 'GET',
+      headers: {
+        'x-api-version': '2025-01-01',
+        'x-client-id': process.env.CASHFREE_APP_ID,
+        'x-client-secret': process.env.CASHFREE_SECRET_KEY
+      }
+    });
+
+    const orderData = await response.json();
+
+    if (!response.ok || orderData.order_status !== 'PAID') {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Payment not completed. Status: ${orderData.order_status || 'unknown'}` 
+      });
+    }
+
+    // Payment verified - activate plan
+    const planDetails = Subscription.PLANS[plan];
+    const cycle = billingCycle || 'monthly';
+    const amount = cycle === 'yearly' ? planDetails.priceYearly : planDetails.priceMonthly;
+
+    let subscription = await Subscription.findOne({ familyId: req.familyId });
+    if (!subscription) {
+      subscription = new Subscription({ familyId: req.familyId });
+    }
+
+    subscription.plan = plan;
+    subscription.status = 'active';
+    subscription.maxMembers = planDetails.maxMembers;
+    subscription.maxTransactionsPerMonth = planDetails.maxTransactionsPerMonth;
+    subscription.features = planDetails.features;
+    subscription.priceMonthly = planDetails.priceMonthly;
+    subscription.priceYearly = planDetails.priceYearly;
+    subscription.billingCycle = cycle;
+    subscription.lastPaymentDate = new Date();
+
+    if (cycle === 'monthly') {
+      subscription.nextBillingDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    } else {
+      subscription.nextBillingDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    }
+
+    subscription.paymentHistory.push({
+      amount: amount,
+      date: new Date(),
+      method: 'upi',
+      transactionId: orderId,
+      status: 'success'
+    });
+
+    await Family.findByIdAndUpdate(req.familyId, { maxMembers: planDetails.maxMembers });
+    if (!subscription.referralCode) subscription.generateReferralCode();
+    await subscription.save();
+
+    res.json({
+      success: true,
+      message: `Payment successful! ${planDetails.name} plan activated.`,
+      subscription: {
+        plan: subscription.plan,
+        status: 'active',
+        maxMembers: subscription.maxMembers,
+        features: subscription.features,
+        nextBillingDate: subscription.nextBillingDate
+      }
+    });
+  } catch (error) {
+    console.error('Verify payment error:', error);
+    res.status(500).json({ success: false, message: 'Payment verification failed.' });
+  }
+});
+
+// ============ CASHFREE: WEBHOOK (auto-confirm payments) ============
+router.post('/webhook', async (req, res) => {
+  try {
+    // Cashfree sends payment updates here
+    const { data } = req.body;
+    if (data && data.order && data.order.order_id) {
+      console.log('Cashfree webhook received for order:', data.order.order_id, 'Status:', data.order.order_status);
+    }
+    res.status(200).json({ success: true });
+  } catch (error) {
+    res.status(200).json({ success: true }); // Always return 200 to webhooks
   }
 });
 
