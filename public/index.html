@@ -1928,28 +1928,43 @@
         <!-- Referral & Affiliate Section -->
         <div class="settings-card" style="border:1.5px solid var(--gold);background:linear-gradient(135deg,#fffbeb,#fff);">
           <h3 style="color:var(--navy);">Refer & Earn</h3>
-          <p style="font-size:0.85rem;color:var(--text-mid);margin-bottom:16px">Invite friends & family to GromoFinance. Earn ₹50 for every paid referral!</p>
+          <p style="font-size:0.85rem;color:var(--text-mid);margin-bottom:16px">Refer friends outside your family. Earn ₹50 for every paid referral!</p>
           <div id="referralSection">
             <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
               <input type="text" id="referralLinkInput" readonly style="flex:1;font-size:0.8rem;padding:10px;background:var(--white);border:1.5px solid var(--border);">
               <button class="btn btn-gold btn-sm" onclick="copyReferralLink()">Copy</button>
               <button class="btn btn-outline btn-sm" onclick="shareReferralWhatsApp()">WhatsApp</button>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:16px;">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:12px;margin-top:16px;">
               <div style="background:var(--white);padding:14px;border-radius:10px;text-align:center;border:1px solid var(--border);">
                 <div style="font-size:1.3rem;font-weight:700;color:var(--navy);" id="refTotalCount">0</div>
-                <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;">Total Referrals</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;">Signups</div>
               </div>
               <div style="background:var(--white);padding:14px;border-radius:10px;text-align:center;border:1px solid var(--border);">
                 <div style="font-size:1.3rem;font-weight:700;color:var(--teal);" id="refPaidCount">0</div>
-                <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;">Paid Upgrades</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;">Paid</div>
               </div>
               <div style="background:var(--white);padding:14px;border-radius:10px;text-align:center;border:1px solid var(--border);">
                 <div style="font-size:1.3rem;font-weight:700;color:var(--gold);" id="refEarnings">₹0</div>
-                <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;">Earnings</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;">Total Earned</div>
+              </div>
+              <div style="background:var(--white);padding:14px;border-radius:10px;text-align:center;border:1px solid var(--teal);">
+                <div style="font-size:1.3rem;font-weight:700;color:var(--teal);" id="refBalance">₹0</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;">Available</div>
               </div>
             </div>
+            <!-- Withdraw Section -->
+            <div style="margin-top:16px;padding:14px;background:var(--surface);border-radius:10px;border:1px solid var(--border);" id="withdrawSection">
+              <h4 style="font-size:0.85rem;font-weight:600;margin-bottom:10px;font-family:'DM Sans',sans-serif;">Withdraw Earnings</h4>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <input type="number" id="withdrawAmount" placeholder="Amount (min ₹200)" style="flex:1;min-width:120px;font-size:0.85rem;">
+                <input type="text" id="withdrawUPI" placeholder="UPI ID (e.g. name@paytm)" style="flex:1;min-width:160px;font-size:0.85rem;">
+                <button class="btn btn-gold btn-sm" onclick="requestWithdrawal()">Withdraw</button>
+              </div>
+              <p style="font-size:0.7rem;color:var(--text-muted);margin-top:8px;">Min ₹200. Paid to your UPI within 3-5 business days.</p>
+            </div>
             <p style="font-size:0.75rem;color:var(--text-muted);margin-top:12px;">Your referral code: <strong id="refCodeDisplay">-</strong> | Share with friends outside your family. Earn ₹50 per paid signup!</p>
+            <p style="font-size:0.72rem;color:var(--rose);margin-top:4px;">Note: Family members joining via invite link do NOT earn referral rewards.</p>
           </div>
           <!-- Apply Referral Code -->
           <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
@@ -2698,8 +2713,47 @@
         if (paidEl) paidEl.textContent = r.paidReferrals;
         var earnEl = document.getElementById('refEarnings');
         if (earnEl) earnEl.textContent = '₹' + r.totalEarnings;
+        var balEl = document.getElementById('refBalance');
+        if (balEl) balEl.textContent = '₹' + (r.availableBalance || 0);
+        // Show/hide withdraw section based on balance
+        var wdSection = document.getElementById('withdrawSection');
+        if (wdSection) wdSection.style.display = (r.availableBalance >= 200) ? 'block' : 'none';
       }
     } catch(e) {}
+  }
+
+  async function requestWithdrawal() {
+    var amount = parseInt(document.getElementById('withdrawAmount').value);
+    var upiId = document.getElementById('withdrawUPI').value.trim();
+    
+    if (!amount || amount < 200) {
+      showToast('Minimum withdrawal amount is ₹200.', 'error');
+      return;
+    }
+    if (!upiId) {
+      showToast('Please enter your UPI ID.', 'error');
+      return;
+    }
+
+    showLoading(true);
+    try {
+      var res = await API.request('/subscription/withdraw', {
+        method: 'POST',
+        body: JSON.stringify({ amount: amount, upiId: upiId })
+      });
+      showLoading(false);
+      if (res.success) {
+        showToast(res.message, 'success');
+        document.getElementById('withdrawAmount').value = '';
+        document.getElementById('withdrawUPI').value = '';
+        loadReferralDashboard(); // Refresh stats
+      } else {
+        showToast(res.message || 'Withdrawal failed.', 'error');
+      }
+    } catch(e) {
+      showLoading(false);
+      showToast('Withdrawal request failed.', 'error');
+    }
   }
 
   function copyReferralLink() {

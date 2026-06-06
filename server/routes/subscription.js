@@ -271,16 +271,16 @@ router.get('/referral', authenticate, async (req, res) => {
       await subscription.save();
     }
 
-    // Count referrals - only count OTHER families (not same family members)
+    // Count referrals - only OTHER families who signed up via this referral code
     const referralCount = await Subscription.countDocuments({ 
       referredBy: req.familyId,
-      familyId: { $ne: req.familyId } // Exclude own family
+      familyId: { $ne: req.familyId }
     });
     
     // Count paid referrals (other families who actually upgraded)
     const paidReferrals = await Subscription.countDocuments({ 
       referredBy: req.familyId,
-      familyId: { $ne: req.familyId }, // Exclude own family
+      familyId: { $ne: req.familyId },
       plan: { $ne: 'free' },
       status: { $in: ['active', 'trial'] }
     });
@@ -288,6 +288,8 @@ router.get('/referral', authenticate, async (req, res) => {
     // Calculate earnings (₹50 per paid referral from OTHER families)
     const earningsPerReferral = 50;
     const totalEarnings = paidReferrals * earningsPerReferral;
+    const withdrawnAmount = subscription.withdrawnAmount || 0;
+    const availableBalance = totalEarnings - withdrawnAmount;
 
     const referralLink = `${process.env.FRONTEND_URL || 'https://gromofinance.com'}?ref=${subscription.referralCode}`;
 
@@ -300,14 +302,96 @@ router.get('/referral', authenticate, async (req, res) => {
         paidReferrals: paidReferrals,
         earningsPerReferral: earningsPerReferral,
         totalEarnings: totalEarnings,
+        withdrawnAmount: withdrawnAmount,
+        availableBalance: availableBalance,
+        minWithdrawal: 200,
         referredBy: subscription.referredBy ? true : false,
         discountForReferred: '20% off first payment',
-        note: 'Earn rewards only when you refer people outside your family (new families).'
+        withdrawalHistory: subscription.withdrawalHistory || [],
+        note: 'Earn ₹50 for every NEW family that upgrades using your referral code. Family members joining via invite link do NOT count.'
       }
     });
   } catch (error) {
     console.error('Referral dashboard error:', error);
     res.status(500).json({ success: false, message: 'Failed to get referral info.' });
+  }
+});
+
+// ============ REQUEST WITHDRAWAL (Encash Referral Earnings) ============
+router.post('/withdraw', authenticate, async (req, res) => {
+  try {
+    const { amount, upiId, bankAccount, ifsc, accountName } = req.body;
+
+    let subscription = await Subscription.findOne({ familyId: req.familyId });
+    if (!subscription) {
+      return res.status(400).json({ success: false, message: 'No subscription found.' });
+    }
+
+    // Calculate available balance
+    const paidReferrals = await Subscription.countDocuments({ 
+      referredBy: req.familyId,
+      familyId: { $ne: req.familyId },
+      plan: { $ne: 'free' },
+      status: { $in: ['active', 'trial'] }
+    });
+
+    const totalEarnings = paidReferrals * 50;
+    const withdrawnAmount = subscription.withdrawnAmount || 0;
+    const availableBalance = totalEarnings - withdrawnAmount;
+
+    // Validations
+    const minWithdrawal = 200;
+    if (!amount || amount < minWithdrawal) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Minimum withdrawal is ₹${minWithdrawal}. Your balance: ₹${availableBalance}` 
+      });
+    }
+
+    if (amount > availableBalance) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Insufficient balance. Available: ₹${availableBalance}` 
+      });
+    }
+
+    if (!upiId && !bankAccount) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Please provide UPI ID or bank account details.' 
+      });
+    }
+
+    // Record withdrawal request
+    const withdrawalRequest = {
+      amount: amount,
+      date: new Date(),
+      status: 'pending',
+      paymentMethod: upiId ? 'upi' : 'bank',
+      paymentDetails: upiId ? { upiId } : { bankAccount, ifsc, accountName },
+      requestId: `WD_${Date.now()}`
+    };
+
+    if (!subscription.withdrawalHistory) {
+      subscription.withdrawalHistory = [];
+    }
+    subscription.withdrawalHistory.push(withdrawalRequest);
+    subscription.withdrawnAmount = (subscription.withdrawnAmount || 0) + amount;
+    await subscription.save();
+
+    res.json({
+      success: true,
+      message: `Withdrawal request of ₹${amount} submitted! Payment will be processed within 3-5 business days.`,
+      withdrawal: {
+        requestId: withdrawalRequest.requestId,
+        amount: amount,
+        status: 'pending',
+        remainingBalance: availableBalance - amount
+      }
+    });
+  } catch (error) {
+    console.error('Withdrawal error:', error);
+    res.status(500).json({ success: false, message: 'Failed to process withdrawal.' });
   }
 });
 

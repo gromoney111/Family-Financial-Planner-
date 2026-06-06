@@ -76,7 +76,22 @@ const subscriptionSchema = new mongoose.Schema({
     type: String,
     unique: true,
     sparse: true
-  }
+  },
+  // Withdrawal tracking
+  withdrawnAmount: {
+    type: Number,
+    default: 0
+  },
+  withdrawalHistory: [{
+    amount: Number,
+    date: { type: Date, default: Date.now },
+    status: { type: String, enum: ['pending', 'completed', 'rejected'], default: 'pending' },
+    paymentMethod: { type: String, enum: ['upi', 'bank'], default: 'upi' },
+    paymentDetails: mongoose.Schema.Types.Mixed,
+    requestId: String,
+    processedDate: Date,
+    note: String
+  }]
 }, {
   timestamps: true
 });
