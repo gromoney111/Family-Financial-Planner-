@@ -891,21 +891,38 @@
     @media (max-width: 768px) {
       .login-hero { display: none; }
       .mobile-logo { display: block !important; }
-      .login-form-section { max-width: 100%; }
+      .login-wrapper { flex-direction: column; }
+      .login-form-section { max-width: 100%; padding: 24px 20px; }
       .login-form-section::before { display: none; }
+      .login-form-container { max-width: 100%; }
+      .auth-tabs { margin-bottom: 20px; }
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
-      .main-content { margin-left: 0; padding: 20px; padding-top: 60px; }
+      .main-content { margin-left: 0; padding: 16px; padding-top: 60px; }
       .mobile-menu-btn { display: flex; }
       .stats-grid { grid-template-columns: 1fr 1fr; }
       .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
       .form-row { flex-direction: column; gap: 0; }
+      .modal { padding: 20px; margin: 10px; max-height: 85vh; }
+      .table-wrapper { font-size: 0.8rem; }
+      /* Landing page mobile */
+      #landingPage nav { padding: 12px 16px; }
+      #landingPage nav a { display: none; }
+      #landingPage section { padding: 60px 16px !important; }
+      #landingPage section:first-of-type { padding-top: 80px !important; }
+      #landingPage h1 { font-size: 2rem !important; }
+      #landingPage h2 { font-size: 1.5rem !important; }
     }
     @media (max-width: 480px) {
       .stats-grid { grid-template-columns: 1fr; }
       .charts-grid { grid-template-columns: 1fr; }
       .members-grid { grid-template-columns: 1fr; }
       .budget-grid { grid-template-columns: 1fr; }
+      .login-form-section { padding: 20px 16px; }
+      .btn-primary { padding: 12px; font-size: 0.9rem; }
+      .form-group { margin-bottom: 14px; }
+      /* Landing page pricing grid mobile */
+      #landingPage [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
     }
 
     /* ======= PRINT ======= */
@@ -1908,6 +1925,42 @@
           </div>
           <button class="btn btn-gold" onclick="saveSettings()" style="margin-top:12px">Save Settings</button>
         </div>
+        <!-- Referral & Affiliate Section -->
+        <div class="settings-card" style="border:1.5px solid var(--gold);background:linear-gradient(135deg,#fffbeb,#fff);">
+          <h3 style="color:var(--navy);">Refer & Earn</h3>
+          <p style="font-size:0.85rem;color:var(--text-mid);margin-bottom:16px">Invite friends & family to GromoFinance. Earn ₹50 for every paid referral!</p>
+          <div id="referralSection">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+              <input type="text" id="referralLinkInput" readonly style="flex:1;font-size:0.8rem;padding:10px;background:var(--white);border:1.5px solid var(--border);">
+              <button class="btn btn-gold btn-sm" onclick="copyReferralLink()">Copy</button>
+              <button class="btn btn-outline btn-sm" onclick="shareReferralWhatsApp()">WhatsApp</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:16px;">
+              <div style="background:var(--white);padding:14px;border-radius:10px;text-align:center;border:1px solid var(--border);">
+                <div style="font-size:1.3rem;font-weight:700;color:var(--navy);" id="refTotalCount">0</div>
+                <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;">Total Referrals</div>
+              </div>
+              <div style="background:var(--white);padding:14px;border-radius:10px;text-align:center;border:1px solid var(--border);">
+                <div style="font-size:1.3rem;font-weight:700;color:var(--teal);" id="refPaidCount">0</div>
+                <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;">Paid Upgrades</div>
+              </div>
+              <div style="background:var(--white);padding:14px;border-radius:10px;text-align:center;border:1px solid var(--border);">
+                <div style="font-size:1.3rem;font-weight:700;color:var(--gold);" id="refEarnings">₹0</div>
+                <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;">Earnings</div>
+              </div>
+            </div>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:12px;">Your referral code: <strong id="refCodeDisplay">-</strong> | Referred users get 20% off their first payment.</p>
+          </div>
+          <!-- Apply Referral Code -->
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+            <label style="font-size:0.82rem;font-weight:600;color:var(--text-mid);display:block;margin-bottom:6px;">Have a referral code?</label>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="applyReferralInput" placeholder="Enter code (e.g., GROMO1A2B3C)" style="flex:1;font-size:0.85rem;">
+              <button class="btn btn-gold btn-sm" onclick="applyReferralCode()">Apply</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Delete Account Section -->
         <div class="settings-card" style="border:1px solid var(--rose);background:#fff5f5;">
           <h3 style="color:var(--rose)">Danger Zone</h3>
@@ -2627,6 +2680,79 @@
     } catch(e) {}
   }
 
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  REFERRAL & AFFILIATE SYSTEM                               ║
+  // ╚══════════════════════════════════════════════════════════╝
+  async function loadReferralDashboard() {
+    try {
+      const res = await API.request('/subscription/referral');
+      if (res.success && res.referral) {
+        var r = res.referral;
+        var linkInput = document.getElementById('referralLinkInput');
+        if (linkInput) linkInput.value = r.link;
+        var codeEl = document.getElementById('refCodeDisplay');
+        if (codeEl) codeEl.textContent = r.code;
+        var totalEl = document.getElementById('refTotalCount');
+        if (totalEl) totalEl.textContent = r.totalReferrals;
+        var paidEl = document.getElementById('refPaidCount');
+        if (paidEl) paidEl.textContent = r.paidReferrals;
+        var earnEl = document.getElementById('refEarnings');
+        if (earnEl) earnEl.textContent = '₹' + r.totalEarnings;
+      }
+    } catch(e) {}
+  }
+
+  function copyReferralLink() {
+    var input = document.getElementById('referralLinkInput');
+    if (!input || !input.value) { showToast('Referral link not ready.', 'info'); return; }
+    navigator.clipboard.writeText(input.value).then(function() {
+      showToast('Referral link copied!', 'success');
+    }).catch(function() {
+      input.select();
+      document.execCommand('copy');
+      showToast('Referral link copied!', 'success');
+    });
+  }
+
+  function shareReferralWhatsApp() {
+    var input = document.getElementById('referralLinkInput');
+    if (!input || !input.value) { showToast('Referral link not ready.', 'info'); return; }
+    var text = 'Hey! I use GromoFinance to manage our family budget. It tracks income, expenses, loans & investments for the whole family. Try it free: ' + input.value;
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  }
+
+  async function applyReferralCode() {
+    var code = document.getElementById('applyReferralInput').value.trim();
+    if (!code) { showToast('Please enter a referral code.', 'info'); return; }
+    showLoading(true);
+    try {
+      var res = await API.request('/subscription/referral', {
+        method: 'POST',
+        body: JSON.stringify({ code: code })
+      });
+      showLoading(false);
+      if (res.success) {
+        showToast(res.message, 'success');
+        document.getElementById('applyReferralInput').value = '';
+      } else {
+        showToast(res.message || 'Invalid code.', 'error');
+      }
+    } catch(e) {
+      showLoading(false);
+      showToast('Failed to apply code.', 'error');
+    }
+  }
+
+  // Check if user arrived via referral link (?ref=GROMO...)
+  (function checkReferralLink() {
+    var params = new URLSearchParams(window.location.search);
+    var refCode = params.get('ref');
+    if (refCode) {
+      sessionStorage.setItem('ffp_referral_code', refCode);
+      showToast('Referral code detected! It will be applied after you register.', 'info');
+    }
+  })();
+
   function initApp() {
     // Check if user arrived via password reset link
     const params = new URLSearchParams(window.location.search);
@@ -3117,6 +3243,14 @@
         showToast(joiningFamily ? 'Welcome! You joined the family as a member.' : 'Account created! You are the family admin.', 'success');
         showApp();
         loadFamilyData();
+        // Auto-apply referral code if user came via referral link
+        var pendingRef = sessionStorage.getItem('ffp_referral_code');
+        if (pendingRef) {
+          API.request('/subscription/referral', { method: 'POST', body: JSON.stringify({ code: pendingRef }) })
+            .then(function(r) { if (r.success) showToast('Referral bonus applied! 20% off your first upgrade.', 'success'); })
+            .catch(function() {});
+          sessionStorage.removeItem('ffp_referral_code');
+        }
         // Clean URL
         window.history.replaceState({}, '', window.location.pathname);
       } else {
@@ -3342,6 +3476,8 @@
     event.currentTarget.classList.add('active');
     // Close mobile sidebar
     document.getElementById('sidebar').classList.remove('open');
+    // Load referral data when navigating to settings
+    if (section === 'settings') loadReferralDashboard();
   }
 
   function toggleSidebar() {
