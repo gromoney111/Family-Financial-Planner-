@@ -500,9 +500,9 @@ router.post('/google', async (req, res) => {
     });
 
     // Create user with random password (they'll use Google login)
-    // Use unique placeholder phone to avoid conflicts
+    // Use unique placeholder phone (digits only to pass validation)
     const randomPassword = crypto.randomBytes(16).toString('hex');
-    const placeholderPhone = `G${Date.now().toString().slice(-9)}`;
+    const placeholderPhone = `9${Date.now().toString().slice(-9)}`;
     user = await User.create({
       name: name || email.split('@')[0],
       email: email.toLowerCase(),
