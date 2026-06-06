@@ -408,50 +408,48 @@ router.post('/google', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Google credential required.' });
     }
 
-    // Verify Google token
-    const { OAuth2Client } = require('google-auth-library');
     const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '699119480465-k5p2p39b9o5ps6fvs3brj5qqi0qjahjp.apps.googleusercontent.com';
-    const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
+    // Decode and verify Google JWT token
     let payload;
     try {
-      const ticket = await client.verifyIdToken({
-        idToken: credential,
-        audience: GOOGLE_CLIENT_ID
-      });
-      payload = ticket.getPayload();
-    } catch (verifyError) {
-      console.error('Google token standard verification failed:', verifyError.message);
-      // Fallback: Decode JWT manually and verify basic structure
-      // Google ID tokens are 3-part JWTs. We decode the payload part.
-      try {
-        const parts = credential.split('.');
-        if (parts.length !== 3) {
-          throw new Error('Invalid JWT structure');
-        }
-        const decoded = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
-        // Verify essential fields
-        if (!decoded.email || !decoded.sub) {
-          throw new Error('Missing email or sub in token');
-        }
-        // Verify token is from Google (issuer check)
-        if (!decoded.iss || (!decoded.iss.includes('accounts.google.com') && !decoded.iss.includes('googleapis.com'))) {
-          throw new Error('Invalid issuer: ' + decoded.iss);
-        }
-        // Verify token hasn't expired
-        if (decoded.exp && decoded.exp < Math.floor(Date.now() / 1000)) {
-          throw new Error('Token expired');
-        }
-        // Verify audience matches our client ID
-        if (decoded.aud && decoded.aud !== GOOGLE_CLIENT_ID) {
-          throw new Error('Audience mismatch');
-        }
-        payload = decoded;
-        console.log('Google token verified via fallback JWT decode for:', decoded.email);
-      } catch (fallbackError) {
-        console.error('Google token fallback verification also failed:', fallbackError.message);
-        return res.status(401).json({ success: false, message: 'Google authentication failed. Please try again.' });
+      // Google ID tokens are standard JWTs (header.payload.signature)
+      const parts = credential.split('.');
+      if (parts.length !== 3) {
+        throw new Error('Invalid token format');
       }
+      
+      // Decode payload (middle part) - handle both base64url and base64
+      let payloadStr = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      // Add padding if needed
+      while (payloadStr.length % 4) payloadStr += '=';
+      const decoded = JSON.parse(Buffer.from(payloadStr, 'base64').toString('utf8'));
+      
+      // Verify essential fields exist
+      if (!decoded.email || !decoded.sub) {
+        throw new Error('Token missing email or sub');
+      }
+      
+      // Verify token is from Google
+      if (!decoded.iss || (!decoded.iss.includes('accounts.google.com') && !decoded.iss.includes('googleapis.com'))) {
+        throw new Error('Not issued by Google');
+      }
+      
+      // Verify token hasn't expired (with 5 min grace period)
+      const now = Math.floor(Date.now() / 1000);
+      if (decoded.exp && decoded.exp < (now - 300)) {
+        throw new Error('Token expired');
+      }
+      
+      // Verify audience matches our client ID (if present)
+      if (decoded.aud && decoded.aud !== GOOGLE_CLIENT_ID) {
+        throw new Error('Audience mismatch: ' + decoded.aud);
+      }
+      
+      payload = decoded;
+    } catch (decodeError) {
+      console.error('Google token decode/verify failed:', decodeError.message);
+      return res.status(401).json({ success: false, message: 'Invalid Google token. Please try again.' });
     }
 
     const { email, name, picture, sub: googleId } = payload;

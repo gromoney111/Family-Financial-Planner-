@@ -230,7 +230,7 @@ router.post('/referral', authenticate, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Invalid referral code.' });
     }
     if (referrerSub.familyId.toString() === req.familyId.toString()) {
-      return res.status(400).json({ success: false, message: 'Cannot use your own referral code.' });
+      return res.status(400).json({ success: false, message: 'Cannot use your own family\'s referral code.' });
     }
 
     let subscription = await Subscription.findOne({ familyId: req.familyId });
@@ -239,7 +239,7 @@ router.post('/referral', authenticate, async (req, res) => {
     }
 
     if (subscription.referredBy) {
-      return res.status(400).json({ success: false, message: 'Referral already applied.' });
+      return res.status(400).json({ success: false, message: 'Referral already applied to your account.' });
     }
 
     subscription.referredBy = referrerSub.familyId;
@@ -247,7 +247,7 @@ router.post('/referral', authenticate, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Referral code applied! You will get 20% off on your first upgrade.'
+      message: 'Referral applied! You get 20% off your first upgrade.'
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to apply referral.' });
@@ -271,17 +271,21 @@ router.get('/referral', authenticate, async (req, res) => {
       await subscription.save();
     }
 
-    // Count referrals
-    const referralCount = await Subscription.countDocuments({ referredBy: req.familyId });
+    // Count referrals - only count OTHER families (not same family members)
+    const referralCount = await Subscription.countDocuments({ 
+      referredBy: req.familyId,
+      familyId: { $ne: req.familyId } // Exclude own family
+    });
     
-    // Count paid referrals (users who actually upgraded)
+    // Count paid referrals (other families who actually upgraded)
     const paidReferrals = await Subscription.countDocuments({ 
-      referredBy: req.familyId, 
+      referredBy: req.familyId,
+      familyId: { $ne: req.familyId }, // Exclude own family
       plan: { $ne: 'free' },
-      status: 'active'
+      status: { $in: ['active', 'trial'] }
     });
 
-    // Calculate earnings (₹50 per paid referral)
+    // Calculate earnings (₹50 per paid referral from OTHER families)
     const earningsPerReferral = 50;
     const totalEarnings = paidReferrals * earningsPerReferral;
 
@@ -297,7 +301,8 @@ router.get('/referral', authenticate, async (req, res) => {
         earningsPerReferral: earningsPerReferral,
         totalEarnings: totalEarnings,
         referredBy: subscription.referredBy ? true : false,
-        discountForReferred: '20% off first payment'
+        discountForReferred: '20% off first payment',
+        note: 'Earn rewards only when you refer people outside your family (new families).'
       }
     });
   } catch (error) {
