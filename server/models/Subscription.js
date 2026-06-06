@@ -82,6 +82,10 @@ const subscriptionSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  subscriptionCredit: {
+    type: Number,
+    default: 0
+  },
   withdrawalHistory: [{
     amount: Number,
     date: { type: Date, default: Date.now },

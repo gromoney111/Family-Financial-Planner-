@@ -1955,13 +1955,21 @@
             </div>
             <!-- Withdraw Section -->
             <div style="margin-top:16px;padding:14px;background:var(--surface);border-radius:10px;border:1px solid var(--border);" id="withdrawSection">
-              <h4 style="font-size:0.85rem;font-weight:600;margin-bottom:10px;font-family:'DM Sans',sans-serif;">Withdraw Earnings</h4>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <input type="number" id="withdrawAmount" placeholder="Amount (min ₹200)" style="flex:1;min-width:120px;font-size:0.85rem;">
-                <input type="text" id="withdrawUPI" placeholder="UPI ID (e.g. name@paytm)" style="flex:1;min-width:160px;font-size:0.85rem;">
-                <button class="btn btn-gold btn-sm" onclick="requestWithdrawal()">Withdraw</button>
+              <h4 style="font-size:0.85rem;font-weight:600;margin-bottom:10px;font-family:'DM Sans',sans-serif;">Use Your Earnings</h4>
+              <!-- 3 Options -->
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:12px;">
+                <button onclick="selectWithdrawMethod('extend')" id="wdOptExtend" class="btn btn-outline btn-sm" style="padding:10px 8px;text-align:center;font-size:0.75rem;border-radius:8px;">🚀 Get Free Pro Days</button>
+                <button onclick="selectWithdrawMethod('subscription')" id="wdOptSub" class="btn btn-outline btn-sm" style="padding:10px 8px;text-align:center;font-size:0.75rem;border-radius:8px;">💳 Adjust Next Payment</button>
+                <button onclick="selectWithdrawMethod('upi')" id="wdOptUPI" class="btn btn-outline btn-sm" style="padding:10px 8px;text-align:center;font-size:0.75rem;border-radius:8px;">💰 Cash to UPI (min ₹200)</button>
               </div>
-              <p style="font-size:0.7rem;color:var(--text-muted);margin-top:8px;">Min ₹200. Paid to your UPI within 3-5 business days.</p>
+              <div id="withdrawForm" style="display:none;">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <input type="number" id="withdrawAmount" placeholder="Amount" style="flex:1;min-width:100px;font-size:0.85rem;">
+                  <input type="text" id="withdrawUPI" placeholder="UPI ID (for cash)" style="flex:1;min-width:140px;font-size:0.85rem;display:none;">
+                  <button class="btn btn-gold btn-sm" onclick="requestWithdrawal()">Submit</button>
+                </div>
+                <p style="font-size:0.7rem;color:var(--text-muted);margin-top:6px;" id="withdrawNote">Select an option above.</p>
+              </div>
             </div>
             <p style="font-size:0.75rem;color:var(--text-muted);margin-top:12px;">Your referral code: <strong id="refCodeDisplay">-</strong> | Share with friends outside your family. Earn ₹50 per paid signup!</p>
             <p style="font-size:0.72rem;color:var(--rose);margin-top:4px;">Note: Family members joining via invite link do NOT earn referral rewards.</p>
@@ -2725,13 +2733,18 @@
   async function requestWithdrawal() {
     var amount = parseInt(document.getElementById('withdrawAmount').value);
     var upiId = document.getElementById('withdrawUPI').value.trim();
+    var method = window._selectedWithdrawMethod || 'upi';
     
-    if (!amount || amount < 200) {
-      showToast('Minimum withdrawal amount is ₹200.', 'error');
+    if (!amount || amount <= 0) {
+      showToast('Please enter a valid amount.', 'error');
       return;
     }
-    if (!upiId) {
+    if (method === 'upi' && !upiId) {
       showToast('Please enter your UPI ID.', 'error');
+      return;
+    }
+    if (method === 'upi' && amount < 200) {
+      showToast('Minimum ₹200 for UPI withdrawal. Try "Get Free Pro Days" instead!', 'error');
       return;
     }
 
@@ -2739,20 +2752,42 @@
     try {
       var res = await API.request('/subscription/withdraw', {
         method: 'POST',
-        body: JSON.stringify({ amount: amount, upiId: upiId })
+        body: JSON.stringify({ amount: amount, method: method, upiId: upiId })
       });
       showLoading(false);
       if (res.success) {
         showToast(res.message, 'success');
         document.getElementById('withdrawAmount').value = '';
         document.getElementById('withdrawUPI').value = '';
-        loadReferralDashboard(); // Refresh stats
+        loadReferralDashboard();
       } else {
-        showToast(res.message || 'Withdrawal failed.', 'error');
+        showToast(res.message || 'Failed.', 'error');
       }
     } catch(e) {
       showLoading(false);
-      showToast('Withdrawal request failed.', 'error');
+      showToast('Request failed.', 'error');
+    }
+  }
+
+  function selectWithdrawMethod(method) {
+    window._selectedWithdrawMethod = method;
+    document.getElementById('withdrawForm').style.display = 'block';
+    var upiInput = document.getElementById('withdrawUPI');
+    var noteEl = document.getElementById('withdrawNote');
+    // Highlight selected button
+    document.getElementById('wdOptExtend').style.background = method === 'extend' ? 'var(--teal-light)' : '';
+    document.getElementById('wdOptSub').style.background = method === 'subscription' ? 'var(--gold-pale)' : '';
+    document.getElementById('wdOptUPI').style.background = method === 'upi' ? 'var(--sky-light)' : '';
+    
+    if (method === 'extend') {
+      upiInput.style.display = 'none';
+      noteEl.textContent = '₹50 = ~7 days Pro. Enter any amount to convert to Pro days instantly!';
+    } else if (method === 'subscription') {
+      upiInput.style.display = 'none';
+      noteEl.textContent = 'Amount will be adjusted against your next monthly payment.';
+    } else {
+      upiInput.style.display = 'block';
+      noteEl.textContent = 'Min ₹200. Paid to your UPI within 3-5 business days.';
     }
   }
 

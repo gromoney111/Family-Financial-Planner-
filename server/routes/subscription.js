@@ -317,10 +317,10 @@ router.get('/referral', authenticate, async (req, res) => {
   }
 });
 
-// ============ REQUEST WITHDRAWAL (Encash Referral Earnings) ============
+// ============ WITHDRAW / USE REFERRAL EARNINGS ============
 router.post('/withdraw', authenticate, async (req, res) => {
   try {
-    const { amount, upiId, bankAccount, ifsc, accountName } = req.body;
+    const { amount, method, upiId, bankAccount, ifsc, accountName } = req.body;
 
     let subscription = await Subscription.findOne({ familyId: req.familyId });
     if (!subscription) {
@@ -334,64 +334,90 @@ router.post('/withdraw', authenticate, async (req, res) => {
       plan: { $ne: 'free' },
       status: { $in: ['active', 'trial'] }
     });
-
     const totalEarnings = paidReferrals * 50;
     const withdrawnAmount = subscription.withdrawnAmount || 0;
     const availableBalance = totalEarnings - withdrawnAmount;
 
-    // Validations
-    const minWithdrawal = 200;
-    if (!amount || amount < minWithdrawal) {
-      return res.status(400).json({ 
-        success: false, 
-        message: `Minimum withdrawal is ₹${minWithdrawal}. Your balance: ₹${availableBalance}` 
-      });
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ success: false, message: 'Enter a valid amount.' });
     }
-
     if (amount > availableBalance) {
-      return res.status(400).json({ 
-        success: false, 
-        message: `Insufficient balance. Available: ₹${availableBalance}` 
+      return res.status(400).json({ success: false, message: `Insufficient balance. Available: ₹${availableBalance}` });
+    }
+
+    const withdrawMethod = method || 'upi';
+    if (!subscription.withdrawalHistory) subscription.withdrawalHistory = [];
+
+    // ===== OPTION 1: Use as subscription credit (adjust against monthly plan) =====
+    if (withdrawMethod === 'subscription') {
+      subscription.subscriptionCredit = (subscription.subscriptionCredit || 0) + amount;
+      subscription.withdrawnAmount = (subscription.withdrawnAmount || 0) + amount;
+      subscription.withdrawalHistory.push({
+        amount, date: new Date(), status: 'completed', paymentMethod: 'subscription',
+        paymentDetails: { type: 'Subscription credit' }, requestId: `WD_SUB_${Date.now()}`,
+        processedDate: new Date(), note: `₹${amount} added as subscription credit`
+      });
+      await subscription.save();
+      return res.json({
+        success: true,
+        message: `₹${amount} added as subscription credit! Will auto-adjust in your next payment.`,
+        withdrawal: { amount, method: 'subscription', status: 'completed', subscriptionCredit: subscription.subscriptionCredit, remainingBalance: availableBalance - amount }
       });
     }
 
+    // ===== OPTION 2: Convert to Pro days (extend subscription free) =====
+    if (withdrawMethod === 'extend') {
+      const daysToAdd = Math.floor((amount / 199) * 30); // ₹199 = 30 days Pro
+      if (daysToAdd < 1) {
+        return res.status(400).json({ success: false, message: 'Need at least ₹7 for 1 day Pro extension.' });
+      }
+      const planDetails = Subscription.PLANS['pro'];
+      const currentEnd = (subscription.nextBillingDate && subscription.nextBillingDate > new Date()) ? subscription.nextBillingDate : new Date();
+      const newEnd = new Date(currentEnd.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+
+      subscription.plan = 'pro';
+      subscription.status = 'active';
+      subscription.maxMembers = planDetails.maxMembers;
+      subscription.maxTransactionsPerMonth = planDetails.maxTransactionsPerMonth;
+      subscription.features = planDetails.features;
+      subscription.nextBillingDate = newEnd;
+      subscription.withdrawnAmount = (subscription.withdrawnAmount || 0) + amount;
+      subscription.withdrawalHistory.push({
+        amount, date: new Date(), status: 'completed', paymentMethod: 'extend',
+        paymentDetails: { daysAdded: daysToAdd, newExpiry: newEnd }, requestId: `WD_EXT_${Date.now()}`,
+        processedDate: new Date(), note: `Converted to ${daysToAdd} days Pro`
+      });
+      await subscription.save();
+      await Family.findByIdAndUpdate(req.familyId, { maxMembers: planDetails.maxMembers });
+      return res.json({
+        success: true,
+        message: `🎉 ₹${amount} converted to ${daysToAdd} days Pro! Active until ${newEnd.toLocaleDateString('en-IN')}.`,
+        withdrawal: { amount, method: 'extend', status: 'completed', daysAdded: daysToAdd, proExpiry: newEnd, remainingBalance: availableBalance - amount }
+      });
+    }
+
+    // ===== OPTION 3: Cash withdrawal to UPI (min ₹200) =====
+    if (amount < 200) {
+      return res.status(400).json({ success: false, message: 'Min ₹200 for UPI withdrawal. Try "Use for Pro" option instead!' });
+    }
     if (!upiId && !bankAccount) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Please provide UPI ID or bank account details.' 
-      });
+      return res.status(400).json({ success: false, message: 'Enter your UPI ID.' });
     }
-
-    // Record withdrawal request
-    const withdrawalRequest = {
-      amount: amount,
-      date: new Date(),
-      status: 'pending',
-      paymentMethod: upiId ? 'upi' : 'bank',
+    subscription.withdrawnAmount = (subscription.withdrawnAmount || 0) + amount;
+    subscription.withdrawalHistory.push({
+      amount, date: new Date(), status: 'pending', paymentMethod: upiId ? 'upi' : 'bank',
       paymentDetails: upiId ? { upiId } : { bankAccount, ifsc, accountName },
       requestId: `WD_${Date.now()}`
-    };
-
-    if (!subscription.withdrawalHistory) {
-      subscription.withdrawalHistory = [];
-    }
-    subscription.withdrawalHistory.push(withdrawalRequest);
-    subscription.withdrawnAmount = (subscription.withdrawnAmount || 0) + amount;
+    });
     await subscription.save();
-
     res.json({
       success: true,
-      message: `Withdrawal request of ₹${amount} submitted! Payment will be processed within 3-5 business days.`,
-      withdrawal: {
-        requestId: withdrawalRequest.requestId,
-        amount: amount,
-        status: 'pending',
-        remainingBalance: availableBalance - amount
-      }
+      message: `₹${amount} withdrawal requested! Payment to UPI within 3-5 business days.`,
+      withdrawal: { amount, method: 'upi', status: 'pending', remainingBalance: availableBalance - amount }
     });
   } catch (error) {
     console.error('Withdrawal error:', error);
-    res.status(500).json({ success: false, message: 'Failed to process withdrawal.' });
+    res.status(500).json({ success: false, message: 'Failed to process.' });
   }
 });
 
