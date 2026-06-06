@@ -254,6 +254,58 @@ router.post('/referral', authenticate, async (req, res) => {
   }
 });
 
+// ============ GET REFERRAL DASHBOARD ============
+router.get('/referral', authenticate, async (req, res) => {
+  try {
+    let subscription = await Subscription.findOne({ familyId: req.familyId });
+    
+    if (!subscription) {
+      subscription = await Subscription.create({
+        familyId: req.familyId, plan: 'free', status: 'active'
+      });
+    }
+
+    // Generate referral code if not exists
+    if (!subscription.referralCode) {
+      subscription.generateReferralCode();
+      await subscription.save();
+    }
+
+    // Count referrals
+    const referralCount = await Subscription.countDocuments({ referredBy: req.familyId });
+    
+    // Count paid referrals (users who actually upgraded)
+    const paidReferrals = await Subscription.countDocuments({ 
+      referredBy: req.familyId, 
+      plan: { $ne: 'free' },
+      status: 'active'
+    });
+
+    // Calculate earnings (₹50 per paid referral)
+    const earningsPerReferral = 50;
+    const totalEarnings = paidReferrals * earningsPerReferral;
+
+    const referralLink = `${process.env.FRONTEND_URL || 'https://gromofinance.com'}?ref=${subscription.referralCode}`;
+
+    res.json({
+      success: true,
+      referral: {
+        code: subscription.referralCode,
+        link: referralLink,
+        totalReferrals: referralCount,
+        paidReferrals: paidReferrals,
+        earningsPerReferral: earningsPerReferral,
+        totalEarnings: totalEarnings,
+        referredBy: subscription.referredBy ? true : false,
+        discountForReferred: '20% off first payment'
+      }
+    });
+  } catch (error) {
+    console.error('Referral dashboard error:', error);
+    res.status(500).json({ success: false, message: 'Failed to get referral info.' });
+  }
+});
+
 // ============ CASHFREE: CREATE ORDER ============
 router.post('/create-order', authenticate, async (req, res) => {
   try {
