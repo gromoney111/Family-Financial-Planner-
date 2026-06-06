@@ -414,13 +414,6 @@
       25% { transform: translateX(-5px); }
       75% { transform: translateX(5px); }
     }
-    .recaptcha-box {
-      margin-bottom: 18px;
-      display: flex;
-      justify-content: center;
-      transform: scale(0.92);
-      transform-origin: center;
-    }
 
     /* ======= SPINNER ======= */
     .spinner {
@@ -2512,7 +2505,6 @@
   // ╚══════════════════════════════════════════════════════════╝
   const CONFIG = {
     APPS_SCRIPT_URL: 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL',
-    RECAPTCHA_SITE_KEY: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
     APP_NAME: 'FamilyFinPlan',
     MAX_MEMBERS: 6,
     CURRENCY: '₹',
@@ -2525,8 +2517,6 @@
   let currentUser = null;
   let familyData = { transactions: [], members: [], budgets: [], loans: [], investments: [], emiPayments: [] };
   let charts = {};
-  let loginRecaptchaWidget = null;
-  let registerRecaptchaWidget = null;
 
   // ╔══════════════════════════════════════════════════════════╗
   // ║  INITIALIZATION                                            ║
@@ -2914,38 +2904,7 @@
     loadCustomBanks();
   }
 
-  // reCAPTCHA callback - called by Google's script
-  var onRecaptchaLoad = function() {
-    if (document.getElementById('loginRecaptcha')) {
-      loginRecaptchaWidget = grecaptcha.render('loginRecaptcha', {
-        sitekey: CONFIG.RECAPTCHA_SITE_KEY
-      });
-    }
-    if (document.getElementById('registerRecaptcha')) {
-      registerRecaptchaWidget = grecaptcha.render('registerRecaptcha', {
-        sitekey: CONFIG.RECAPTCHA_SITE_KEY
-      });
-    }
-  };
 
-  // Expose callback globally
-  window.onRecaptchaLoad = onRecaptchaLoad;
-
-  // Try to render reCAPTCHA after page load if API already loaded
-  window.addEventListener('load', () => {
-    if (typeof grecaptcha !== 'undefined' && grecaptcha.render) {
-      setTimeout(() => {
-        try {
-          if (document.getElementById('loginRecaptcha') && !document.getElementById('loginRecaptcha').hasChildNodes()) {
-            loginRecaptchaWidget = grecaptcha.render('loginRecaptcha', { sitekey: CONFIG.RECAPTCHA_SITE_KEY });
-          }
-          if (document.getElementById('registerRecaptcha') && !document.getElementById('registerRecaptcha').hasChildNodes()) {
-            registerRecaptchaWidget = grecaptcha.render('registerRecaptcha', { sitekey: CONFIG.RECAPTCHA_SITE_KEY });
-          }
-        } catch(e) { /* already rendered */ }
-      }, 500);
-    }
-  });
 
   // ╔══════════════════════════════════════════════════════════╗
   // ║  API COMMUNICATION                                         ║
@@ -3346,7 +3305,6 @@
     }
     btn.disabled = false;
     btn.innerHTML = '<span>Create Account</span>';
-    if (!isLocalMode && typeof grecaptcha !== 'undefined' && registerRecaptchaWidget !== null) grecaptcha.reset(registerRecaptchaWidget);
   }
 
   async function handleForgotPassword(e) {
