@@ -29,7 +29,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit" async defer></script>
   <!-- Google Identity Services for OAuth Login -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- Cashfree Payment Gateway -->
@@ -1286,9 +1285,6 @@
               </div>
             </div>
             <span class="forgot-link" onclick="showForgotPassword()">Forgot Password?</span>
-            <div class="recaptcha-box">
-              <div class="g-recaptcha" id="loginRecaptcha"></div>
-            </div>
             <button type="submit" class="btn-primary" id="loginBtn">
               <span>Login</span>
             </button>
@@ -1350,9 +1346,6 @@
                 }
               })();
             </script>
-            <div class="recaptcha-box">
-              <div class="g-recaptcha" id="registerRecaptcha"></div>
-            </div>
             <button type="submit" class="btn-primary" id="registerBtn">
               <span>Create Account</span>
             </button>
@@ -1930,10 +1923,11 @@
           <h3 style="color:var(--navy);">Refer & Earn</h3>
           <p style="font-size:0.85rem;color:var(--text-mid);margin-bottom:16px">Refer friends outside your family. Earn ₹50 for every paid referral!</p>
           <div id="referralSection">
-            <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
-              <input type="text" id="referralLinkInput" readonly style="flex:1;font-size:0.8rem;padding:10px;background:var(--white);border:1.5px solid var(--border);">
-              <button class="btn btn-gold btn-sm" onclick="copyReferralLink()">Copy</button>
-              <button class="btn btn-outline btn-sm" onclick="shareReferralWhatsApp()">WhatsApp</button>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+              <input type="text" id="referralLinkInput" readonly style="flex:1;min-width:180px;font-size:0.8rem;padding:10px;background:var(--white);border:1.5px solid var(--border);">
+              <button class="btn btn-gold btn-sm" onclick="copyReferralLink()">📋 Copy</button>
+              <button class="btn btn-outline btn-sm" onclick="shareReferralWhatsApp()">💬 WhatsApp</button>
+              <button class="btn btn-outline btn-sm" onclick="shareReferralEmail()">📧 Email</button>
             </div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:12px;margin-top:16px;">
               <div style="background:var(--white);padding:14px;border-radius:10px;text-align:center;border:1px solid var(--border);">
@@ -1973,6 +1967,8 @@
             </div>
             <p style="font-size:0.75rem;color:var(--text-muted);margin-top:12px;">Your referral code: <strong id="refCodeDisplay">-</strong> | Share with friends outside your family. Earn ₹50 per paid signup!</p>
             <p style="font-size:0.72rem;color:var(--rose);margin-top:4px;">Note: Family members joining via invite link do NOT earn referral rewards.</p>
+            <!-- Referred Users List -->
+            <div id="referredUsersList" style="display:none;margin-top:14px;padding:12px;background:var(--white);border-radius:8px;border:1px solid var(--border);"></div>
           </div>
           <!-- Apply Referral Code -->
           <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
@@ -2725,7 +2721,20 @@
         if (balEl) balEl.textContent = '₹' + (r.availableBalance || 0);
         // Show/hide withdraw section based on balance
         var wdSection = document.getElementById('withdrawSection');
-        if (wdSection) wdSection.style.display = (r.availableBalance >= 200) ? 'block' : 'none';
+        if (wdSection) wdSection.style.display = (r.availableBalance > 0) ? 'block' : 'none';
+        // Show referred users list
+        var listEl = document.getElementById('referredUsersList');
+        if (listEl && r.referredUsers && r.referredUsers.length > 0) {
+          listEl.innerHTML = '<h4 style="font-size:0.85rem;font-weight:600;margin-bottom:8px;font-family:DM Sans,sans-serif;">People You Referred</h4>' +
+            r.referredUsers.map(function(u) {
+              var badge = u.plan !== 'free' ? '<span style="background:#d1fae5;color:#059669;padding:2px 8px;border-radius:10px;font-size:0.65rem;font-weight:600;">PAID ✓</span>' : '<span style="background:#f1f5f9;color:#94a3b8;padding:2px 8px;border-radius:10px;font-size:0.65rem;">Free</span>';
+              return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><div><strong style="font-size:0.82rem">' + u.name + '</strong><div style="font-size:0.7rem;color:var(--text-muted)">' + u.email + '</div></div>' + badge + '</div>';
+            }).join('');
+          listEl.style.display = 'block';
+        } else if (listEl) {
+          listEl.innerHTML = '';
+          listEl.style.display = 'none';
+        }
       }
     } catch(e) {}
   }
@@ -2808,6 +2817,14 @@
     if (!input || !input.value) { showToast('Referral link not ready.', 'info'); return; }
     var text = 'Hey! I use GromoFinance to manage our family budget. It tracks income, expenses, loans & investments for the whole family. Try it free: ' + input.value;
     window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  }
+
+  function shareReferralEmail() {
+    var input = document.getElementById('referralLinkInput');
+    if (!input || !input.value) { showToast('Referral link not ready.', 'info'); return; }
+    var subject = 'Try GromoFinance - Smart Family Budget Planner';
+    var body = 'Hi,\n\nI use GromoFinance to manage my family finances - income, expenses, loans, EMIs, and investments all in one place.\n\nYou should try it too! Sign up free here:\n' + input.value + '\n\nYou\'ll get 20% off on your first upgrade!\n\nBest,\n' + (currentUser ? currentUser.name : 'A friend');
+    window.open('mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body));
   }
 
   async function applyReferralCode() {
@@ -3217,16 +3234,6 @@
     if (!identifier) { showAuthError('Please enter email or phone.'); return; }
     if (!password) { showAuthError('Please enter password.'); return; }
 
-    // Skip reCAPTCHA in local mode (no backend configured)
-    const isLocalMode = CONFIG.APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
-    if (!isLocalMode && typeof grecaptcha !== 'undefined' && loginRecaptchaWidget !== null) {
-      const response = grecaptcha.getResponse(loginRecaptchaWidget);
-      if (!response) {
-        showAuthError('Please complete the reCAPTCHA verification.');
-        return;
-      }
-    }
-
     const btn = document.getElementById('loginBtn');
     btn.disabled = true;
     btn.innerHTML = '<div class="spinner"></div> Logging in...';
@@ -3252,7 +3259,6 @@
     }
     btn.disabled = false;
     btn.innerHTML = '<span>Login</span>';
-    if (!isLocalMode && typeof grecaptcha !== 'undefined' && loginRecaptchaWidget !== null) grecaptcha.reset(loginRecaptchaWidget);
   }
 
   async function handleRegister(e) {
@@ -3290,16 +3296,6 @@
     if (emailExists || phoneExists || nameAndEmailExists) {
       showAuthError('Account already exists with this email or phone. Please login instead.');
       return;
-    }
-
-    // Skip reCAPTCHA in local mode
-    const isLocalMode = CONFIG.APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
-    if (!isLocalMode && typeof grecaptcha !== 'undefined' && registerRecaptchaWidget !== null) {
-      const response = grecaptcha.getResponse(registerRecaptchaWidget);
-      if (!response) {
-        showAuthError('Please complete the reCAPTCHA verification.');
-        return;
-      }
     }
 
     const btn = document.getElementById('registerBtn');

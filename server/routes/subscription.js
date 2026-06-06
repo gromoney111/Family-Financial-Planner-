@@ -272,20 +272,31 @@ router.get('/referral', authenticate, async (req, res) => {
     }
 
     // Count referrals - only OTHER families who signed up via this referral code
-    const referralCount = await Subscription.countDocuments({ 
+    const referredSubs = await Subscription.find({ 
       referredBy: req.familyId,
       familyId: { $ne: req.familyId }
-    });
-    
-    // Count paid referrals (other families who actually upgraded)
-    const paidReferrals = await Subscription.countDocuments({ 
-      referredBy: req.familyId,
-      familyId: { $ne: req.familyId },
-      plan: { $ne: 'free' },
-      status: { $in: ['active', 'trial'] }
-    });
+    }).select('familyId plan status createdAt');
 
-    // Calculate earnings (₹50 per paid referral from OTHER families)
+    // Get names of referred families
+    const User = require('../models/User');
+    const referredList = [];
+    for (const sub of referredSubs) {
+      const admin = await User.findOne({ familyId: sub.familyId, role: 'admin' }).select('name email createdAt');
+      if (admin) {
+        referredList.push({
+          name: admin.name,
+          email: admin.email.replace(/(.{2})(.*)(@.*)/, '$1***$3'), // Mask email
+          plan: sub.plan,
+          status: sub.status,
+          joinedAt: admin.createdAt
+        });
+      }
+    }
+
+    const referralCount = referredSubs.length;
+    const paidReferrals = referredSubs.filter(s => s.plan !== 'free' && ['active', 'trial'].includes(s.status)).length;
+
+    // Calculate earnings
     const earningsPerReferral = 50;
     const totalEarnings = paidReferrals * earningsPerReferral;
     const withdrawnAmount = subscription.withdrawnAmount || 0;
@@ -307,6 +318,7 @@ router.get('/referral', authenticate, async (req, res) => {
         minWithdrawal: 200,
         referredBy: subscription.referredBy ? true : false,
         discountForReferred: '20% off first payment',
+        referredUsers: referredList,
         withdrawalHistory: subscription.withdrawalHistory || [],
         note: 'Earn ₹50 for every NEW family that upgrades using your referral code. Family members joining via invite link do NOT count.'
       }
