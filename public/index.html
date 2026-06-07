@@ -2533,6 +2533,14 @@
 
   function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
+      // First, unregister any old SW and clear old caches to fix stale pages
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        registrations.forEach(function(reg) { reg.unregister(); });
+      });
+      caches.keys().then(function(names) {
+        names.forEach(function(name) { if (name !== 'gromofinance-v3') caches.delete(name); });
+      });
+      // Register fresh SW
       navigator.serviceWorker.register('/sw.js')
         .then(reg => console.log('SW registered:', reg.scope))
         .catch(err => console.log('SW registration failed:', err));
