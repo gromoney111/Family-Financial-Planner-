@@ -3194,24 +3194,34 @@
   }
 
   async function handleLogin(e) {
-    e.preventDefault();
-    const identifier = document.getElementById('loginIdentifier').value.trim();
-    const password = document.getElementById('loginPassword').value;
+    if (e && e.preventDefault) e.preventDefault();
+    var identifier = '';
+    var password = '';
+    try {
+      identifier = document.getElementById('loginIdentifier').value.trim();
+      password = document.getElementById('loginPassword').value;
+    } catch(ex) {
+      alert('Error reading form: ' + ex.message);
+      return;
+    }
 
     if (!identifier) { showAuthError('Please enter email or phone.'); return; }
     if (!password) { showAuthError('Please enter password.'); return; }
 
-    const btn = document.getElementById('loginBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<div class="spinner"></div> Logging in...';
+    var btn = document.getElementById('loginBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Logging in...';
+    }
     document.getElementById('authError').classList.remove('show');
 
     try {
-      const result = await apiCall({ action: 'login', identifier, password });
-      if (result.success) {
+      var result = await apiCall({ action: 'login', identifier: identifier, password: password });
+      if (result && result.success) {
         currentUser = result.user;
         if (result.token) {
           localStorage.setItem('ffp_token', result.token);
+          if (window.API) API.token = result.token;
         }
         localStorage.setItem('ffp_session', JSON.stringify(currentUser));
         localStorage.setItem('ffp_user', JSON.stringify(currentUser));
@@ -3219,13 +3229,16 @@
         showApp();
         loadFamilyData();
       } else {
-        showAuthError(result.message || 'Invalid credentials. Please check email/phone and password.');
+        showAuthError((result && result.message) || 'Invalid credentials. Please check email/phone and password.');
       }
     } catch(err) {
-      showAuthError('Login failed. Please try again.');
+      console.error('Login handler error:', err);
+      showAuthError('Login failed: ' + (err.message || 'Please try again.'));
     }
-    btn.disabled = false;
-    btn.innerHTML = '<span>Login</span>';
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<span>Login</span>';
+    }
   }
 
   async function handleRegister(e) {
