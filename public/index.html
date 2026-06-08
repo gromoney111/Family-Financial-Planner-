@@ -1913,8 +1913,9 @@
         </div>
         <!-- Referral & Affiliate Section -->
         <div class="settings-card" style="border:1.5px solid var(--gold);background:linear-gradient(135deg,#fffbeb,#fff);">
-          <h3 style="color:var(--navy);">Refer & Earn</h3>
-          <p style="font-size:0.85rem;color:var(--text-mid);margin-bottom:16px">Refer friends outside your family. Earn ₹50 for every paid referral!</p>
+          <h3 style="color:var(--navy);">Refer & Earn (For Others - NOT Family)</h3>
+          <p style="font-size:0.85rem;color:var(--text-mid);margin-bottom:6px">Share this link with <strong>friends outside your family</strong>. Earn ₹50 for every paid referral!</p>
+          <p style="font-size:0.78rem;color:var(--rose);margin-bottom:16px;padding:8px;background:#fff5f5;border-radius:6px;">⚠️ <strong>NOT for family members!</strong> To add family members, go to "Family Members" section → click "Invite" button.</p>
           <div id="referralSection">
             <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
               <input type="text" id="referralLinkInput" readonly style="flex:1;min-width:180px;font-size:0.8rem;padding:10px;background:var(--white);border:1.5px solid var(--border);">
@@ -3229,7 +3230,12 @@
         showApp();
         loadFamilyData();
       } else {
-        showAuthError((result && result.message) || 'Invalid credentials. Please check email/phone and password.');
+        var errMsg = (result && result.message) || 'Invalid credentials.';
+        // If user registered via Google, they won't have a password
+        if (errMsg.includes('Invalid credentials')) {
+          errMsg += ' If you signed up with Google, use the "Sign in with Google" button instead.';
+        }
+        showAuthError(errMsg);
       }
     } catch(err) {
       console.error('Login handler error:', err);
@@ -4300,6 +4306,8 @@
     // Don't run if we're on a reset token page
     if (params.get('resetToken')) return;
     if (inviteCode) {
+      // Show login page (not landing page)
+      showLogin();
       // Hide login form, show register form
       document.getElementById('loginForm').style.display = 'none';
       document.getElementById('registerForm').style.display = 'block';
@@ -4315,7 +4323,16 @@
       // Store the familyId from invite for registration (inviteCode IS the familyId)
       sessionStorage.setItem('ffp_pending_invite', inviteCode);
       sessionStorage.setItem('ffp_invite_familyId', inviteCode);
-      showToast('You have been invited! Register below to join the family.', 'info');
+      // Show clear message that this is a family invite
+      showAuthError('');
+      var errEl = document.getElementById('authError');
+      if (errEl) {
+        errEl.style.background = '#d1fae5';
+        errEl.style.color = '#059669';
+        errEl.style.border = '1px solid #059669';
+        errEl.textContent = '👨‍👩‍👧‍👦 You have been invited to join a family! Fill in your details below to register as a member.';
+        errEl.classList.add('show');
+      }
     }
   }
 
@@ -4539,6 +4556,13 @@
 
   function showLoading(show) {
     document.getElementById('loadingOverlay').classList.toggle('active', show);
+    // Safety: auto-hide loading after 10 seconds max
+    if (show) {
+      clearTimeout(window._loadingTimeout);
+      window._loadingTimeout = setTimeout(function() {
+        document.getElementById('loadingOverlay').classList.remove('active');
+      }, 10000);
+    }
   }
 
   function showToast(message, type = 'info') {
