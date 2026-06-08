@@ -2874,16 +2874,6 @@
 
     // Check if user arrived via invite link FIRST
     const inviteCode = params.get('invite');
-    if (inviteCode) {
-      // Don't auto-login — show registration for invite
-      showLogin();
-      // Set today's date for transaction form
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('txDate').value = today;
-      populateMonthFilter();
-      loadCustomBanks();
-      return; // Let checkInviteLink handle the rest
-    }
 
     // Check for existing session (token-based)
     const token = localStorage.getItem('ffp_token');
@@ -2891,19 +2881,47 @@
     if (token && session) {
       try {
         currentUser = JSON.parse(session);
-        // Set token in API client
         if (window.API) API.token = token;
+        
+        // If logged-in user has invite code, auto-join family
+        if (inviteCode) {
+          API.request('/auth/join-family', {
+            method: 'POST',
+            body: JSON.stringify({ inviteCode: inviteCode })
+          }).then(function(r) {
+            if (r && r.success) {
+              currentUser = r.user;
+              localStorage.setItem('ffp_user', JSON.stringify(currentUser));
+              if (r.token) { localStorage.setItem('ffp_token', r.token); API.token = r.token; }
+              showToast(r.message, 'success');
+              window.history.replaceState({}, '', window.location.pathname);
+            } else {
+              showToast(r.message || 'Could not join family.', 'error');
+            }
+            showApp();
+            loadFamilyData();
+          }).catch(function() {
+            showApp();
+            loadFamilyData();
+          });
+          return;
+        }
+        
         showApp();
         loadFamilyData();
       } catch(e) {
         localStorage.removeItem('ffp_token');
         localStorage.removeItem('ffp_user');
         localStorage.removeItem('ffp_session');
-        showLandingPage();
+        if (inviteCode) { showLogin(); } else { showLandingPage(); }
       }
     } else {
-      // Show landing page for new/logged-out visitors
-      showLandingPage();
+      // Not logged in
+      if (inviteCode) {
+        showLogin(); // checkInviteLink will handle showing register form
+      } else {
+        showLandingPage();
+      }
     }
     // Set today's date for transaction form
     const today = new Date().toISOString().split('T')[0];
@@ -3226,9 +3244,32 @@
         }
         localStorage.setItem('ffp_session', JSON.stringify(currentUser));
         localStorage.setItem('ffp_user', JSON.stringify(currentUser));
-        showToast('Welcome back, ' + currentUser.name + '!', 'success');
-        showApp();
-        loadFamilyData();
+        
+        // Check if user logged in from invite link — auto-join family
+        var urlParams = new URLSearchParams(window.location.search);
+        var loginInvite = urlParams.get('invite');
+        if (loginInvite) {
+          API.request('/auth/join-family', {
+            method: 'POST',
+            body: JSON.stringify({ inviteCode: loginInvite })
+          }).then(function(r) {
+            if (r && r.success) {
+              currentUser = r.user;
+              localStorage.setItem('ffp_user', JSON.stringify(currentUser));
+              if (r.token) { localStorage.setItem('ffp_token', r.token); API.token = r.token; }
+              showToast('Welcome! ' + r.message, 'success');
+            } else {
+              showToast('Logged in! ' + (r.message || ''), 'info');
+            }
+            window.history.replaceState({}, '', window.location.pathname);
+            showApp();
+            loadFamilyData();
+          }).catch(function() { showApp(); loadFamilyData(); });
+        } else {
+          showToast('Welcome back, ' + currentUser.name + '!', 'success');
+          showApp();
+          loadFamilyData();
+        }
       } else {
         var errMsg = (result && result.message) || 'Invalid credentials.';
         // If user registered via Google, they won't have a password

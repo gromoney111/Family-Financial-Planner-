@@ -22,11 +22,26 @@ router.post('/register', async (req, res) => {
     // Check if user already exists (email OR phone - must be unique across ALL families)
     const existingEmail = await User.findOne({ email: email.toLowerCase() });
     if (existingEmail) {
+      // Special case: If user exists AND invite code provided, let them join via login instead
+      if (inviteCode) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'This email is already registered. Please LOGIN first, then you will be automatically added to the family.',
+          alreadyRegistered: true
+        });
+      }
       return res.status(400).json({ success: false, message: 'This email is already registered. Each person can only have one account.' });
     }
 
     const existingPhone = await User.findOne({ phone: phone.trim() });
     if (existingPhone) {
+      if (inviteCode) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'This phone is already registered. Please LOGIN first, then you will be automatically added to the family.',
+          alreadyRegistered: true
+        });
+      }
       return res.status(400).json({ success: false, message: 'This phone number is already registered. Each person can only have one account.' });
     }
 
@@ -554,6 +569,75 @@ router.post('/google', async (req, res) => {
   } catch (error) {
     console.error('Google OAuth error:', error);
     res.status(500).json({ success: false, message: 'Google login failed. Please try again.' });
+  }
+});
+
+// ============ JOIN FAMILY (for already-registered users via invite link) ============
+router.post('/join-family', authenticate, async (req, res) => {
+  try {
+    const { inviteCode } = req.body;
+    if (!inviteCode) {
+      return res.status(400).json({ success: false, message: 'Invite code required.' });
+    }
+
+    // Find family by invite code or familyId
+    let family = await Family.findOne({ inviteCode });
+    if (!family) {
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(inviteCode)) {
+        family = await Family.findById(inviteCode);
+      }
+    }
+    if (!family) {
+      return res.status(400).json({ success: false, message: 'Invalid invite code.' });
+    }
+
+    // Check if already in this family
+    const user = await User.findById(req.userId);
+    if (user.familyId.toString() === family._id.toString()) {
+      return res.status(400).json({ success: false, message: 'You are already in this family.' });
+    }
+
+    // Check invite expiry
+    if (family.inviteExpiry && new Date() > family.inviteExpiry) {
+      return res.status(400).json({ success: false, message: 'Invite link expired. Ask admin for a new one.' });
+    }
+
+    // Check member limit
+    const Subscription = require('../models/Subscription');
+    const familySub = await Subscription.findOne({ familyId: family._id });
+    const maxAllowed = familySub ? familySub.maxMembers : 3;
+    if (family.members.length >= maxAllowed) {
+      return res.status(400).json({ success: false, message: `Family is full (${maxAllowed} members max). Admin needs to upgrade.` });
+    }
+
+    // Remove user from old family
+    const oldFamily = await Family.findById(user.familyId);
+    if (oldFamily) {
+      oldFamily.members.pull(user._id);
+      await oldFamily.save();
+    }
+
+    // Add user to new family
+    user.familyId = family._id;
+    user.role = 'member';
+    user.relation = 'Other';
+    await user.save();
+
+    family.members.push(user._id);
+    await family.save();
+
+    const token = generateToken(user._id);
+    res.json({
+      success: true,
+      message: `You joined ${family.familyName} successfully!`,
+      token,
+      user: user.toSafeObject(),
+      familyCode: family.familyCode
+    });
+  } catch (error) {
+    console.error('Join family error:', error);
+    res.status(500).json({ success: false, message: 'Failed to join family.' });
   }
 });
 
