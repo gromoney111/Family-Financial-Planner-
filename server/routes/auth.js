@@ -46,8 +46,18 @@ router.post('/register', async (req, res) => {
       if (!family) {
         return res.status(400).json({ success: false, message: 'Invalid invite code.' });
       }
-      if (family.isFull()) {
-        return res.status(400).json({ success: false, message: 'Family has reached maximum members (6).' });
+      
+      // Check if invite has expired (if inviteExpiry exists)
+      if (family.inviteExpiry && new Date() > family.inviteExpiry) {
+        return res.status(400).json({ success: false, message: 'This invite link has expired. Ask the admin to generate a new one.' });
+      }
+      
+      // Check member limit based on subscription
+      const Subscription = require('../models/Subscription');
+      const familySub = await Subscription.findOne({ familyId: family._id });
+      const maxAllowed = familySub ? familySub.maxMembers : 3;
+      if (family.members.length >= maxAllowed) {
+        return res.status(400).json({ success: false, message: `Family has reached maximum members (${maxAllowed}). Admin needs to upgrade plan.` });
       }
 
       // Create member user
@@ -64,6 +74,11 @@ router.post('/register', async (req, res) => {
       // Add to family members
       family.members.push(user._id);
       await family.save();
+
+      // Send welcome email to new member (non-blocking)
+      sendWelcomeEmail(user).catch(err => {
+        console.log('Welcome email to member could not be sent:', err);
+      });
 
       const token = generateToken(user._id);
       return res.status(201).json({
@@ -84,13 +99,14 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Family code already taken. Please choose another.' });
     }
 
-    // Create family with placeholder adminId
+    // Create family with placeholder adminId (maxMembers=3 for free plan)
     const mongoose = require('mongoose');
     family = await Family.create({
       familyCode: code.toLowerCase(),
       familyName: `${name}'s Family`,
       adminId: new mongoose.Types.ObjectId(),
       members: [],
+      maxMembers: 3,
       settings: { currency: '₹', locale: 'en-IN' }
     });
 
@@ -356,8 +372,7 @@ router.get('/verify-email', async (req, res) => {
     user.emailVerificationExpiry = undefined;
     await user.save();
 
-    // Send welcome email
-    sendWelcomeEmail(user).catch(err => console.log('Welcome email error:', err));
+    // Welcome email already sent at registration - no need to send again
 
     res.send(`
       <div style="font-family:Arial,sans-serif;text-align:center;padding:60px 20px;">
@@ -496,6 +511,7 @@ router.post('/google', async (req, res) => {
       familyName: `${name}'s Family`,
       adminId: new mongoose.Types.ObjectId(),
       members: [],
+      maxMembers: 3,
       settings: { currency: '₹', locale: 'en-IN' }
     });
 
@@ -519,6 +535,11 @@ router.post('/google', async (req, res) => {
     family.members.push(user._id);
     await family.save();
 
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(user).catch(err => {
+      console.log('Welcome email to Google user could not be sent:', err);
+    });
+
     const token = generateToken(user._id);
 
     res.status(201).json({
@@ -527,11 +548,36 @@ router.post('/google', async (req, res) => {
       token,
       user: user.toSafeObject(),
       familyCode: family.familyCode,
-      isNewUser: true
+      isNewUser: true,
+      needsPhoneUpdate: true
     });
   } catch (error) {
     console.error('Google OAuth error:', error);
     res.status(500).json({ success: false, message: 'Google login failed. Please try again.' });
+  }
+});
+
+// ============ UPDATE PHONE (for Google users) ============
+router.post('/update-phone', authenticate, async (req, res) => {
+  try {
+    const { phone } = req.body;
+    if (!phone || !/^[0-9]{10,15}$/.test(phone)) {
+      return res.status(400).json({ success: false, message: 'Enter a valid phone number (10-15 digits).' });
+    }
+
+    // Check if phone already taken by another user
+    const existing = await User.findOne({ phone: phone.trim(), _id: { $ne: req.userId } });
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'This phone number is already used by another account.' });
+    }
+
+    const user = await User.findById(req.userId);
+    user.phone = phone.trim();
+    await user.save();
+
+    res.json({ success: true, message: 'Phone number updated.' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to update phone.' });
   }
 });
 

@@ -50,10 +50,13 @@ router.post('/members', authenticate, requireAdmin, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Name, email, phone, and password are required.' });
     }
 
-    // Check family member limit
+    // Check family member limit (subscription-aware)
     const family = await Family.findById(req.familyId);
-    if (family.isFull()) {
-      return res.status(400).json({ success: false, message: `Maximum ${family.maxMembers} members allowed.` });
+    const Subscription = require('../models/Subscription');
+    const familySub = await Subscription.findOne({ familyId: req.familyId });
+    const maxAllowed = familySub ? familySub.maxMembers : 3;
+    if (family.members.length >= maxAllowed) {
+      return res.status(400).json({ success: false, message: `Maximum ${maxAllowed} members allowed on your plan. Upgrade to add more.` });
     }
 
     // Check if email already exists (globally unique)

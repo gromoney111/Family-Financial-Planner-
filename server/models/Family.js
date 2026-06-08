@@ -24,7 +24,7 @@ const familySchema = new mongoose.Schema({
   }],
   maxMembers: {
     type: Number,
-    default: 6
+    default: 3
   },
   inviteCode: {
     type: String,

@@ -3290,8 +3290,20 @@
 
     try {
       // Check if user has an invite code (joining existing family as MEMBER)
-      const pendingInvite = sessionStorage.getItem('ffp_pending_invite');
-      const inviteFamilyId = sessionStorage.getItem('ffp_invite_familyId');
+      // Read from sessionStorage OR directly from URL (in case sessionStorage was cleared)
+      let pendingInvite = sessionStorage.getItem('ffp_pending_invite');
+      let inviteFamilyId = sessionStorage.getItem('ffp_invite_familyId');
+      
+      // Fallback: re-read from URL if sessionStorage is empty
+      if (!pendingInvite) {
+        var urlParams = new URLSearchParams(window.location.search);
+        var urlInvite = urlParams.get('invite');
+        if (urlInvite) {
+          pendingInvite = urlInvite;
+          inviteFamilyId = urlInvite;
+        }
+      }
+      
       let actionData = { action: 'register', name, email, phone, password, customFamilyId };
       let joiningFamily = false;
       
@@ -3299,8 +3311,6 @@
         // User came via invite link - use register with inviteCode (backend handles linking)
         actionData = { action: 'register', name, email, phone, password, inviteCode: inviteFamilyId };
         joiningFamily = true;
-        sessionStorage.removeItem('ffp_pending_invite');
-        sessionStorage.removeItem('ffp_invite_familyId');
       }
       
       const result = await apiCall(actionData);
@@ -4472,6 +4482,24 @@
         showToast(data.isNewUser ? 'Account created with Google! You are the family admin.' : 'Welcome back, ' + currentUser.name + '!', 'success');
         showApp();
         loadFamilyData();
+        // Prompt for phone number if new Google user
+        if (data.needsPhoneUpdate || data.isNewUser) {
+          setTimeout(function() {
+            var phone = prompt('Please enter your real mobile number (10 digits).\nThis helps family members contact you:');
+            if (phone && /^[0-9]{10}$/.test(phone)) {
+              API.request('/auth/update-phone', {
+                method: 'POST',
+                body: JSON.stringify({ phone: phone })
+              }).then(function(r) {
+                if (r && r.success) {
+                  showToast('Phone number updated!', 'success');
+                  currentUser.phone = phone;
+                  localStorage.setItem('ffp_user', JSON.stringify(currentUser));
+                }
+              }).catch(function() {});
+            }
+          }, 2000);
+        }
       } else {
         showAuthError(data.message || 'Google login failed.');
         showToast(data.message || 'Google login failed.', 'error');
