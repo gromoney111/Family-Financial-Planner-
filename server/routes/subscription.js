@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Subscription = require('../models/Subscription');
 const Family = require('../models/Family');
+const User = require('../models/User');
 const { authenticate } = require('../middleware/auth');
+const { sendPaymentSuccessEmail, sendPaymentFailedEmail } = require('../utils/email');
 
 // ============ GET AVAILABLE PLANS ============
 router.get('/plans', (req, res) => {
@@ -595,6 +597,19 @@ router.post('/verify-payment', authenticate, async (req, res) => {
         nextBillingDate: subscription.nextBillingDate
       }
     });
+
+    // Send payment success email with receipt + referral code (non-blocking)
+    const user = await User.findById(req.userId);
+    if (user) {
+      sendPaymentSuccessEmail(user, {
+        plan: planDetails.name,
+        amount: amount,
+        transactionId: orderId,
+        billingCycle: cycle,
+        nextBillingDate: subscription.nextBillingDate,
+        referralCode: subscription.referralCode || ''
+      }).catch(err => console.log('Payment email error:', err));
+    }
   } catch (error) {
     console.error('Verify payment error:', error);
     res.status(500).json({ success: false, message: 'Payment verification failed.' });
