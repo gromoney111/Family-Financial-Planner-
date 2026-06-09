@@ -1440,6 +1440,9 @@
         <div class="nav-item" onclick="navigateTo('reports')">
           <span class="nav-icon">📈</span> Reports
         </div>
+        <div class="nav-item" onclick="navigateTo('upgrade')" style="background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.05));border:1px solid rgba(245,158,11,0.3);margin-top:8px;">
+          <span class="nav-icon">⭐</span> <span style="color:var(--gold);font-weight:600;">Upgrade Plan</span>
+        </div>
         <div class="nav-item" onclick="navigateTo('settings')">
           <span class="nav-icon">⚙️</span> Settings
         </div>
@@ -1859,6 +1862,83 @@
           <div id="reportSummary">
             <p style="color:var(--text-muted)">Select a month to generate report.</p>
           </div>
+        </div>
+      </section>
+
+      <!-- ===== UPGRADE / PRICING ===== -->
+      <section class="section" id="sec-upgrade">
+        <div class="page-header">
+          <div>
+            <h1>Upgrade Your Plan</h1>
+            <p class="subtitle">Unlock more features for your family</p>
+          </div>
+        </div>
+        <!-- Current Plan Banner -->
+        <div id="currentPlanBanner" style="background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;padding:20px 24px;border-radius:14px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-size:0.75rem;text-transform:uppercase;color:rgba(255,255,255,0.5);letter-spacing:0.5px;">Current Plan</div>
+            <div style="font-size:1.4rem;font-weight:700;color:#f59e0b;" id="upgradePlanName">Free</div>
+            <div style="font-size:0.8rem;color:rgba(255,255,255,0.6);" id="upgradePlanStatus">3 members | 50 transactions/month</div>
+          </div>
+          <button class="btn btn-gold" onclick="startFreeTrial()" id="trialBtn">Start 7-Day Free Trial</button>
+        </div>
+        <!-- Pricing Cards -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;">
+          <!-- Free -->
+          <div class="card" style="border:1.5px solid var(--border);">
+            <h3 style="font-family:'DM Sans',sans-serif;font-size:1rem;margin-bottom:4px;">Free</h3>
+            <div style="font-size:1.8rem;font-weight:800;margin-bottom:16px;">₹0<span style="font-size:0.85rem;font-weight:400;color:var(--text-muted);">/forever</span></div>
+            <ul style="list-style:none;padding:0;margin-bottom:20px;font-size:0.85rem;color:var(--text-mid);">
+              <li style="padding:5px 0;">✅ 3 family members</li>
+              <li style="padding:5px 0;">✅ 50 transactions/month</li>
+              <li style="padding:5px 0;">✅ Dashboard & charts</li>
+              <li style="padding:5px 0;">✅ Budget goals</li>
+              <li style="padding:5px 0;color:var(--text-muted);">❌ Loan & EMI tracker</li>
+              <li style="padding:5px 0;color:var(--text-muted);">❌ Investment portfolio</li>
+            </ul>
+            <button class="btn btn-outline" disabled style="width:100%;opacity:0.6;">Current Plan</button>
+          </div>
+          <!-- Pro (Popular) -->
+          <div class="card" style="border:2px solid var(--gold);position:relative;">
+            <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--gold);color:#fff;padding:3px 12px;border-radius:10px;font-size:0.65rem;font-weight:700;text-transform:uppercase;">Most Popular</div>
+            <h3 style="font-family:'DM Sans',sans-serif;font-size:1rem;margin-bottom:4px;">Pro</h3>
+            <div style="font-size:1.8rem;font-weight:800;margin-bottom:4px;">₹199<span style="font-size:0.85rem;font-weight:400;color:var(--text-muted);">/month</span></div>
+            <div style="font-size:0.75rem;color:var(--teal);margin-bottom:16px;">or ₹1,999/year (save 16%)</div>
+            <ul style="list-style:none;padding:0;margin-bottom:20px;font-size:0.85rem;color:var(--text-mid);">
+              <li style="padding:5px 0;">✅ 6 family members</li>
+              <li style="padding:5px 0;">✅ Unlimited transactions</li>
+              <li style="padding:5px 0;">✅ Loan & EMI tracker</li>
+              <li style="padding:5px 0;">✅ Investment portfolio</li>
+              <li style="padding:5px 0;">✅ CSV & PDF export</li>
+              <li style="padding:5px 0;">✅ Email reports & alerts</li>
+            </ul>
+            <button class="btn btn-gold" style="width:100%;" onclick="openPayment('pro','monthly')">Upgrade to Pro - ₹199/mo</button>
+            <button class="btn btn-outline" style="width:100%;margin-top:8px;" onclick="openPayment('pro','yearly')">₹1,999/year (Best Value)</button>
+          </div>
+          <!-- Enterprise -->
+          <div class="card" style="border:1.5px solid var(--border);">
+            <h3 style="font-family:'DM Sans',sans-serif;font-size:1rem;margin-bottom:4px;">Enterprise</h3>
+            <div style="font-size:1.8rem;font-weight:800;margin-bottom:4px;">₹499<span style="font-size:0.85rem;font-weight:400;color:var(--text-muted);">/month</span></div>
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:16px;">or ₹4,999/year</div>
+            <ul style="list-style:none;padding:0;margin-bottom:20px;font-size:0.85rem;color:var(--text-mid);">
+              <li style="padding:5px 0;">✅ 10 family members</li>
+              <li style="padding:5px 0;">✅ Everything in Pro</li>
+              <li style="padding:5px 0;">✅ Multi-currency</li>
+              <li style="padding:5px 0;">✅ Priority support</li>
+              <li style="padding:5px 0;">✅ Custom categories</li>
+              <li style="padding:5px 0;">✅ API access</li>
+            </ul>
+            <button class="btn btn-gold" style="width:100%;" onclick="openPayment('enterprise','monthly')">Upgrade - ₹499/mo</button>
+          </div>
+        </div>
+        <!-- Coupon Code -->
+        <div class="card" style="margin-top:20px;">
+          <h3 style="font-family:'DM Sans',sans-serif;font-size:0.95rem;margin-bottom:12px;">Have a coupon code?</h3>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="couponInput" placeholder="Enter code (e.g. GROMO50)" style="flex:1;">
+            <button class="btn btn-gold btn-sm" onclick="applyCoupon()">Apply</button>
+          </div>
+          <p style="font-size:0.72rem;color:var(--text-muted);margin-top:6px;">Codes: WELCOME20 (20% off), GROMO50 (50% off), LAUNCH100 (100% free!)</p>
         </div>
       </section>
 
@@ -2694,8 +2774,36 @@
       const res = await API.request('/subscription/current');
       if (res.success) {
         window.currentSubscription = res.subscription;
+        updateUpgradePage(res.subscription);
       }
     } catch(e) {}
+  }
+
+  function updateUpgradePage(sub) {
+    if (!sub) return;
+    var nameEl = document.getElementById('upgradePlanName');
+    var statusEl = document.getElementById('upgradePlanStatus');
+    var trialBtn = document.getElementById('trialBtn');
+    if (nameEl) {
+      var planLabel = sub.plan === 'free' ? 'Free' : sub.plan === 'pro' ? 'Pro' : sub.plan === 'enterprise' ? 'Enterprise' : sub.plan;
+      if (sub.status === 'trial') planLabel += ' (Trial)';
+      nameEl.textContent = planLabel;
+    }
+    if (statusEl) {
+      statusEl.textContent = (sub.maxMembers || 3) + ' members | ' + (sub.maxTransactionsPerMonth === -1 ? 'Unlimited' : (sub.maxTransactionsPerMonth || 50)) + ' transactions/month';
+    }
+    if (trialBtn) {
+      if (sub.plan !== 'free') {
+        trialBtn.style.display = 'none';
+      }
+    }
+  }
+
+  function applyCoupon() {
+    var code = document.getElementById('couponInput').value.trim();
+    if (!code) { showToast('Enter a coupon code.', 'info'); return; }
+    showToast('Coupon "' + code + '" will be applied at checkout.', 'success');
+    sessionStorage.setItem('ffp_coupon', code);
   }
 
   // ╔══════════════════════════════════════════════════════════╗
@@ -2854,18 +2962,29 @@
     var refCode = params.get('ref');
     if (refCode) {
       sessionStorage.setItem('ffp_referral_code', refCode);
-      // If not logged in, show register form for referral
+      // Skip landing page - show login/register directly
       setTimeout(function() {
         if (!currentUser) {
-          showLogin();
+          // Hide landing page, show login page
+          var lp = document.getElementById('landingPage');
+          if (lp) lp.style.display = 'none';
+          document.getElementById('loginPage').style.display = 'flex';
           // Switch to Register tab
           document.getElementById('loginForm').style.display = 'none';
           document.getElementById('registerForm').style.display = 'block';
           var tabs = document.querySelectorAll('.auth-tab');
           if (tabs.length >= 2) { tabs[0].classList.remove('active'); tabs[1].classList.add('active'); }
-          showToast('Referral code applied! Register to get 20% off your first upgrade.', 'success');
+          // Show referral applied message
+          var errEl = document.getElementById('authError');
+          if (errEl) {
+            errEl.style.background = '#d1fae5';
+            errEl.style.color = '#059669';
+            errEl.style.border = '1px solid #059669';
+            errEl.textContent = '🎁 Referral code applied! Register to get 20% off your first upgrade.';
+            errEl.classList.add('show');
+          }
         }
-      }, 500);
+      }, 300);
     }
   })();
 
@@ -3611,6 +3730,8 @@
     document.getElementById('sidebar').classList.remove('open');
     // Load referral data when navigating to settings
     if (section === 'settings') loadReferralDashboard();
+    // Load subscription data when navigating to upgrade
+    if (section === 'upgrade') loadSubscriptionStatus();
   }
 
   function toggleSidebar() {
