@@ -1434,6 +1434,9 @@
         <div class="nav-item" onclick="navigateTo('investments')">
           <span class="nav-icon">📊</span> Investments
         </div>
+        <div class="nav-item" onclick="navigateTo('insurance')">
+          <span class="nav-icon">🛡️</span> Insurance
+        </div>
         <div class="nav-item" onclick="navigateTo('networth')">
           <span class="nav-icon">💎</span> Net Worth
         </div>
@@ -1650,7 +1653,15 @@
         </div>
         <div class="members-grid" id="membersGrid">
         </div>
+        <!-- Family Tree Visualization -->
+        <div class="card" style="margin-top:24px;">
+          <h3 style="font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;margin-bottom:16px;">🌳 Family Tree</h3>
+          <div id="familyTreeView" style="width:100%;text-align:center;padding:20px;min-height:200px;overflow-x:auto;"></div>
+        </div>
       </section>
+
+      <!-- ===== FAMILY TREE (redirect to family) ===== -->
+      <section class="section" id="sec-familytree" style="display:none;"></section>
 
       <!-- ===== LOANS & EMI ===== -->
       <section class="section" id="sec-loans">
@@ -1844,6 +1855,67 @@
             <h3>Investment Growth</h3>
             <div class="chart-container"><canvas id="investGrowthChart"></canvas></div>
           </div>
+        </div>
+      </section>
+
+      <!-- ===== INSURANCE ===== -->
+      <section class="section" id="sec-insurance">
+        <div class="page-header">
+          <div>
+            <h1>Insurance Tracker</h1>
+            <p class="subtitle">Track all family insurance policies & renewals</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-gold" onclick="openInsuranceModal()">+ Add Policy</button>
+            <a href="https://gromoneycapital.com/" target="_blank" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;">🛡️ Buy via GroMoneyCapital</a>
+          </div>
+        </div>
+        <!-- Insurance Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#ede9fe;color:#7c3aed">🛡️</div>
+            <div class="stat-info"><h4>Active Policies</h4><div class="amount" id="statActivePolicies">0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7;color:#d97706">💰</div>
+            <div class="stat-info"><h4>Total Premium/Year</h4><div class="amount" id="statTotalPremium">₹0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#d1fae5;color:#059669">🏥</div>
+            <div class="stat-info"><h4>Total Coverage</h4><div class="amount" id="statTotalCoverage">₹0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fee2e2;color:#dc2626">📅</div>
+            <div class="stat-info"><h4>Renewals Soon</h4><div class="amount" id="statRenewalsSoon">0</div></div>
+          </div>
+        </div>
+        <!-- Insurance Table -->
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Policy Name</th>
+                  <th>Provider</th>
+                  <th>Member</th>
+                  <th>Premium</th>
+                  <th>Coverage</th>
+                  <th>Renewal Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="insuranceTableBody">
+                <tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:40px">No insurance policies added. Click "+ Add Policy" to track your family's insurance.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Renewal Reminders Info -->
+        <div style="margin-top:16px;padding:14px;background:#f5f3ff;border:1px solid #c4b5fd;border-radius:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <p style="font-size:0.82rem;color:#5b21b6;margin:0;">🔔 Auto-reminders: Email + WhatsApp sent 15, 7, 3 & 1 day before renewal date.</p>
+          <a href="https://gromoneycapital.com/" target="_blank" style="padding:8px 16px;background:#7c3aed;color:#fff;border-radius:6px;font-size:0.8rem;font-weight:600;text-decoration:none;">Compare & Buy Insurance →</a>
         </div>
       </section>
 
@@ -2622,6 +2694,86 @@
         <div class="modal-actions">
           <button type="button" class="btn btn-outline" onclick="closeModal('editTransactionModal')">Cancel</button>
           <button type="submit" class="btn btn-gold">Update Transaction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== INSURANCE MODAL ===== -->
+  <div class="modal-overlay" id="insuranceModal">
+    <div class="modal">
+      <h3>Add Insurance Policy</h3>
+      <form onsubmit="saveInsurance(event); return false;">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Insurance Type</label>
+            <select id="insType" required>
+              <option value="">Select type</option>
+              <option value="Health">Health Insurance</option>
+              <option value="Term Life">Term Life Insurance</option>
+              <option value="Motor">Motor Insurance</option>
+              <option value="Home">Home Insurance</option>
+              <option value="Travel">Travel Insurance</option>
+              <option value="Personal Accident">Personal Accident</option>
+              <option value="Critical Illness">Critical Illness</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Provider / Company</label>
+            <input type="text" id="insProvider" placeholder="e.g. Star Health, HDFC Ergo" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Policy Name</label>
+          <input type="text" id="insPolicyName" placeholder="e.g. Family Floater Health Plan" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Sum Insured (₹)</label>
+            <input type="number" id="insSumInsured" placeholder="e.g. 500000" required>
+          </div>
+          <div class="form-group">
+            <label>Premium (₹)</label>
+            <input type="number" id="insPremium" placeholder="e.g. 15000" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Premium Frequency</label>
+            <select id="insFrequency">
+              <option value="yearly">Yearly</option>
+              <option value="half-yearly">Half-Yearly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Member</label>
+            <select id="insMember" required></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Start Date</label>
+            <input type="date" id="insStartDate" required>
+          </div>
+          <div class="form-group">
+            <label>Renewal Date</label>
+            <input type="date" id="insRenewalDate" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Policy Number (optional)</label>
+          <input type="text" id="insPolicyNumber" placeholder="Policy number">
+        </div>
+        <div class="form-group">
+          <label>Nominees (optional)</label>
+          <input type="text" id="insNominees" placeholder="e.g. Spouse, Children">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('insuranceModal')">Cancel</button>
+          <button type="submit" class="btn btn-gold">Save Policy</button>
         </div>
       </form>
     </div>
@@ -3769,6 +3921,169 @@
   // ╔══════════════════════════════════════════════════════════╗
   // ║  NAVIGATION                                                ║
   // ╚══════════════════════════════════════════════════════════╝
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  INSURANCE TRACKER                                         ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function openInsuranceModal() {
+    var sel = document.getElementById('insMember');
+    var allM = familyData.members.length > 0 ? familyData.members : (currentUser ? [currentUser] : []);
+    sel.innerHTML = allM.map(function(m) { return '<option value="' + m.name + '">' + m.name + '</option>'; }).join('');
+    document.getElementById('insStartDate').value = new Date().toISOString().split('T')[0];
+    var nextYear = new Date(); nextYear.setFullYear(nextYear.getFullYear() + 1);
+    document.getElementById('insRenewalDate').value = nextYear.toISOString().split('T')[0];
+    document.getElementById('insuranceModal').classList.add('active');
+  }
+
+  async function saveInsurance(e) {
+    if (e) e.preventDefault();
+    var data = {
+      type: document.getElementById('insType').value,
+      provider: document.getElementById('insProvider').value,
+      policyName: document.getElementById('insPolicyName').value,
+      sumInsured: Number(document.getElementById('insSumInsured').value),
+      premium: Number(document.getElementById('insPremium').value),
+      premiumFrequency: document.getElementById('insFrequency').value,
+      memberName: document.getElementById('insMember').value,
+      startDate: document.getElementById('insStartDate').value,
+      renewalDate: document.getElementById('insRenewalDate').value,
+      policyNumber: document.getElementById('insPolicyNumber').value,
+      nominees: document.getElementById('insNominees').value
+    };
+    showLoading(true);
+    try {
+      var res = await API.request('/insurance', { method: 'POST', body: JSON.stringify(data) });
+      showLoading(false);
+      if (res.success) {
+        showToast('Insurance policy added!', 'success');
+        closeModal('insuranceModal');
+        loadInsurance();
+      } else {
+        showToast(res.message || 'Failed to add policy.', 'error');
+      }
+    } catch(e) { showLoading(false); showToast('Failed.', 'error'); }
+  }
+
+  async function loadInsurance() {
+    try {
+      var res = await API.request('/insurance');
+      if (res.success) {
+        renderInsuranceTable(res.policies || []);
+      }
+      var statsRes = await API.request('/insurance/stats');
+      if (statsRes.success) {
+        var s = document.getElementById('statActivePolicies'); if(s) s.textContent = statsRes.totalPolicies || 0;
+        s = document.getElementById('statTotalPremium'); if(s) s.textContent = formatCurrency(statsRes.totalPremium || 0);
+        s = document.getElementById('statTotalCoverage'); if(s) s.textContent = formatCurrency(statsRes.totalCoverage || 0);
+        s = document.getElementById('statRenewalsSoon'); if(s) s.textContent = statsRes.upcomingRenewals || 0;
+      }
+    } catch(e) {}
+  }
+
+  function renderInsuranceTable(policies) {
+    var tbody = document.getElementById('insuranceTableBody');
+    if (!tbody) return;
+    if (!policies.length) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:40px">No insurance policies added yet.</td></tr>';
+      return;
+    }
+    var today = new Date();
+    tbody.innerHTML = policies.map(function(p) {
+      var renewDate = new Date(p.renewalDate);
+      var daysUntil = Math.ceil((renewDate - today) / (1000*60*60*24));
+      var statusBadge = '';
+      if (p.status === 'expired' || daysUntil < 0) statusBadge = '<span class="due-overdue">Expired</span>';
+      else if (daysUntil <= 7) statusBadge = '<span class="due-1day">' + daysUntil + 'd left</span>';
+      else if (daysUntil <= 30) statusBadge = '<span class="due-7days">' + daysUntil + 'd left</span>';
+      else statusBadge = '<span class="due-safe">Active</span>';
+      return '<tr><td>' + p.type + '</td><td><strong>' + p.policyName + '</strong></td><td>' + p.provider + '</td><td>' + p.memberName + '</td><td style="font-weight:600">₹' + (p.premium || 0).toLocaleString('en-IN') + '</td><td>₹' + (p.sumInsured || 0).toLocaleString('en-IN') + '</td><td>' + renewDate.toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'}) + '</td><td>' + statusBadge + '</td><td><button class="btn-icon" onclick="deleteInsurance(\'' + p._id + '\')">🗑️</button></td></tr>';
+    }).join('');
+  }
+
+  async function deleteInsurance(id) {
+    if (!confirm('Delete this policy?')) return;
+    var res = await API.request('/insurance/' + id, { method: 'DELETE' });
+    if (res.success) { showToast('Deleted.', 'success'); loadInsurance(); }
+    else showToast('Failed.', 'error');
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  FAMILY TREE (Visual)                                      ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function renderFamilyTree() {
+    var container = document.getElementById('familyTreeView');
+    if (!container) return;
+    var members = familyData.members.length > 0 ? familyData.members : (currentUser ? [currentUser] : []);
+    if (members.length === 0) {
+      container.innerHTML = '<p style="color:var(--text-muted)">No family members yet.</p>';
+      return;
+    }
+
+    // Find admin (root of tree)
+    var admin = members.find(function(m) { return m.role === 'admin'; }) || members[0];
+    var otherMembers = members.filter(function(m) { return m.id !== admin.id && m._id !== admin._id; });
+
+    // Organize by relation
+    var spouse = otherMembers.filter(function(m) { return m.relation === 'Spouse'; });
+    var children = otherMembers.filter(function(m) { return m.relation === 'Son' || m.relation === 'Daughter'; });
+    var parents = otherMembers.filter(function(m) { return m.relation === 'Father' || m.relation === 'Mother'; });
+    var others = otherMembers.filter(function(m) { return !['Spouse','Son','Daughter','Father','Mother'].includes(m.relation); });
+
+    var html = '<div style="display:flex;flex-direction:column;align-items:center;gap:24px;">';
+
+    // Parents row
+    if (parents.length > 0) {
+      html += '<div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">';
+      parents.forEach(function(p) { html += treeNode(p, '#e0f2fe', '👴'); });
+      html += '</div>';
+      html += '<div style="width:2px;height:24px;background:var(--border);"></div>';
+    }
+
+    // Admin + Spouse row
+    html += '<div style="display:flex;gap:24px;align-items:center;justify-content:center;flex-wrap:wrap;">';
+    html += treeNode(admin, '#fef3c7', '👑', true);
+    if (spouse.length > 0) {
+      html += '<div style="width:40px;height:2px;background:var(--gold);"></div>';
+      spouse.forEach(function(s) { html += treeNode(s, '#fce7f3', '💑'); });
+    }
+    html += '</div>';
+
+    // Connection line to children
+    if (children.length > 0) {
+      html += '<div style="width:2px;height:24px;background:var(--border);"></div>';
+      html += '<div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">';
+      children.forEach(function(c) {
+        var icon = c.relation === 'Son' ? '👦' : '👧';
+        html += treeNode(c, '#d1fae5', icon);
+      });
+      html += '</div>';
+    }
+
+    // Others row
+    if (others.length > 0) {
+      html += '<div style="width:2px;height:24px;background:var(--border);margin-top:12px;"></div>';
+      html += '<div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">';
+      others.forEach(function(o) { html += treeNode(o, '#f1f5f9', '👤'); });
+      html += '</div>';
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  function treeNode(member, bgColor, emoji, isAdmin) {
+    var name = member.name || 'Unknown';
+    var relation = member.relation || 'Member';
+    var role = member.role === 'admin' ? '<span style="background:#f59e0b;color:#fff;padding:1px 6px;border-radius:8px;font-size:0.6rem;font-weight:700;">ADMIN</span>' : '';
+    return '<div style="background:' + bgColor + ';border:1.5px solid var(--border);border-radius:12px;padding:16px 20px;text-align:center;min-width:120px;' + (isAdmin ? 'border-color:var(--gold);box-shadow:0 2px 12px rgba(245,158,11,0.2);' : '') + '">' +
+      '<div style="font-size:1.5rem;margin-bottom:6px;">' + emoji + '</div>' +
+      '<div style="font-weight:600;font-size:0.85rem;">' + name + '</div>' +
+      '<div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">' + relation + '</div>' +
+      (role ? '<div style="margin-top:4px;">' + role + '</div>' : '') +
+    '</div>';
+  }
+
+  // Load insurance and render tree when navigating
+  var _origNavigateTo = navigateTo;
   function navigateTo(section) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -3780,6 +4095,10 @@
     if (section === 'settings') loadReferralDashboard();
     // Load subscription data when navigating to upgrade
     if (section === 'upgrade') loadSubscriptionStatus();
+    // Load insurance data
+    if (section === 'insurance') loadInsurance();
+    // Render family tree when navigating to family
+    if (section === 'family') renderFamilyTree();
   }
 
   function toggleSidebar() {

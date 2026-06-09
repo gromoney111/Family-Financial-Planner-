@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
 const Loan = require('../models/Loan');
 const Investment = require('../models/Investment');
+const Insurance = require('../models/Insurance');
 const User = require('../models/User');
 const Family = require('../models/Family');
 
@@ -114,6 +115,57 @@ const sendSIPReminderEmail = async (user, investment, daysUntil, nextDueDate) =>
   }
 };
 
+// Send Insurance renewal reminder email
+const sendInsuranceReminderEmail = async (user, policy, daysUntil) => {
+  const mailOptions = {
+    from: `"GromoFinance" <${process.env.SMTP_USER || 'noreply@gromofinance.com'}>`,
+    to: user.email,
+    subject: `🛡️ Insurance Renewal in ${daysUntil} days - ${policy.type} (${policy.provider})`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f8fafc;border-radius:12px;">
+        <div style="text-align:center;padding:20px 0;border-bottom:2px solid #f59e0b;">
+          <h1 style="color:#0f172a;margin:0;">Gromo<span style="color:#f59e0b;">Finance</span></h1>
+          <p style="color:#64748b;margin-top:4px;">Insurance Reminder</p>
+        </div>
+        <div style="padding:30px 20px;">
+          <h2 style="color:#7c3aed;text-align:center;">🛡️ Insurance Renewal Due in ${daysUntil} Day${daysUntil > 1 ? 's' : ''}!</h2>
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:20px;margin:20px 0;">
+            <table style="width:100%;font-size:14px;color:#475569;">
+              <tr><td style="padding:8px 0;font-weight:600;">Insurance Type</td><td style="text-align:right;">${policy.type}</td></tr>
+              <tr><td style="padding:8px 0;font-weight:600;">Provider</td><td style="text-align:right;">${policy.provider}</td></tr>
+              <tr><td style="padding:8px 0;font-weight:600;">Policy Name</td><td style="text-align:right;">${policy.policyName}</td></tr>
+              <tr><td style="padding:8px 0;font-weight:600;">Premium Amount</td><td style="text-align:right;color:#7c3aed;font-weight:700;">₹${policy.premium.toLocaleString('en-IN')}</td></tr>
+              <tr><td style="padding:8px 0;font-weight:600;">Sum Insured</td><td style="text-align:right;">₹${policy.sumInsured.toLocaleString('en-IN')}</td></tr>
+              <tr><td style="padding:8px 0;font-weight:600;">Renewal Date</td><td style="text-align:right;">${policy.renewalDate.toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'})}</td></tr>
+              <tr><td style="padding:8px 0;font-weight:600;">Member</td><td style="text-align:right;">${policy.memberName}</td></tr>
+            </table>
+          </div>
+          <p style="color:#dc2626;font-size:14px;text-align:center;font-weight:600;">
+            ⚠️ Don't let your ${policy.type} insurance lapse! Renew on time to maintain coverage.
+          </p>
+          <div style="text-align:center;margin-top:20px;">
+            <a href="https://gromoneycapital.com/" style="display:inline-block;padding:12px 28px;background:#059669;color:#fff;font-weight:600;text-decoration:none;border-radius:8px;margin-right:10px;">
+              Renew via GroMoneyCapital
+            </a>
+            <a href="${process.env.FRONTEND_URL || 'https://gromofinance.com'}" style="display:inline-block;padding:12px 28px;background:#0f172a;color:#f59e0b;font-weight:600;text-decoration:none;border-radius:8px;">
+              View Dashboard
+            </a>
+          </div>
+        </div>
+      </div>
+    `
+  };
+
+  try {
+    const transporter = createTransporter();
+    await transporter.sendMail(mailOptions);
+    return { success: true };
+  } catch (error) {
+    console.error('Insurance reminder email error:', error.message);
+    return { success: false, error: error.message };
+  }
+};
+
 // Generate WhatsApp reminder link
 const generateWhatsAppReminder = (phone, name, type, amount, dueDate, daysUntil) => {
   const msg = `🔔 *GromoFinance Reminder*\n\nHi ${name}!\n\nYour *${type}* payment of *₹${amount.toLocaleString('en-IN')}* is due in *${daysUntil} day${daysUntil > 1 ? 's' : ''}* (${dueDate.toLocaleDateString('en-IN', {day:'2-digit',month:'short'})}).\n\nPlease ensure sufficient balance.\n\n📊 Track at: https://gromofinance.com\n💰 Invest: https://gromoneycapital.com`;
@@ -166,6 +218,24 @@ const checkAndSendReminders = async () => {
           emailsSent++;
           const waLink = generateWhatsAppReminder(admin.phone, admin.name, `${inv.type} SIP (${inv.name})`, inv.monthlyContribution, nextDue, daysUntil);
           whatsappLinks.push({ user: admin.name, type: 'SIP', link: waLink });
+        }
+      }
+    }
+
+    // === INSURANCE PREMIUM REMINDERS ===
+    const insuranceReminderDays = [1, 3, 7, 15]; // Remind more aggressively for insurance
+    const activeInsurance = await Insurance.find({ status: 'active' });
+    for (const policy of activeInsurance) {
+      if (!policy.renewalDate) continue;
+      const daysUntilRenewal = Math.ceil((policy.renewalDate - today) / (1000 * 60 * 60 * 24));
+
+      if (insuranceReminderDays.includes(daysUntilRenewal)) {
+        const admin = await User.findOne({ familyId: policy.familyId, role: 'admin' });
+        if (admin) {
+          await sendInsuranceReminderEmail(admin, policy, daysUntilRenewal);
+          emailsSent++;
+          const waLink = generateWhatsAppReminder(admin.phone, admin.name, `${policy.type} Insurance (${policy.provider})`, policy.premium, policy.renewalDate, daysUntilRenewal);
+          whatsappLinks.push({ user: admin.name, type: 'Insurance', link: waLink });
         }
       }
     }
