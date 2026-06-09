@@ -8,6 +8,15 @@
   <meta name="author" content="FamilyFinPlan Team">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#0f172a">
+  <!-- Google Search Console verification (replace content with your verification code) -->
+  <meta name="google-site-verification" content="YOUR_GOOGLE_SEARCH_CONSOLE_VERIFICATION_CODE">
+  <!-- DNS Prefetch for faster loading -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+  <link rel="dns-prefetch" href="https://accounts.google.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <meta property="og:title" content="GromoFinance – Smart Family Budget Planner">
   <meta property="og:description" content="Plan your family finances together. Track income, expenses, savings for every member.">
   <meta property="og:type" content="website">
@@ -27,12 +36,21 @@
   <meta name="apple-mobile-web-app-title" content="GromoFinance">
   <link rel="canonical" href="https://gromofinance.com/">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- Google tag (gtag.js) - Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JZWKDZYLLJ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-JZWKDZYLLJ');
+  </script>
+  <!-- Critical scripts loaded async/defer for page speed -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
   <!-- Google Identity Services for OAuth Login -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <!-- Cashfree Payment Gateway -->
-  <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+  <!-- Cashfree Payment Gateway (loaded only when needed) -->
+  <script src="https://sdk.cashfree.com/js/v3/cashfree.js" async defer></script>
   <!-- Google AdSense (replace ca-pub-XXXXXXX with your publisher ID) -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 

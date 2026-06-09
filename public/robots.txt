@@ -2,5 +2,10 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /sw.js
+Disallow: /manifest.json
 
+# Sitemaps
 Sitemap: https://gromofinance.com/sitemap.xml
+
+# Crawl-delay (be polite)
+Crawl-delay: 1
