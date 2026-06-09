@@ -2854,7 +2854,18 @@
     var refCode = params.get('ref');
     if (refCode) {
       sessionStorage.setItem('ffp_referral_code', refCode);
-      showToast('Referral code detected! It will be applied after you register.', 'info');
+      // If not logged in, show register form for referral
+      setTimeout(function() {
+        if (!currentUser) {
+          showLogin();
+          // Switch to Register tab
+          document.getElementById('loginForm').style.display = 'none';
+          document.getElementById('registerForm').style.display = 'block';
+          var tabs = document.querySelectorAll('.auth-tab');
+          if (tabs.length >= 2) { tabs[0].classList.remove('active'); tabs[1].classList.add('active'); }
+          showToast('Referral code applied! Register to get 20% off your first upgrade.', 'success');
+        }
+      }, 500);
     }
   })();
 
@@ -2913,11 +2924,12 @@
         localStorage.removeItem('ffp_token');
         localStorage.removeItem('ffp_user');
         localStorage.removeItem('ffp_session');
-        if (inviteCode) { showLogin(); } else { showLandingPage(); }
+        // Preserve invite/ref flow even if session was invalid
+        if (inviteCode || params.get('ref')) { showLogin(); } else { showLandingPage(); }
       }
     } else {
       // Not logged in
-      if (inviteCode) {
+      if (inviteCode || params.get('ref')) {
         showLogin(); // checkInviteLink will handle showing register form
       } else {
         showLandingPage();

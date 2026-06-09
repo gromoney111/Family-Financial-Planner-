@@ -35,11 +35,15 @@ const API = {
       const data = await response.json();
 
       if (response.status === 401) {
-        // Token expired - logout
+        // Token expired - clear session but DON'T reload (preserves URL params)
         this.setToken(null);
         localStorage.removeItem('ffp_user');
-        window.location.reload();
-        return { success: false, message: 'Session expired. Please login again.' };
+        localStorage.removeItem('ffp_session');
+        localStorage.removeItem('ffp_token');
+        // Show login page without reloading (preserves ?invite= and ?ref= params)
+        if (typeof showLogin === 'function') showLogin();
+        if (typeof showToast === 'function') showToast('Session expired. Please login again.', 'info');
+        return { success: false, message: 'Session expired. Please login again.', sessionExpired: true };
       }
 
       return data;
