@@ -1712,7 +1712,10 @@
         </div>
         <!-- EMI Payment History -->
         <div class="card" style="margin-top:20px">
-          <h3 style="font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;margin-bottom:16px">EMI Payment History</h3>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+            <h3 style="font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600">EMI Payment History</h3>
+            <p style="font-size:0.78rem;color:var(--teal);">🔔 Email + WhatsApp reminders sent 3 days before EMI due date</p>
+          </div>
           <div class="table-wrapper">
             <table>
               <thead>
@@ -1786,6 +1789,51 @@
             </table>
           </div>
         </div>
+        <!-- SIP Tracker Section -->
+        <div class="card" style="margin-top:20px;border:1.5px solid var(--teal);background:linear-gradient(135deg,#f0fdfa,#fff);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+            <div>
+              <h3 style="font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;color:var(--navy);">📅 SIP & Recurring Investments</h3>
+              <p style="font-size:0.8rem;color:var(--text-muted);margin-top:4px;">Track your monthly SIPs, LIC premiums & recurring investments</p>
+            </div>
+            <a href="https://gromoneycapital.com/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,#059669,#047857);color:#fff;border-radius:8px;font-weight:600;font-size:0.85rem;text-decoration:none;box-shadow:0 2px 8px rgba(5,150,105,0.3);">
+              💰 Invest Now via GroMoneyCapital
+            </a>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Scheme / Name</th>
+                  <th>SIP Amount</th>
+                  <th>Due Day</th>
+                  <th>Next Due</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="sipTrackerBody">
+                <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">No SIPs found. Add investments with "Monthly Contribution" to track here.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top:14px;padding:12px;background:#ecfdf5;border-radius:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <p style="font-size:0.8rem;color:#065f46;margin:0;">🔔 Reminders will be sent via WhatsApp & Email 3 days before due date.</p>
+            <button class="btn btn-gold btn-sm" onclick="sendTestReminder()">Test Reminder</button>
+          </div>
+        </div>
+
+        <!-- Invest with GroMoneyCapital CTA -->
+        <div style="margin-top:20px;padding:24px;background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+          <div>
+            <h3 style="color:#fff;font-family:'DM Sans',sans-serif;font-size:1.1rem;margin-bottom:4px;">Start Investing Today with GroMoneyCapital</h3>
+            <p style="color:rgba(255,255,255,0.6);font-size:0.85rem;">Mutual Funds, SIPs, Insurance, FDs — Expert-guided investments for your family.</p>
+          </div>
+          <a href="https://gromoneycapital.com/" target="_blank" rel="noopener" style="padding:12px 28px;background:#f59e0b;color:#fff;border-radius:8px;font-weight:700;font-size:0.9rem;text-decoration:none;white-space:nowrap;">
+            Visit GroMoneyCapital →
+          </a>
+        </div>
+
         <!-- Portfolio Allocation Chart -->
         <div class="charts-grid" style="margin-top:20px">
           <div class="chart-card">
@@ -5325,6 +5373,45 @@
     document.getElementById('statTotalReturns').textContent = (totalReturns>=0?'+':'') + formatCurrency(totalReturns);
     document.getElementById('statAvgReturn').textContent = avgReturn + '%';
     renderPortfolioCharts();
+    renderSIPTracker();
+  }
+
+  // Render SIP Tracker table
+  function renderSIPTracker() {
+    var tbody = document.getElementById('sipTrackerBody');
+    if (!tbody) return;
+    var sips = (familyData.investments || []).filter(function(inv) {
+      return inv.monthlyContribution && inv.monthlyContribution > 0 && inv.status !== 'withdrawn';
+    });
+    if (sips.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">No SIPs found. Add investments with monthly SIP amount to track here.</td></tr>';
+      return;
+    }
+    var today = new Date();
+    tbody.innerHTML = sips.map(function(inv) {
+      var dueDay = inv.paymentDueDay || inv.dueDay || 5;
+      var nextDue = new Date(today.getFullYear(), today.getMonth(), dueDay);
+      if (nextDue < today) nextDue.setMonth(nextDue.getMonth() + 1);
+      var daysUntil = Math.ceil((nextDue - today) / (1000*60*60*24));
+      var statusBadge = '';
+      if (daysUntil <= 1) statusBadge = '<span class="due-today">TODAY</span>';
+      else if (daysUntil <= 3) statusBadge = '<span class="due-2days">' + daysUntil + ' days</span>';
+      else if (daysUntil <= 7) statusBadge = '<span class="due-7days">' + daysUntil + ' days</span>';
+      else statusBadge = '<span class="due-safe">' + daysUntil + ' days</span>';
+      return '<tr><td>' + (inv.type || 'SIP') + '</td><td><strong>' + (inv.name || inv.schemeName || '-') + '</strong></td><td style="font-weight:600">' + formatCurrency(inv.monthlyContribution || inv.sipAmount || 0) + '</td><td>' + dueDay + 'th</td><td>' + nextDue.toLocaleDateString('en-IN', {day:'2-digit',month:'short'}) + '</td><td>' + statusBadge + '</td></tr>';
+    }).join('');
+  }
+
+  // Test reminder (sends WhatsApp link)
+  function sendTestReminder() {
+    var phone = currentUser ? currentUser.phone : '';
+    var msg = 'Hi ' + (currentUser ? currentUser.name : 'User') + '! Your SIP/EMI payment is due in 3 days. Please ensure sufficient balance. - GromoFinance';
+    if (phone && phone.length >= 10) {
+      window.open('https://wa.me/91' + phone.replace(/^0+/,'') + '?text=' + encodeURIComponent(msg), '_blank');
+    } else {
+      window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    }
+    showToast('WhatsApp reminder opened! In production, this will be sent automatically.', 'info');
   }
 
   function renderPortfolioCharts() {

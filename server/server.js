@@ -44,6 +44,17 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Reminder trigger endpoint (called by cron or manually)
+app.get('/api/reminders/check', async (req, res) => {
+  try {
+    const { checkAndSendReminders } = require('./utils/reminders');
+    const result = await checkAndSendReminders();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Serve frontend for all other routes (SPA support)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
@@ -69,6 +80,17 @@ mongoose.connect(MONGODB_URI)
       console.log(`🚀 FamilyFinPlan API running on port ${PORT}`);
       console.log(`📂 Frontend served from /public`);
     });
+
+    // Run reminder check every 6 hours
+    setInterval(async () => {
+      try {
+        const { checkAndSendReminders } = require('./utils/reminders');
+        const result = await checkAndSendReminders();
+        console.log(`[Auto-Reminder] ${result.emailsSent || 0} emails sent`);
+      } catch (e) {
+        console.log('[Auto-Reminder] Error:', e.message);
+      }
+    }, 6 * 60 * 60 * 1000); // Every 6 hours
   })
   .catch(err => {
     console.error('❌ MongoDB connection failed:', err.message);
