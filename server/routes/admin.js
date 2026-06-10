@@ -303,6 +303,57 @@ router.get('/subscriptions', superAdminAuth, async (req, res) => {
   }
 });
 
+// ============ DETAILED SUBSCRIPTIONS LIST ============
+router.get('/subscriptions/detailed', superAdminAuth, async (req, res) => {
+  try {
+    const Subscription = require('../models/Subscription');
+    const subs = await Subscription.find({ plan: { $ne: 'free' } }).sort({ updatedAt: -1 }).limit(100);
+    
+    const detailed = [];
+    for (const sub of subs) {
+      const admin = await User.findOne({ familyId: sub.familyId, role: 'admin' }).select('name email');
+      detailed.push({
+        id: sub._id,
+        adminName: admin ? admin.name : 'Unknown',
+        adminEmail: admin ? admin.email : 'Unknown',
+        plan: sub.plan,
+        status: sub.status,
+        billingCycle: sub.billingCycle,
+        nextBillingDate: sub.nextBillingDate,
+        couponCode: sub.couponCode || null,
+        referralCode: sub.referralCode,
+        paymentHistory: sub.paymentHistory || [],
+        trialEndDate: sub.trialEndDate,
+        createdAt: sub.createdAt
+      });
+    }
+
+    // Pending withdrawals
+    const allSubs = await Subscription.find({ 'withdrawalHistory': { $elemMatch: { status: 'pending' } } });
+    const pendingList = [];
+    for (const s of allSubs) {
+      const admin = await User.findOne({ familyId: s.familyId, role: 'admin' }).select('name email');
+      s.withdrawalHistory.filter(w => w.status === 'pending').forEach(w => {
+        pendingList.push({
+          userName: admin ? admin.name : 'Unknown',
+          amount: w.amount,
+          paymentMethod: w.paymentMethod,
+          upiId: w.paymentDetails?.upiId || '',
+          bankAccount: w.paymentDetails?.bankAccount || '',
+          date: w.date,
+          status: w.status,
+          requestId: w.requestId
+        });
+      });
+    }
+
+    res.json({ success: true, subscriptions: detailed, pendingWithdrawals: pendingList });
+  } catch (error) {
+    console.error('Detailed subs error:', error);
+    res.status(500).json({ success: false, message: 'Failed.' });
+  }
+});
+
 // ============ RECENT ACTIVITY LOG ============
 router.get('/activity', superAdminAuth, async (req, res) => {
   try {

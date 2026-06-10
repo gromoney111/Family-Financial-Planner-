@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>GromoFinance - Developer Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -87,7 +89,9 @@
     <!-- Payments Tab -->
     <div id="tab-payments" style="display:none;">
       <div class="stats-row" id="paymentStats"></div>
-      <div class="card"><h3>Coupon Usage</h3><div id="couponTable"></div></div>
+      <div class="card"><h3>💳 All Subscriptions (Detailed)</h3><div style="overflow-x:auto;"><table><thead><tr><th>User</th><th>Email</th><th>Plan</th><th>Status</th><th>Billing</th><th>Next Renewal</th><th>Coupon Used</th><th>Total Paid</th></tr></thead><tbody id="subsTableBody"><tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:20px;">Loading...</td></tr></tbody></table></div></div>
+      <div class="card"><h3>🎟️ Coupon Usage</h3><div id="couponTable"></div></div>
+      <div class="card"><h3>💸 Pending Withdrawal Requests</h3><div id="withdrawalTable"></div></div>
     </div>
 
     <!-- Activity Tab -->
@@ -172,12 +176,41 @@
         var s = d.subscriptions;
         document.getElementById('paymentStats').innerHTML =
           statBox(s.pro, 'Pro Plans', 'gold') + statBox(s.enterprise, 'Enterprise', 'purple') +
-          statBox(s.trial, 'On Trial', 'green') + statBox('₹' + (s.totalRevenue || 0), 'Revenue', 'green') +
-          statBox('₹' + (s.pendingWithdrawals || 0), 'Pending Payouts', 'rose') + statBox(s.totalReferrals, 'Referrals', '');
-        document.getElementById('couponTable').innerHTML = (s.couponUsage || []).map(c =>
-          '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;"><span class="badge-gold">' + c._id + '</span><span>' + c.count + ' uses</span></div>'
-        ).join('') || '<p style="color:#94a3b8;">No coupons used yet.</p>';
+          statBox(s.trial, 'On Trial', 'green') + statBox('₹' + (s.totalRevenue || 0), 'Total Revenue', 'green') +
+          statBox('₹' + (s.pendingWithdrawals || 0), 'Pending Payouts', 'rose') + statBox(s.totalReferrals, 'Referrals', '') +
+          statBox(s.free, 'Free Plans', '') + statBox(s.totalInsurance, 'Insurance Policies', 'purple');
+        document.getElementById('couponTable').innerHTML = (s.couponUsage || []).length > 0 ?
+          '<table><thead><tr><th>Code</th><th>Times Used</th><th>Status</th></tr></thead><tbody>' +
+          (s.couponUsage || []).map(c => '<tr><td><span class="badge-gold">' + c._id + '</span></td><td><strong>' + c.count + '</strong></td><td>' + (c.count >= 50 ? '<span class="badge-red">Limit Reached</span>' : '<span class="badge-green">Active</span>') + '</td></tr>').join('') +
+          '</tbody></table>' : '<p style="color:#94a3b8;padding:10px;">No coupons used yet.</p>';
+        // Load detailed subscriptions
+        if (s.detailedSubs) renderSubsTable(s.detailedSubs);
+        // Load withdrawal requests
+        if (s.pendingWithdrawalsList) renderWithdrawals(s.pendingWithdrawalsList);
       });
+      // Also load detailed subs from separate endpoint
+      api('/subscriptions/detailed').then(d => {
+        if (d && d.success) renderSubsTable(d.subscriptions);
+      }).catch(() => {});
+    }
+
+    function renderSubsTable(subs) {
+      var tbody = document.getElementById('subsTableBody');
+      if (!subs || subs.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:20px;">No paid subscriptions yet.</td></tr>'; return; }
+      tbody.innerHTML = subs.map(s => {
+        var planBadge = s.plan === 'pro' ? '<span class="badge-gold">Pro</span>' : s.plan === 'enterprise' ? '<span style="background:#ede9fe;color:#7c3aed;padding:2px 8px;border-radius:10px;font-size:0.7rem;font-weight:600;">Enterprise</span>' : s.plan === 'free' ? 'Free' : s.plan;
+        var statusBadge = s.status === 'active' ? '<span class="badge-green">Active</span>' : s.status === 'trial' ? '<span class="badge-gold">Trial</span>' : '<span class="badge-red">' + s.status + '</span>';
+        var totalPaid = (s.paymentHistory || []).reduce((sum, p) => sum + (p.status === 'success' ? p.amount : 0), 0);
+        return '<tr><td><strong>' + (s.adminName || '-') + '</strong></td><td>' + (s.adminEmail || '-') + '</td><td>' + planBadge + '</td><td>' + statusBadge + '</td><td>' + (s.billingCycle || '-') + '</td><td>' + (s.nextBillingDate ? new Date(s.nextBillingDate).toLocaleDateString('en-IN') : '-') + '</td><td>' + (s.couponCode || '-') + '</td><td style="font-weight:700;color:#059669;">₹' + totalPaid + '</td></tr>';
+      }).join('');
+    }
+
+    function renderWithdrawals(list) {
+      var el = document.getElementById('withdrawalTable');
+      if (!list || list.length === 0) { el.innerHTML = '<p style="color:#94a3b8;padding:10px;">No pending withdrawals.</p>'; return; }
+      el.innerHTML = '<table><thead><tr><th>User</th><th>Amount</th><th>Method</th><th>UPI/Bank</th><th>Date</th><th>Status</th></tr></thead><tbody>' +
+        list.map(w => '<tr><td>' + (w.userName || '-') + '</td><td style="font-weight:700;">₹' + w.amount + '</td><td>' + w.paymentMethod + '</td><td>' + (w.upiId || w.bankAccount || '-') + '</td><td>' + new Date(w.date).toLocaleDateString('en-IN') + '</td><td><span class="badge-gold">' + w.status + '</span></td></tr>').join('') +
+        '</tbody></table>';
     }
 
     function loadActivity() {
