@@ -3185,15 +3185,24 @@
     var input = document.getElementById('referralLinkInput');
     if (!input || !input.value) { showToast('Referral link not ready.', 'info'); return; }
     var userName = currentUser ? currentUser.name : 'Your friend';
-    var text = '🎉 *' + userName + ' invites you to GromoFinance!*\n\n' +
-      'I use this app to manage my family budget — income, expenses, loans, EMIs, investments & insurance — all in ONE place!\n\n' +
-      '✅ Track expenses for up to 6 family members\n' +
-      '✅ EMI & SIP reminders via WhatsApp\n' +
-      '✅ Insurance renewal alerts\n' +
-      '✅ Beautiful PDF reports\n\n' +
-      '🎁 *You get 20% OFF* on your first upgrade!\n\n' +
-      '👉 Sign up FREE: ' + input.value + '\n\n' +
-      '_India\'s smartest family finance app_ 🇮🇳';
+    var text = '━━━━━━━━━━━━━━━━━━━━━\n' +
+      '💰 *GromoFinance*\n' +
+      '_Smart Family Budget Planner_\n' +
+      '━━━━━━━━━━━━━━━━━━━━━\n\n' +
+      '🎉 *' + userName + ' invites you!*\n\n' +
+      'I manage my entire family\'s finances with this app. You should try it too!\n\n' +
+      '📊 Track Income & Expenses\n' +
+      '🏦 EMI & Loan Reminders\n' +
+      '📈 SIP & Investment Tracker\n' +
+      '🛡️ Insurance Renewal Alerts\n' +
+      '👨‍👩‍👧‍👦 Up to 6 Family Members\n' +
+      '📄 PDF & CSV Reports\n\n' +
+      '🎁 *Special Offer:*\n' +
+      '✨ Use my link & get *20% OFF* on Pro!\n\n' +
+      '👇 *Sign Up FREE Now:*\n' +
+      input.value + '\n\n' +
+      '🇮🇳 Made for Indian Families\n' +
+      '━━━━━━━━━━━━━━━━━━━━━';
     window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
   }
 
@@ -3201,19 +3210,25 @@
     var input = document.getElementById('referralLinkInput');
     if (!input || !input.value) { showToast('Referral link not ready.', 'info'); return; }
     var userName = currentUser ? currentUser.name : 'A friend';
-    var subject = userName + ' invites you to GromoFinance - Smart Family Budget App';
+    var subject = '🎉 ' + userName + ' invites you to GromoFinance (20% OFF inside!)';
     var body = 'Hi there!\n\n' +
-      'I\'ve been using GromoFinance to manage my family finances and it\'s been amazing. I thought you\'d find it useful too!\n\n' +
-      'Here\'s what it does:\n' +
-      '- Track income & expenses for up to 6 family members\n' +
-      '- Loan & EMI tracker with auto WhatsApp reminders\n' +
-      '- SIP & investment portfolio tracking\n' +
-      '- Insurance policy manager with renewal alerts\n' +
-      '- Beautiful PDF reports & net worth dashboard\n\n' +
-      'As my referral, you get 20% OFF on your first Pro upgrade!\n\n' +
-      'Sign up here (free): ' + input.value + '\n\n' +
-      'Best,\n' + userName + '\n\n' +
-      '---\nGromoFinance - Smart Family Budget Planner\nhttps://gromofinance.com';
+      userName + ' is using GromoFinance and thinks you\'d love it too!\n\n' +
+      '━━━ What is GromoFinance? ━━━\n\n' +
+      'India\'s smartest family budget planner:\n\n' +
+      '✅ Track income & expenses for 6 family members\n' +
+      '✅ WhatsApp reminders before EMI due dates\n' +
+      '✅ SIP, Mutual Fund & Investment tracking\n' +
+      '✅ Insurance renewal alerts (Health, Term, Motor)\n' +
+      '✅ Beautiful PDF financial reports\n' +
+      '✅ Family Net Worth dashboard\n\n' +
+      '━━━ Your Special Offer ━━━\n\n' +
+      '🎁 As ' + userName + '\'s referral, you get 20% OFF on Pro!\n\n' +
+      '👉 Sign up FREE:\n' +
+      input.value + '\n\n' +
+      '━━━━━━━━━━━━━━━━━━━━━\n' +
+      'Website: https://gromofinance.com\n' +
+      'Invest: https://gromoneycapital.com\n\n' +
+      'Best,\n' + userName;
     window.open('mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body));
   }
 
