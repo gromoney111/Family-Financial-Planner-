@@ -453,16 +453,28 @@ router.post('/create-order', authenticate, async (req, res) => {
     // Apply coupon code discount
     if (couponCode) {
       const validCoupons = {
-        'GROMO50': 50,
-        'WELCOME20': 20,
-        'FAMILY30': 30,
-        'LAUNCH100': 100
+        'GROMO50': { discount: 50, maxUses: 100 },
+        'WELCOME20': { discount: 20, maxUses: 500 },
+        'FAMILY30': { discount: 30, maxUses: 200 },
+        'LAUNCH100': { discount: 100, maxUses: 50 }
       };
-      const couponDiscount = validCoupons[couponCode.toUpperCase()];
-      if (couponDiscount) {
-        discount = couponDiscount;
+      const couponInfo = validCoupons[couponCode.toUpperCase()];
+      if (couponInfo) {
+        // Check if coupon has been used too many times
+        const couponUsageCount = await Subscription.countDocuments({ couponCode: couponCode.toUpperCase() });
+        if (couponUsageCount >= couponInfo.maxUses) {
+          return res.status(400).json({ success: false, message: 'This coupon has reached its usage limit. Try another code.' });
+        }
+        // Check if THIS user already used a coupon before
+        const existingSub = await Subscription.findOne({ familyId: req.familyId });
+        if (existingSub && existingSub.couponCode) {
+          return res.status(400).json({ success: false, message: 'You have already used a coupon code. Only one coupon per account.' });
+        }
+        discount = couponInfo.discount;
         amount = Math.max(0, Math.round(amount - (amount * discount / 100)));
         appliedCoupon = couponCode.toUpperCase();
+      } else {
+        return res.status(400).json({ success: false, message: 'Invalid coupon code.' });
       }
     }
 
