@@ -3184,15 +3184,36 @@
   function shareReferralWhatsApp() {
     var input = document.getElementById('referralLinkInput');
     if (!input || !input.value) { showToast('Referral link not ready.', 'info'); return; }
-    var text = 'Hey! I use GromoFinance to manage our family budget. It tracks income, expenses, loans & investments for the whole family. Try it free: ' + input.value;
+    var userName = currentUser ? currentUser.name : 'Your friend';
+    var text = '🎉 *' + userName + ' invites you to GromoFinance!*\n\n' +
+      'I use this app to manage my family budget — income, expenses, loans, EMIs, investments & insurance — all in ONE place!\n\n' +
+      '✅ Track expenses for up to 6 family members\n' +
+      '✅ EMI & SIP reminders via WhatsApp\n' +
+      '✅ Insurance renewal alerts\n' +
+      '✅ Beautiful PDF reports\n\n' +
+      '🎁 *You get 20% OFF* on your first upgrade!\n\n' +
+      '👉 Sign up FREE: ' + input.value + '\n\n' +
+      '_India\'s smartest family finance app_ 🇮🇳';
     window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
   }
 
   function shareReferralEmail() {
     var input = document.getElementById('referralLinkInput');
     if (!input || !input.value) { showToast('Referral link not ready.', 'info'); return; }
-    var subject = 'Try GromoFinance - Smart Family Budget Planner';
-    var body = 'Hi,\n\nI use GromoFinance to manage my family finances - income, expenses, loans, EMIs, and investments all in one place.\n\nYou should try it too! Sign up free here:\n' + input.value + '\n\nYou\'ll get 20% off on your first upgrade!\n\nBest,\n' + (currentUser ? currentUser.name : 'A friend');
+    var userName = currentUser ? currentUser.name : 'A friend';
+    var subject = userName + ' invites you to GromoFinance - Smart Family Budget App';
+    var body = 'Hi there!\n\n' +
+      'I\'ve been using GromoFinance to manage my family finances and it\'s been amazing. I thought you\'d find it useful too!\n\n' +
+      'Here\'s what it does:\n' +
+      '- Track income & expenses for up to 6 family members\n' +
+      '- Loan & EMI tracker with auto WhatsApp reminders\n' +
+      '- SIP & investment portfolio tracking\n' +
+      '- Insurance policy manager with renewal alerts\n' +
+      '- Beautiful PDF reports & net worth dashboard\n\n' +
+      'As my referral, you get 20% OFF on your first Pro upgrade!\n\n' +
+      'Sign up here (free): ' + input.value + '\n\n' +
+      'Best,\n' + userName + '\n\n' +
+      '---\nGromoFinance - Smart Family Budget Planner\nhttps://gromofinance.com';
     window.open('mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body));
   }
 

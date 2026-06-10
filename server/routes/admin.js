@@ -244,4 +244,84 @@ router.delete('/families/:id', superAdminAuth, async (req, res) => {
   }
 });
 
+// ============ SUBSCRIPTION & PAYMENT STATS ============
+router.get('/subscriptions', superAdminAuth, async (req, res) => {
+  try {
+    const Subscription = require('../models/Subscription');
+    const Insurance = require('../models/Insurance');
+
+    const totalSubs = await Subscription.countDocuments();
+    const freeSubs = await Subscription.countDocuments({ plan: 'free' });
+    const proSubs = await Subscription.countDocuments({ plan: 'pro', status: { $in: ['active', 'trial'] } });
+    const enterpriseSubs = await Subscription.countDocuments({ plan: 'enterprise', status: 'active' });
+    const trialSubs = await Subscription.countDocuments({ status: 'trial' });
+    const totalInsurance = await Insurance.countDocuments();
+
+    // Revenue calculation
+    const paidSubs = await Subscription.find({ 'paymentHistory.0': { $exists: true } });
+    let totalRevenue = 0;
+    paidSubs.forEach(s => {
+      s.paymentHistory.forEach(p => {
+        if (p.status === 'success') totalRevenue += p.amount;
+      });
+    });
+
+    // Pending withdrawals
+    const pendingWithdrawals = await Subscription.find({ 'withdrawalHistory': { $elemMatch: { status: 'pending' } } });
+    let pendingAmount = 0;
+    pendingWithdrawals.forEach(s => {
+      s.withdrawalHistory.forEach(w => { if (w.status === 'pending') pendingAmount += w.amount; });
+    });
+
+    // Coupon usage
+    const couponUsage = await Subscription.aggregate([
+      { $match: { couponCode: { $exists: true, $ne: null } } },
+      { $group: { _id: '$couponCode', count: { $sum: 1 } } }
+    ]);
+
+    // Referral stats
+    const totalReferrals = await Subscription.countDocuments({ referredBy: { $exists: true, $ne: null } });
+
+    res.json({
+      success: true,
+      subscriptions: {
+        total: totalSubs,
+        free: freeSubs,
+        pro: proSubs,
+        enterprise: enterpriseSubs,
+        trial: trialSubs,
+        totalInsurance,
+        totalRevenue,
+        pendingWithdrawals: pendingAmount,
+        couponUsage,
+        totalReferrals
+      }
+    });
+  } catch (error) {
+    console.error('Admin subs error:', error);
+    res.status(500).json({ success: false, message: 'Failed to get subscription stats.' });
+  }
+});
+
+// ============ RECENT ACTIVITY LOG ============
+router.get('/activity', superAdminAuth, async (req, res) => {
+  try {
+    const { limit = 50 } = req.query;
+    const recentUsers = await User.find().sort({ createdAt: -1 }).limit(5).select('name email createdAt');
+    const recentLogins = await User.find({ lastLogin: { $exists: true } }).sort({ lastLogin: -1 }).limit(10).select('name email lastLogin');
+    const recentTransactions = await Transaction.find().sort({ createdAt: -1 }).limit(10).select('type category amount memberName createdAt');
+
+    res.json({
+      success: true,
+      activity: {
+        recentSignups: recentUsers,
+        recentLogins: recentLogins,
+        recentTransactions: recentTransactions
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to get activity.' });
+  }
+});
+
 module.exports = router;

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>GromoFinance - Developer Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #f1f5f9; color: #0f172a; min-height: 100vh; }
+    .admin-header { background: linear-gradient(135deg, #0f172a, #1e293b); padding: 20px 32px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+    .admin-header h1 { font-size: 1.3rem; } .admin-header h1 span { color: #f59e0b; }
+    .admin-header .badge { background: #f59e0b; color: #0f172a; padding: 4px 12px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; }
+    .admin-login { max-width: 400px; margin: 80px auto; background: #fff; padding: 40px; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    .admin-login h2 { margin-bottom: 24px; text-align: center; }
+    .admin-login input { width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; margin-bottom: 14px; font-size: 0.9rem; }
+    .admin-login button { width: 100%; padding: 12px; background: #0f172a; color: #f59e0b; border: none; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; }
+    .admin-content { padding: 24px 32px; display: none; }
+    .admin-content.active { display: block; }
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .stat-box { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); text-align: center; }
+    .stat-box .num { font-size: 2rem; font-weight: 800; color: #0f172a; }
+    .stat-box .label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; margin-top: 4px; }
+    .stat-box.gold .num { color: #f59e0b; }
+    .stat-box.green .num { color: #059669; }
+    .stat-box.rose .num { color: #dc2626; }
+    .stat-box.purple .num { color: #7c3aed; }
+    .card { background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 20px; }
+    .card h3 { font-size: 1rem; margin-bottom: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th { text-align: left; padding: 10px 12px; background: #f8fafc; font-size: 0.72rem; text-transform: uppercase; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; }
+    tr:hover { background: #f8fafc; }
+    .badge-green { background: #d1fae5; color: #059669; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
+    .badge-red { background: #fee2e2; color: #dc2626; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
+    .badge-gold { background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab { padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: #e2e8f0; color: #475569; border: none; }
+    .tab.active { background: #0f172a; color: #f59e0b; }
+    .search-box { padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; width: 300px; font-size: 0.85rem; margin-bottom: 16px; }
+    @media (max-width: 768px) { .admin-content { padding: 16px; } .stats-row { grid-template-columns: 1fr 1fr; } .search-box { width: 100%; } }
+  </style>
+</head>
+<body>
+  <div class="admin-header">
+    <h1>Gromo<span>Finance</span> — Developer Dashboard</h1>
+    <div><span class="badge">ADMIN PANEL</span> <button onclick="adminLogout()" style="background:none;border:1px solid rgba(255,255,255,0.3);color:#fff;padding:6px 14px;border-radius:6px;font-size:0.8rem;cursor:pointer;margin-left:10px;">Logout</button></div>
+  </div>
+
+  <!-- Login -->
+  <div class="admin-login" id="adminLoginBox">
+    <h2>🔒 Admin Login</h2>
+    <input type="email" id="adminEmail" placeholder="Admin Email">
+    <input type="password" id="adminPass" placeholder="Admin Password">
+    <button onclick="adminLogin()">Login to Dashboard</button>
+    <p id="adminError" style="color:#dc2626;font-size:0.8rem;margin-top:10px;text-align:center;display:none;"></p>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="admin-content" id="adminDashboard">
+    <div class="tabs">
+      <button class="tab active" onclick="switchAdminTab('overview')">Overview</button>
+      <button class="tab" onclick="switchAdminTab('users')">Users</button>
+      <button class="tab" onclick="switchAdminTab('families')">Families</button>
+      <button class="tab" onclick="switchAdminTab('payments')">Payments & Plans</button>
+      <button class="tab" onclick="switchAdminTab('activity')">Activity</button>
+    </div>
+
+    <!-- Overview Tab -->
+    <div id="tab-overview">
+      <div class="stats-row" id="statsRow"></div>
+      <div class="card"><h3>📈 Monthly Registrations</h3><div id="monthlyChart" style="height:200px;display:flex;align-items:flex-end;gap:8px;padding-top:20px;"></div></div>
+    </div>
+
+    <!-- Users Tab -->
+    <div id="tab-users" style="display:none;">
+      <input type="text" class="search-box" id="userSearch" placeholder="Search by name, email or phone..." oninput="searchUsers()">
+      <div class="card"><div style="overflow-x:auto;"><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Family</th><th>Verified</th><th>Active</th><th>Joined</th></tr></thead><tbody id="usersTableBody"></tbody></table></div></div>
+    </div>
+
+    <!-- Families Tab -->
+    <div id="tab-families" style="display:none;">
+      <div class="card"><div style="overflow-x:auto;"><table><thead><tr><th>Family Name</th><th>Code</th><th>Admin</th><th>Members</th><th>Max</th><th>Created</th></tr></thead><tbody id="familiesTableBody"></tbody></table></div></div>
+    </div>
+
+    <!-- Payments Tab -->
+    <div id="tab-payments" style="display:none;">
+      <div class="stats-row" id="paymentStats"></div>
+      <div class="card"><h3>Coupon Usage</h3><div id="couponTable"></div></div>
+    </div>
+
+    <!-- Activity Tab -->
+    <div id="tab-activity" style="display:none;">
+      <div class="card"><h3>Recent Signups</h3><div id="recentSignups"></div></div>
+      <div class="card"><h3>Recent Logins</h3><div id="recentLogins"></div></div>
+    </div>
+  </div>
+
+  <script>
+    var adminToken = localStorage.getItem('ffp_admin_token') || '';
+    var BASE = window.location.origin + '/api/admin';
+
+    if (adminToken) { showDashboard(); loadAllData(); }
+
+    function adminLogin() {
+      var email = document.getElementById('adminEmail').value;
+      var pass = document.getElementById('adminPass').value;
+      fetch(BASE + '/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email, password: pass}) })
+        .then(r => r.json())
+        .then(d => {
+          if (d.success) { adminToken = d.token; localStorage.setItem('ffp_admin_token', adminToken); showDashboard(); loadAllData(); }
+          else { document.getElementById('adminError').textContent = d.message; document.getElementById('adminError').style.display = 'block'; }
+        });
+    }
+
+    function adminLogout() { localStorage.removeItem('ffp_admin_token'); location.reload(); }
+    function showDashboard() { document.getElementById('adminLoginBox').style.display = 'none'; document.getElementById('adminDashboard').classList.add('active'); }
+
+    function switchAdminTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      ['overview','users','families','payments','activity'].forEach(t => { document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none'; });
+    }
+
+    function api(path) { return fetch(BASE + path, { headers: { 'Authorization': 'Bearer ' + adminToken } }).then(r => r.json()); }
+
+    function loadAllData() { loadStats(); loadUsers(); loadFamilies(); loadPayments(); loadActivity(); }
+
+    function loadStats() {
+      api('/stats').then(d => {
+        if (!d.success) return;
+        var s = d.stats;
+        document.getElementById('statsRow').innerHTML =
+          statBox(s.totalUsers, 'Total Users', '') + statBox(s.totalFamilies, 'Families', '') +
+          statBox(s.newUsersThisWeek, 'New This Week', 'green') + statBox(s.activeUsers, 'Active', 'green') +
+          statBox(s.verifiedUsers, 'Verified', 'gold') + statBox(s.unverifiedUsers, 'Unverified', 'rose') +
+          statBox(s.totalTransactions, 'Transactions', 'purple') + statBox(s.totalLoans, 'Loans', '') +
+          statBox(s.totalInvestments, 'Investments', '');
+        // Monthly chart
+        var chart = document.getElementById('monthlyChart');
+        var maxCount = Math.max(...(s.monthlyRegistrations || []).map(m => m.count), 1);
+        chart.innerHTML = (s.monthlyRegistrations || []).map(m =>
+          '<div style="flex:1;text-align:center;"><div style="background:linear-gradient(180deg,#f59e0b,#d97706);height:' + ((m.count/maxCount)*150) + 'px;border-radius:6px 6px 0 0;min-height:4px;"></div><div style="font-size:0.7rem;color:#64748b;margin-top:6px;">' + m._id.slice(5) + '</div><div style="font-size:0.75rem;font-weight:700;">' + m.count + '</div></div>'
+        ).join('');
+      });
+    }
+
+    function loadUsers() {
+      api('/users').then(d => {
+        if (!d.success) return;
+        var tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = d.users.map(u =>
+          '<tr><td><strong>' + u.name + '</strong></td><td>' + u.email + '</td><td>' + u.phone + '</td><td>' + u.role + '</td><td>' + u.familyCode + '</td><td>' + (u.isEmailVerified ? '<span class="badge-green">Yes</span>' : '<span class="badge-red">No</span>') + '</td><td>' + (u.isActive ? '<span class="badge-green">Active</span>' : '<span class="badge-red">Disabled</span>') + '</td><td>' + new Date(u.createdAt).toLocaleDateString('en-IN') + '</td></tr>'
+        ).join('');
+      });
+    }
+
+    function loadFamilies() {
+      api('/families').then(d => {
+        if (!d.success) return;
+        var tbody = document.getElementById('familiesTableBody');
+        tbody.innerHTML = d.families.map(f =>
+          '<tr><td><strong>' + f.familyName + '</strong></td><td>' + f.familyCode + '</td><td>' + f.adminName + ' (' + f.adminEmail + ')</td><td>' + f.memberCount + '</td><td>' + f.maxMembers + '</td><td>' + new Date(f.createdAt).toLocaleDateString('en-IN') + '</td></tr>'
+        ).join('');
+      });
+    }
+
+    function loadPayments() {
+      api('/subscriptions').then(d => {
+        if (!d.success) return;
+        var s = d.subscriptions;
+        document.getElementById('paymentStats').innerHTML =
+          statBox(s.pro, 'Pro Plans', 'gold') + statBox(s.enterprise, 'Enterprise', 'purple') +
+          statBox(s.trial, 'On Trial', 'green') + statBox('₹' + (s.totalRevenue || 0), 'Revenue', 'green') +
+          statBox('₹' + (s.pendingWithdrawals || 0), 'Pending Payouts', 'rose') + statBox(s.totalReferrals, 'Referrals', '');
+        document.getElementById('couponTable').innerHTML = (s.couponUsage || []).map(c =>
+          '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;"><span class="badge-gold">' + c._id + '</span><span>' + c.count + ' uses</span></div>'
+        ).join('') || '<p style="color:#94a3b8;">No coupons used yet.</p>';
+      });
+    }
+
+    function loadActivity() {
+      api('/activity').then(d => {
+        if (!d.success) return;
+        document.getElementById('recentSignups').innerHTML = (d.activity.recentSignups || []).map(u =>
+          '<div style="padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:0.85rem;"><strong>' + u.name + '</strong> (' + u.email + ') — ' + new Date(u.createdAt).toLocaleDateString('en-IN') + '</div>'
+        ).join('');
+        document.getElementById('recentLogins').innerHTML = (d.activity.recentLogins || []).map(u =>
+          '<div style="padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:0.85rem;">' + u.name + ' — ' + new Date(u.lastLogin).toLocaleString('en-IN') + '</div>'
+        ).join('');
+      });
+    }
+
+    function searchUsers() {
+      var q = document.getElementById('userSearch').value;
+      api('/users?search=' + encodeURIComponent(q)).then(d => {
+        if (!d.success) return;
+        var tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = d.users.map(u =>
+          '<tr><td><strong>' + u.name + '</strong></td><td>' + u.email + '</td><td>' + u.phone + '</td><td>' + u.role + '</td><td>' + u.familyCode + '</td><td>' + (u.isEmailVerified ? '<span class="badge-green">Yes</span>' : '<span class="badge-red">No</span>') + '</td><td>' + (u.isActive ? '<span class="badge-green">Active</span>' : '<span class="badge-red">Disabled</span>') + '</td><td>' + new Date(u.createdAt).toLocaleDateString('en-IN') + '</td></tr>'
+        ).join('');
+      });
+    }
+
+    function statBox(num, label, color) {
+      return '<div class="stat-box ' + color + '"><div class="num">' + num + '</div><div class="label">' + label + '</div></div>';
+    }
+  </script>
+</body>
+</html>
