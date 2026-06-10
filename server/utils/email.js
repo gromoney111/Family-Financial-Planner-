@@ -247,4 +247,91 @@ const sendPaymentFailedEmail = async (user, details) => {
   }
 };
 
-module.exports = { sendVerificationEmail, sendWelcomeEmail, sendPasswordResetEmail, sendPaymentSuccessEmail, sendPaymentFailedEmail };
+
+
+// Send beautiful HTML referral invite email
+const sendReferralInviteEmail = async (fromUser, toEmail, referralLink) => {
+  const mailOptions = {
+    from: `"GromoFinance" <${process.env.SMTP_USER || 'noreply@gromofinance.com'}>`,
+    to: toEmail,
+    subject: `🎉 ${fromUser.name} invites you to GromoFinance (20% OFF inside!)`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.1);">
+        <!-- Header with Logo -->
+        <div style="background:linear-gradient(135deg,#0f172a,#1e293b);padding:32px 24px;text-align:center;">
+          <img src="https://gromofinance.com/favicon.svg" alt="GromoFinance" style="width:48px;height:48px;margin-bottom:12px;">
+          <h1 style="color:#ffffff;margin:0;font-size:24px;">Gromo<span style="color:#f59e0b;">Finance</span></h1>
+          <p style="color:rgba(255,255,255,0.6);margin:6px 0 0;font-size:13px;">Smart Family Budget Planner</p>
+        </div>
+
+        <!-- Main Content -->
+        <div style="padding:32px 24px;">
+          <!-- Invite Message -->
+          <div style="text-align:center;margin-bottom:24px;">
+            <div style="width:64px;height:64px;background:linear-gradient(135deg,#f59e0b,#d97706);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;">
+              <span style="font-size:28px;">🎉</span>
+            </div>
+            <h2 style="color:#0f172a;margin:0 0 8px;font-size:20px;">${fromUser.name} invites you!</h2>
+            <p style="color:#64748b;font-size:14px;line-height:1.6;margin:0;">
+              Your friend is using GromoFinance to manage their family finances and thought you'd love it too.
+            </p>
+          </div>
+
+          <!-- Features Grid -->
+          <div style="background:#f8fafc;border-radius:12px;padding:20px;margin-bottom:24px;">
+            <h3 style="color:#0f172a;font-size:14px;margin:0 0 16px;text-align:center;">What you can do with GromoFinance:</h3>
+            <table style="width:100%;font-size:13px;color:#475569;">
+              <tr><td style="padding:6px 0;">📊</td><td style="padding:6px 8px;">Track income & expenses for <strong>6 family members</strong></td></tr>
+              <tr><td style="padding:6px 0;">🏦</td><td style="padding:6px 8px;">Loan & EMI tracker with <strong>WhatsApp reminders</strong></td></tr>
+              <tr><td style="padding:6px 0;">📈</td><td style="padding:6px 8px;">SIP & Mutual Fund portfolio tracking</td></tr>
+              <tr><td style="padding:6px 0;">🛡️</td><td style="padding:6px 8px;">Insurance tracker with <strong>renewal alerts</strong></td></tr>
+              <tr><td style="padding:6px 0;">📄</td><td style="padding:6px 8px;">Beautiful PDF & CSV reports</td></tr>
+              <tr><td style="padding:6px 0;">💎</td><td style="padding:6px 8px;">Net Worth & Family Tree dashboard</td></tr>
+            </table>
+          </div>
+
+          <!-- Special Offer Box -->
+          <div style="background:linear-gradient(135deg,#fef3c7,#fffbeb);border:2px solid #f59e0b;border-radius:12px;padding:20px;text-align:center;margin-bottom:24px;">
+            <p style="color:#92400e;font-size:13px;margin:0 0 4px;font-weight:600;">🎁 SPECIAL OFFER FOR YOU</p>
+            <p style="color:#0f172a;font-size:20px;font-weight:800;margin:0;">20% OFF on Pro Plan!</p>
+            <p style="color:#92400e;font-size:12px;margin:6px 0 0;">As ${fromUser.name}'s referral, you get an exclusive discount.</p>
+          </div>
+
+          <!-- CTA Button -->
+          <div style="text-align:center;margin-bottom:24px;">
+            <a href="${referralLink}" style="display:inline-block;padding:16px 40px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#ffffff;font-weight:700;font-size:16px;text-decoration:none;border-radius:10px;box-shadow:0 4px 16px rgba(245,158,11,0.3);">
+              Sign Up FREE Now →
+            </a>
+          </div>
+          <p style="text-align:center;font-size:12px;color:#94a3b8;">Free forever. No credit card required.</p>
+
+          <!-- Invest CTA -->
+          <div style="background:#059669;border-radius:10px;padding:16px 20px;text-align:center;margin-top:20px;">
+            <p style="color:#ffffff;font-size:13px;margin:0 0 8px;">💰 Also explore expert-guided investments</p>
+            <a href="https://gromoneycapital.com/" style="color:#ffffff;font-weight:700;font-size:14px;text-decoration:underline;">Visit GroMoneyCapital →</a>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="background:#f8fafc;padding:20px 24px;text-align:center;border-top:1px solid #e2e8f0;">
+          <p style="color:#64748b;font-size:11px;margin:0 0 4px;">
+            <a href="https://gromofinance.com" style="color:#f59e0b;text-decoration:none;font-weight:600;">gromofinance.com</a> |
+            <a href="https://gromoneycapital.com" style="color:#059669;text-decoration:none;font-weight:600;">gromoneycapital.com</a>
+          </p>
+          <p style="color:#94a3b8;font-size:10px;margin:0;">© 2024-2026 GromoFinance. India's smartest family finance app.</p>
+        </div>
+      </div>
+    `
+  };
+
+  try {
+    const transporter = createTransporter();
+    await transporter.sendMail(mailOptions);
+    return { success: true };
+  } catch (error) {
+    console.error('Referral invite email error:', error.message);
+    return { success: false, error: error.message };
+  }
+};
+
+module.exports = { sendVerificationEmail, sendWelcomeEmail, sendPasswordResetEmail, sendPaymentSuccessEmail, sendPaymentFailedEmail, sendReferralInviteEmail };

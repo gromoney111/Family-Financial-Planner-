@@ -2163,8 +2163,14 @@
               <input type="text" id="referralLinkInput" readonly style="flex:1;min-width:180px;font-size:0.8rem;padding:10px;background:var(--white);border:1.5px solid var(--border);">
               <button class="btn btn-gold btn-sm" onclick="copyReferralLink()">📋 Copy</button>
               <button class="btn btn-outline btn-sm" onclick="shareReferralWhatsApp()">💬 WhatsApp</button>
-              <button class="btn btn-outline btn-sm" onclick="shareReferralEmail()">📧 Email</button>
+              <button class="btn btn-outline btn-sm" onclick="shareReferralEmail()">📧 Email App</button>
             </div>
+            <!-- Send Professional HTML Email -->
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+              <input type="email" id="referralEmailInput" placeholder="Enter friend's email address" style="flex:1;min-width:200px;font-size:0.85rem;padding:10px;">
+              <button class="btn btn-gold btn-sm" onclick="sendReferralHTMLEmail()">📨 Send Invite Email</button>
+            </div>
+            <p style="font-size:0.7rem;color:var(--text-muted);">Sends a beautiful branded email with your referral link, logo & 20% off offer.</p>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:12px;margin-top:16px;">
               <div style="background:var(--white);padding:14px;border-radius:10px;text-align:center;border:1px solid var(--border);">
                 <div style="font-size:1.3rem;font-weight:700;color:var(--navy);" id="refTotalCount">0</div>
@@ -3251,6 +3257,29 @@
     } catch(e) {
       showLoading(false);
       showToast('Failed to apply code.', 'error');
+    }
+  }
+
+  async function sendReferralHTMLEmail() {
+    var email = document.getElementById('referralEmailInput').value.trim();
+    if (!email) { showToast('Please enter an email address.', 'error'); return; }
+    if (!/\S+@\S+\.\S+/.test(email)) { showToast('Please enter a valid email.', 'error'); return; }
+    showLoading(true);
+    try {
+      var res = await API.request('/subscription/send-referral-email', {
+        method: 'POST',
+        body: JSON.stringify({ email: email })
+      });
+      showLoading(false);
+      if (res.success) {
+        showToast(res.message, 'success');
+        document.getElementById('referralEmailInput').value = '';
+      } else {
+        showToast(res.message || 'Failed to send.', 'error');
+      }
+    } catch(e) {
+      showLoading(false);
+      showToast('Failed to send email.', 'error');
     }
   }
 

@@ -221,6 +221,36 @@ router.post('/cancel', authenticate, async (req, res) => {
   }
 });
 
+// ============ SEND REFERRAL EMAIL (Beautiful HTML) ============
+router.post('/send-referral-email', authenticate, async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, message: 'Email address required.' });
+
+    let subscription = await Subscription.findOne({ familyId: req.familyId });
+    if (!subscription) {
+      subscription = await Subscription.create({ familyId: req.familyId, plan: 'free', status: 'active' });
+    }
+    if (!subscription.referralCode) {
+      subscription.generateReferralCode();
+      await subscription.save();
+    }
+
+    const referralLink = `${process.env.FRONTEND_URL || 'https://gromofinance.com'}?ref=${subscription.referralCode}`;
+    const { sendReferralInviteEmail } = require('../utils/email');
+    const result = await sendReferralInviteEmail(req.user, email, referralLink);
+
+    if (result.success) {
+      res.json({ success: true, message: `Beautiful referral invite sent to ${email}!` });
+    } else {
+      res.status(500).json({ success: false, message: 'Failed to send email.' });
+    }
+  } catch (error) {
+    console.error('Send referral email error:', error);
+    res.status(500).json({ success: false, message: 'Failed.' });
+  }
+});
+
 // ============ APPLY REFERRAL CODE ============
 router.post('/referral', authenticate, async (req, res) => {
   try {
