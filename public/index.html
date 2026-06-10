@@ -2918,14 +2918,28 @@
   async function openPayment(plan, billingCycle) {
     showLoading(true);
     try {
+      // Get coupon code from sessionStorage or input
+      var couponCode = sessionStorage.getItem('ffp_coupon') || '';
+      var couponInput = document.getElementById('couponInput');
+      if (couponInput && couponInput.value.trim()) couponCode = couponInput.value.trim();
+
       const res = await API.request('/subscription/create-order', {
         method: 'POST',
-        body: JSON.stringify({ plan, billingCycle })
+        body: JSON.stringify({ plan, billingCycle, couponCode: couponCode })
       });
 
       if (!res.success) {
         showToast(res.message || 'Failed to create order.', 'error');
         showLoading(false);
+        return;
+      }
+
+      // If coupon gave 100% off, plan activated without payment
+      if (res.freePlan) {
+        showLoading(false);
+        showToast(res.message, 'success');
+        sessionStorage.removeItem('ffp_coupon');
+        loadSubscriptionStatus();
         return;
       }
 
@@ -3044,8 +3058,14 @@
   function applyCoupon() {
     var code = document.getElementById('couponInput').value.trim();
     if (!code) { showToast('Enter a coupon code.', 'info'); return; }
-    showToast('Coupon "' + code + '" will be applied at checkout.', 'success');
-    sessionStorage.setItem('ffp_coupon', code);
+    var validCoupons = { 'GROMO50': 50, 'WELCOME20': 20, 'FAMILY30': 30, 'LAUNCH100': 100 };
+    var discount = validCoupons[code.toUpperCase()];
+    if (discount) {
+      sessionStorage.setItem('ffp_coupon', code.toUpperCase());
+      showToast('✅ Coupon "' + code.toUpperCase() + '" applied! ' + discount + '% off on your next payment.', 'success');
+    } else {
+      showToast('❌ Invalid coupon code. Please check and try again.', 'error');
+    }
   }
 
   // ╔══════════════════════════════════════════════════════════╗

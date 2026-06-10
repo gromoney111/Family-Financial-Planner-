@@ -438,7 +438,7 @@ router.post('/withdraw', authenticate, async (req, res) => {
 // ============ CASHFREE: CREATE ORDER ============
 router.post('/create-order', authenticate, async (req, res) => {
   try {
-    const { plan, billingCycle } = req.body;
+    const { plan, billingCycle, couponCode } = req.body;
 
     if (!plan || !['basic', 'pro', 'enterprise'].includes(plan)) {
       return res.status(400).json({ success: false, message: 'Invalid plan.' });
@@ -447,11 +447,61 @@ router.post('/create-order', authenticate, async (req, res) => {
     const planDetails = Subscription.PLANS[plan];
     const cycle = billingCycle || 'monthly';
     let amount = cycle === 'yearly' ? planDetails.priceYearly : planDetails.priceMonthly;
+    let discount = 0;
+    let appliedCoupon = '';
+
+    // Apply coupon code discount
+    if (couponCode) {
+      const validCoupons = {
+        'GROMO50': 50,
+        'WELCOME20': 20,
+        'FAMILY30': 30,
+        'LAUNCH100': 100
+      };
+      const couponDiscount = validCoupons[couponCode.toUpperCase()];
+      if (couponDiscount) {
+        discount = couponDiscount;
+        amount = Math.max(0, Math.round(amount - (amount * discount / 100)));
+        appliedCoupon = couponCode.toUpperCase();
+      }
+    }
 
     // Check for referral discount
     const subscription = await Subscription.findOne({ familyId: req.familyId });
     if (subscription && subscription.referredBy && subscription.paymentHistory.length === 0) {
       amount = Math.round(amount * 0.8); // 20% off first payment for referred users
+    }
+
+    // If amount is 0 (100% coupon like LAUNCH100), activate plan directly without payment
+    if (amount <= 0) {
+      let sub = subscription || new Subscription({ familyId: req.familyId });
+      sub.plan = plan;
+      sub.status = 'active';
+      sub.maxMembers = planDetails.maxMembers;
+      sub.maxTransactionsPerMonth = planDetails.maxTransactionsPerMonth;
+      sub.features = planDetails.features;
+      sub.priceMonthly = planDetails.priceMonthly;
+      sub.priceYearly = planDetails.priceYearly;
+      sub.billingCycle = cycle;
+      sub.lastPaymentDate = new Date();
+      sub.couponCode = appliedCoupon;
+      sub.discountPercent = discount;
+      if (cycle === 'monthly') {
+        sub.nextBillingDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      } else {
+        sub.nextBillingDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+      }
+      sub.paymentHistory.push({ amount: 0, date: new Date(), method: 'upi', transactionId: 'COUPON_' + appliedCoupon + '_' + Date.now(), status: 'success' });
+      await Family.findByIdAndUpdate(req.familyId, { maxMembers: planDetails.maxMembers });
+      if (!sub.referralCode) sub.generateReferralCode();
+      await sub.save();
+
+      return res.json({
+        success: true,
+        freePlan: true,
+        message: `🎉 Coupon ${appliedCoupon} applied! ${planDetails.name} plan activated for FREE!`,
+        subscription: { plan: sub.plan, status: 'active', maxMembers: sub.maxMembers, nextBillingDate: sub.nextBillingDate }
+      });
     }
 
     const orderId = `order_${req.familyId.toString().slice(-8)}_${Date.now()}`;
@@ -502,6 +552,9 @@ router.post('/create-order', authenticate, async (req, res) => {
         orderId: orderData.order_id,
         paymentSessionId: orderData.payment_session_id,
         amount: amount,
+        originalAmount: cycle === 'yearly' ? planDetails.priceYearly : planDetails.priceMonthly,
+        discount: discount,
+        couponApplied: appliedCoupon,
         currency: 'INR',
         plan: plan,
         planName: planDetails.name,
