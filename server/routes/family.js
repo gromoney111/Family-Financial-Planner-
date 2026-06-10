@@ -183,16 +183,21 @@ router.post('/invite', authenticate, requireAdmin, async (req, res) => {
 router.get('/invite/:code', async (req, res) => {
   try {
     const { code } = req.params;
-    const family = await Family.findOne({ inviteCode: code }).populate('adminId', 'name');
+    let family = await Family.findOne({ inviteCode: code }).populate('adminId', 'name');
+
+    // Also try finding by familyId (invite links embed familyId directly)
+    if (!family) {
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(code)) {
+        family = await Family.findById(code).populate('adminId', 'name');
+      }
+    }
 
     if (!family) {
       return res.status(404).json({ success: false, message: 'Invalid invite code.' });
     }
-    if (!family.isInviteValid()) {
+    if (family.inviteExpiry && !family.isInviteValid()) {
       return res.status(400).json({ success: false, message: 'Invite code has expired.' });
-    }
-    if (family.isFull()) {
-      return res.status(400).json({ success: false, message: 'Family is full.' });
     }
 
     res.json({

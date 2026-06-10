@@ -9,7 +9,7 @@ const { sendVerificationEmail, sendWelcomeEmail, sendPasswordResetEmail } = requ
 // ============ REGISTER (Creates Admin + Family) ============
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, phone, password, familyCode, inviteCode } = req.body;
+    const { name, email, phone, password, familyCode, inviteCode, relation } = req.body;
 
     // Validation
     if (!name || !email || !phone || !password) {
@@ -82,7 +82,7 @@ router.post('/register', async (req, res) => {
         phone,
         password,
         role: 'member',
-        relation: 'Other',
+        relation: relation || 'Other',
         familyId: family._id
       });
 

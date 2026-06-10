@@ -1359,12 +1359,25 @@
               <input type="text" id="regFamilyId" placeholder="e.g., sharma_family, gupta2024 (leave blank for auto)">
               <span style="font-size:0.75rem;color:var(--text-muted)">Letters, numbers & underscores only. This is your unique family identifier.</span>
             </div>
+            <div class="form-group" id="relationGroup" style="display:none;">
+              <label>Your Relationship with Family Admin</label>
+              <select id="regRelation">
+                <option value="Spouse">Spouse</option>
+                <option value="Son">Son</option>
+                <option value="Daughter">Daughter</option>
+                <option value="Father">Father</option>
+                <option value="Mother">Mother</option>
+                <option value="Other" selected>Other</option>
+              </select>
+            </div>
             <script>
               // Show Family ID field ONLY when there's no invite code in URL
               (function() {
                 var params = new URLSearchParams(window.location.search);
                 if (!params.get('invite')) {
                   document.getElementById('familyIdGroup').style.display = 'block';
+                } else {
+                  document.getElementById('relationGroup').style.display = 'block';
                 }
               })();
             </script>
@@ -3710,7 +3723,7 @@
       
       if (pendingInvite && inviteFamilyId) {
         // User came via invite link - use register with inviteCode (backend handles linking)
-        actionData = { action: 'register', name, email, phone, password, inviteCode: inviteFamilyId };
+        actionData = { action: 'register', name, email, phone, password, inviteCode: inviteFamilyId, relation: document.getElementById('regRelation') ? document.getElementById('regRelation').value : 'Other' };
         joiningFamily = true;
       }
       
@@ -4897,22 +4910,31 @@
         tabs[0].classList.remove('active');
         tabs[1].classList.add('active');
       }
-      // Hide Family ID field (not needed when joining via invite)
+      // Hide Family ID field, show Relationship field
       var familyIdGroup = document.getElementById('familyIdGroup');
       if (familyIdGroup) familyIdGroup.style.display = 'none';
+      var relationGroup = document.getElementById('relationGroup');
+      if (relationGroup) relationGroup.style.display = 'block';
       // Store the familyId from invite for registration (inviteCode IS the familyId)
       sessionStorage.setItem('ffp_pending_invite', inviteCode);
       sessionStorage.setItem('ffp_invite_familyId', inviteCode);
-      // Show clear message that this is a family invite
-      showAuthError('');
+      // Show clear message with admin's name (fetch from API)
       var errEl = document.getElementById('authError');
       if (errEl) {
         errEl.style.background = '#d1fae5';
         errEl.style.color = '#059669';
         errEl.style.border = '1px solid #059669';
-        errEl.textContent = '👨‍👩‍👧‍👦 You have been invited to join a family! Fill in your details below to register as a member.';
+        errEl.textContent = '👨‍👩‍👧‍👦 You have been invited to join a family! Fill in your details and select your relationship.';
         errEl.classList.add('show');
       }
+      // Try to fetch family info to show who invited
+      fetch('/api/family/invite/' + encodeURIComponent(inviteCode))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success && data.familyName && errEl) {
+            errEl.textContent = '👨‍👩‍👧‍👦 ' + (data.adminName || 'Family Admin') + ' invited you to join "' + data.familyName + '"! Register below.';
+          }
+        }).catch(function() {});
     }
   }
 
