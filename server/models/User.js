@@ -51,6 +51,17 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  profilePicture: {
+    type: String,
+    default: ''
+  },
+  bankAccounts: [{
+    bankName: { type: String, required: true },
+    accountNumber: { type: String, default: '' },
+    ifsc: { type: String, default: '' },
+    upiId: { type: String, default: '' },
+    isDefault: { type: Boolean, default: false }
+  }],
   emailVerificationToken: String,
   emailVerificationExpiry: Date,
   resetToken: String,
@@ -83,6 +94,8 @@ userSchema.methods.toSafeObject = function() {
     relation: this.relation,
     familyId: this.familyId,
     isActive: this.isActive,
+    profilePicture: this.profilePicture || '',
+    bankAccounts: this.bankAccounts || [],
     createdAt: this.createdAt,
     lastLogin: this.lastLogin
   };

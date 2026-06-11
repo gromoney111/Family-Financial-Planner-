@@ -665,4 +665,72 @@ router.post('/update-phone', authenticate, async (req, res) => {
   }
 });
 
+// ============ UPLOAD PROFILE PICTURE (Base64) ============
+router.post('/upload-profile-pic', authenticate, async (req, res) => {
+  try {
+    const { image } = req.body;
+    if (!image) {
+      return res.status(400).json({ success: false, message: 'No image provided.' });
+    }
+    // Limit size to 200KB base64
+    if (image.length > 300000) {
+      return res.status(400).json({ success: false, message: 'Image too large. Max 200KB.' });
+    }
+
+    const user = await User.findById(req.userId);
+    user.profilePicture = image;
+    await user.save();
+
+    res.json({ success: true, message: 'Profile picture updated!', profilePicture: image });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to upload picture.' });
+  }
+});
+
+// ============ ADD BANK ACCOUNT / UPI ============
+router.post('/bank-account', authenticate, async (req, res) => {
+  try {
+    const { bankName, accountNumber, ifsc, upiId, isDefault } = req.body;
+    if (!bankName) {
+      return res.status(400).json({ success: false, message: 'Bank name is required.' });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user.bankAccounts) user.bankAccounts = [];
+
+    // Max 5 bank accounts
+    if (user.bankAccounts.length >= 5) {
+      return res.status(400).json({ success: false, message: 'Maximum 5 bank accounts allowed.' });
+    }
+
+    // If setting as default, unset others
+    if (isDefault) {
+      user.bankAccounts.forEach(b => { b.isDefault = false; });
+    }
+
+    user.bankAccounts.push({ bankName, accountNumber: accountNumber || '', ifsc: ifsc || '', upiId: upiId || '', isDefault: isDefault || user.bankAccounts.length === 0 });
+    await user.save();
+
+    res.json({ success: true, message: `${bankName} added!`, bankAccounts: user.bankAccounts });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to add bank account.' });
+  }
+});
+
+// ============ DELETE BANK ACCOUNT ============
+router.delete('/bank-account/:index', authenticate, async (req, res) => {
+  try {
+    const idx = parseInt(req.params.index);
+    const user = await User.findById(req.userId);
+    if (!user.bankAccounts || idx >= user.bankAccounts.length) {
+      return res.status(404).json({ success: false, message: 'Account not found.' });
+    }
+    user.bankAccounts.splice(idx, 1);
+    await user.save();
+    res.json({ success: true, message: 'Bank account removed.', bankAccounts: user.bankAccounts });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed.' });
+  }
+});
+
 module.exports = router;

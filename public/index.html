@@ -2114,6 +2114,17 @@
         </div>
         <div class="settings-card">
           <h3>Profile Information</h3>
+          <!-- Profile Picture -->
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+            <div id="profilePicPreview" style="width:64px;height:64px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:var(--navy);overflow:hidden;">
+              <span id="profileInitial">A</span>
+            </div>
+            <div>
+              <label for="profilePicInput" style="display:inline-block;padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;">📷 Upload Photo</label>
+              <input type="file" id="profilePicInput" accept="image/*" style="display:none;" onchange="uploadProfilePic(this)">
+              <p style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;">Max 200KB. JPG/PNG</p>
+            </div>
+          </div>
           <div class="form-group">
             <label>Name</label>
             <input type="text" id="settingsName" readonly>
@@ -2153,6 +2164,40 @@
           </div>
           <button class="btn btn-gold" onclick="saveSettings()" style="margin-top:12px">Save Settings</button>
         </div>
+        <!-- Bank Accounts / UPI -->
+        <div class="settings-card">
+          <h3>Bank Accounts & UPI</h3>
+          <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:14px;">Add your bank accounts and UPI IDs for payment tracking.</p>
+          <div id="bankAccountsList"></div>
+          <div style="margin-top:14px;padding:14px;background:var(--surface);border-radius:8px;border:1px solid var(--border);">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Bank Name</label>
+                <select id="addBankName">
+                  <option value="">Select Bank</option>
+                  <option value="SBI">SBI</option>
+                  <option value="HDFC">HDFC Bank</option>
+                  <option value="ICICI">ICICI Bank</option>
+                  <option value="Axis">Axis Bank</option>
+                  <option value="Kotak">Kotak Mahindra</option>
+                  <option value="PNB">PNB</option>
+                  <option value="BOB">Bank of Baroda</option>
+                  <option value="Union">Union Bank</option>
+                  <option value="Canara">Canara Bank</option>
+                  <option value="IndusInd">IndusInd Bank</option>
+                  <option value="Yes">Yes Bank</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>UPI ID (optional)</label>
+                <input type="text" id="addBankUPI" placeholder="e.g. name@paytm, 9876@ybl">
+              </div>
+            </div>
+            <button class="btn btn-gold btn-sm" onclick="addBankAccount()">+ Add Bank</button>
+          </div>
+        </div>
+
         <!-- Referral & Affiliate Section -->
         <div class="settings-card" style="border:1.5px solid var(--gold);background:linear-gradient(135deg,#fffbeb,#fff);">
           <h3 style="color:var(--navy);">Refer & Earn (For Others - NOT Family)</h3>
@@ -3974,6 +4019,10 @@
     updateSidebar();
     updateMemberSelect();
     loadSubscriptionStatus();
+    loadProfilePic();
+    renderBankAccounts();
+    // Check opening balance after data loads
+    setTimeout(checkOpeningBalance, 3000);
     // Hide add member & invite buttons for non-admins
     const addBtn = document.getElementById('addMemberBtn');
     const inviteBtn = document.getElementById('inviteMemberBtn');
@@ -4048,6 +4097,127 @@
   // ╔══════════════════════════════════════════════════════════╗
   // ║  NAVIGATION                                                ║
   // ╚══════════════════════════════════════════════════════════╝
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  PROFILE PICTURE & BANK ACCOUNTS                           ║
+  // ╚══════════════════════════════════════════════════════════╝
+  function uploadProfilePic(input) {
+    if (!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    if (file.size > 200000) { showToast('Image too large. Max 200KB.', 'error'); return; }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var base64 = e.target.result;
+      showLoading(true);
+      API.request('/auth/upload-profile-pic', {
+        method: 'POST',
+        body: JSON.stringify({ image: base64 })
+      }).then(function(res) {
+        showLoading(false);
+        if (res.success) {
+          showToast('Profile picture updated!', 'success');
+          updateProfilePicUI(base64);
+          currentUser.profilePicture = base64;
+          localStorage.setItem('ffp_user', JSON.stringify(currentUser));
+        } else {
+          showToast(res.message || 'Failed.', 'error');
+        }
+      }).catch(function() { showLoading(false); showToast('Upload failed.', 'error'); });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function updateProfilePicUI(base64) {
+    var preview = document.getElementById('profilePicPreview');
+    if (preview && base64) {
+      preview.innerHTML = '<img src="' + base64 + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+    }
+    // Also update sidebar avatar
+    var sidebarAvatar = document.getElementById('sidebarAvatar');
+    if (sidebarAvatar && base64) {
+      sidebarAvatar.innerHTML = '<img src="' + base64 + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+      sidebarAvatar.style.overflow = 'hidden';
+    }
+  }
+
+  function loadProfilePic() {
+    if (currentUser && currentUser.profilePicture) {
+      updateProfilePicUI(currentUser.profilePicture);
+    } else if (currentUser) {
+      document.getElementById('profileInitial').textContent = currentUser.name.charAt(0).toUpperCase();
+    }
+  }
+
+  async function addBankAccount() {
+    var bankName = document.getElementById('addBankName').value;
+    var upiId = document.getElementById('addBankUPI').value.trim();
+    if (!bankName) { showToast('Select a bank.', 'error'); return; }
+    showLoading(true);
+    try {
+      var res = await API.request('/auth/bank-account', {
+        method: 'POST',
+        body: JSON.stringify({ bankName: bankName, upiId: upiId })
+      });
+      showLoading(false);
+      if (res.success) {
+        showToast(res.message, 'success');
+        currentUser.bankAccounts = res.bankAccounts;
+        localStorage.setItem('ffp_user', JSON.stringify(currentUser));
+        renderBankAccounts();
+        document.getElementById('addBankName').value = '';
+        document.getElementById('addBankUPI').value = '';
+      } else {
+        showToast(res.message || 'Failed.', 'error');
+      }
+    } catch(e) { showLoading(false); showToast('Failed.', 'error'); }
+  }
+
+  function renderBankAccounts() {
+    var el = document.getElementById('bankAccountsList');
+    if (!el) return;
+    var accounts = (currentUser && currentUser.bankAccounts) || [];
+    if (accounts.length === 0) {
+      el.innerHTML = '<p style="font-size:0.82rem;color:var(--text-muted);padding:8px 0;">No bank accounts added yet.</p>';
+      return;
+    }
+    el.innerHTML = accounts.map(function(b, i) {
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">' +
+        '<div><strong style="font-size:0.85rem;">' + b.bankName + '</strong>' + (b.upiId ? '<span style="font-size:0.75rem;color:var(--text-muted);margin-left:8px;">' + b.upiId + '</span>' : '') + (b.isDefault ? ' <span style="background:var(--gold-pale);color:#92400e;padding:1px 6px;border-radius:6px;font-size:0.6rem;font-weight:600;">DEFAULT</span>' : '') + '</div>' +
+        '<button class="btn-icon" onclick="deleteBankAccount(' + i + ')" title="Remove">🗑️</button></div>';
+    }).join('');
+  }
+
+  async function deleteBankAccount(index) {
+    if (!confirm('Remove this bank account?')) return;
+    var res = await API.request('/auth/bank-account/' + index, { method: 'DELETE' });
+    if (res.success) {
+      currentUser.bankAccounts = res.bankAccounts;
+      localStorage.setItem('ffp_user', JSON.stringify(currentUser));
+      renderBankAccounts();
+      showToast('Removed.', 'success');
+    }
+  }
+
+  // Opening Balance Prompt (shown on first transaction)
+  function checkOpeningBalance() {
+    if (!currentUser) return;
+    var hasBalance = localStorage.getItem('ffp_opening_balance_set_' + currentUser.familyId);
+    if (!hasBalance && familyData.transactions.length === 0) {
+      setTimeout(function() {
+        var setBalance = confirm('Welcome! Would you like to set your Opening Balance first?\n\nThis helps track your net savings accurately.\n\nClick OK to set balance, or Cancel to skip.');
+        if (setBalance) {
+          navigateToSection('dashboard');
+          setTimeout(function() { openBalanceModal(); }, 500);
+        }
+        localStorage.setItem('ffp_opening_balance_set_' + currentUser.familyId, '1');
+      }, 2000);
+    }
+  }
+
+  function navigateToSection(section) {
+    document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+    document.getElementById('sec-' + section).classList.add('active');
+  }
+
   // ╔══════════════════════════════════════════════════════════╗
   // ║  INSURANCE TRACKER                                         ║
   // ╚══════════════════════════════════════════════════════════╝
@@ -4219,7 +4389,7 @@
     // Close mobile sidebar
     document.getElementById('sidebar').classList.remove('open');
     // Load referral data when navigating to settings
-    if (section === 'settings') loadReferralDashboard();
+    if (section === 'settings') { loadReferralDashboard(); loadProfilePic(); renderBankAccounts(); }
     // Load subscription data when navigating to upgrade
     if (section === 'upgrade') loadSubscriptionStatus();
     // Load insurance data
