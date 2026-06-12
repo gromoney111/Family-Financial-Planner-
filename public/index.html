@@ -3421,7 +3421,39 @@
     } else {
       // Not logged in
       if (inviteCode || params.get('ref')) {
-        showLogin(); // checkInviteLink will handle showing register form
+        showLogin();
+        // Directly handle invite UI here (don't rely on separate DOMContentLoaded)
+        if (inviteCode) {
+          setTimeout(function() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            var tabs = document.querySelectorAll('.auth-tab');
+            if (tabs.length >= 2) { tabs[0].classList.remove('active'); tabs[1].classList.add('active'); }
+            var familyIdGroup = document.getElementById('familyIdGroup');
+            if (familyIdGroup) familyIdGroup.style.display = 'none';
+            var relationGroup = document.getElementById('relationGroup');
+            if (relationGroup) relationGroup.style.display = 'block';
+            sessionStorage.setItem('ffp_pending_invite', inviteCode);
+            sessionStorage.setItem('ffp_invite_familyId', inviteCode);
+            // Show invite message with family info
+            var errEl = document.getElementById('authError');
+            if (errEl) {
+              errEl.style.background = '#d1fae5';
+              errEl.style.color = '#059669';
+              errEl.style.border = '1px solid #059669';
+              errEl.textContent = '👨‍👩‍👧‍👦 You have been invited to join a family! Register below as a member.';
+              errEl.classList.add('show');
+            }
+            // Fetch family name
+            fetch('/api/family/invite/' + encodeURIComponent(inviteCode))
+              .then(function(r) { return r.json(); })
+              .then(function(data) {
+                if (data.success && errEl) {
+                  errEl.textContent = '👨‍👩‍👧‍👦 ' + (data.adminName || 'Admin') + ' invited you to join "' + data.familyName + '"! Register below.';
+                }
+              }).catch(function() {});
+          }, 100);
+        }
       } else {
         showLandingPage();
       }
@@ -4021,8 +4053,6 @@
     loadSubscriptionStatus();
     loadProfilePic();
     renderBankAccounts();
-    // Check opening balance after data loads
-    setTimeout(checkOpeningBalance, 3000);
     // Hide add member & invite buttons for non-admins
     const addBtn = document.getElementById('addMemberBtn');
     const inviteBtn = document.getElementById('inviteMemberBtn');
@@ -4197,21 +4227,36 @@
     }
   }
 
-  // Opening Balance Prompt (shown on first transaction)
+  // Opening Balance Prompt (shown when user clicks Add Transaction for the first time)
   function checkOpeningBalance() {
-    if (!currentUser) return;
-    var hasBalance = localStorage.getItem('ffp_opening_balance_set_' + currentUser.familyId);
-    if (!hasBalance && familyData.transactions.length === 0) {
-      setTimeout(function() {
-        var setBalance = confirm('Welcome! Would you like to set your Opening Balance first?\n\nThis helps track your net savings accurately.\n\nClick OK to set balance, or Cancel to skip.');
+    // Do nothing on app load — triggered only from openTransactionModal
+  }
+
+  var _origOpenTransactionModal = null;
+  function wrapTransactionModalWithBalanceCheck() {
+    if (typeof openTransactionModal === 'function' && !_origOpenTransactionModal) {
+      _origOpenTransactionModal = openTransactionModal;
+    }
+    // Override openTransactionModal to check balance first
+    window.openTransactionModal = function() {
+      if (!currentUser) return;
+      var hasBalance = localStorage.getItem('ffp_opening_balance_set_' + currentUser.familyId);
+      if (!hasBalance && familyData.transactions.length === 0) {
+        var setBalance = confirm('Before adding your first transaction, would you like to set your Opening Balance?\n\nThis helps track your net savings accurately.\n\nClick OK to set balance first, or Cancel to add transaction directly.');
+        localStorage.setItem('ffp_opening_balance_set_' + currentUser.familyId, '1');
         if (setBalance) {
           navigateToSection('dashboard');
-          setTimeout(function() { openBalanceModal(); }, 500);
+          setTimeout(function() { if (typeof openBalanceModal === 'function') openBalanceModal(); }, 300);
+          return;
         }
-        localStorage.setItem('ffp_opening_balance_set_' + currentUser.familyId, '1');
-      }, 2000);
-    }
+      }
+      // Open the actual transaction modal
+      document.getElementById('transactionModal').classList.add('active');
+      if (typeof toggleBankName === 'function') toggleBankName();
+    };
   }
+  // Wrap after a delay to ensure openTransactionModal is defined
+  setTimeout(wrapTransactionModalWithBalanceCheck, 1000);
 
   function navigateToSection(section) {
     document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
