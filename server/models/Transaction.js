@@ -18,7 +18,7 @@ const transactionSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['income', 'expense'],
+    enum: ['income', 'expense', 'borrow', 'lend', 'transfer'],
     required: true
   },
   category: {
@@ -47,6 +47,20 @@ const transactionSchema = new mongoose.Schema({
     default: 'Cash'
   },
   bankName: {
+    type: String,
+    default: ''
+  },
+  // For borrow/lend transactions
+  borrowerLenderName: {
+    type: String,
+    default: ''
+  },
+  // For transfer between family members
+  transferTo: {
+    type: String,
+    default: ''
+  },
+  transferFrom: {
     type: String,
     default: ''
   }

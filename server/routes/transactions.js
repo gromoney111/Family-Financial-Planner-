@@ -127,7 +127,7 @@ router.get('/stats', authenticate, async (req, res) => {
 // ============ ADD TRANSACTION ============
 router.post('/', authenticate, async (req, res) => {
   try {
-    const { type, category, amount, description, date, memberName, paymentMethod, bankName } = req.body;
+    const { type, category, amount, description, date, memberName, paymentMethod, bankName, borrowerLenderName, transferTo, transferFrom } = req.body;
 
     if (!type || !category || !amount || !date) {
       return res.status(400).json({ success: false, message: 'Type, category, amount, and date are required.' });
@@ -143,8 +143,32 @@ router.post('/', authenticate, async (req, res) => {
       date: new Date(date),
       memberName: memberName || req.user.name,
       paymentMethod: paymentMethod || 'Cash',
-      bankName: bankName || ''
+      bankName: bankName || '',
+      borrowerLenderName: borrowerLenderName || '',
+      transferTo: transferTo || '',
+      transferFrom: transferFrom || ''
     });
+
+    // Auto-update closing balance for the month
+    try {
+      const Balance = require('../models/Balance');
+      const txMonth = new Date(date).toISOString().slice(0, 7); // '2026-06'
+      const vertical = bankName || paymentMethod || 'Cash';
+      
+      let balance = await Balance.findOne({ familyId: req.familyId, vertical, month: txMonth });
+      if (balance) {
+        // Update closing balance based on transaction type
+        if (type === 'income' || type === 'borrow') {
+          balance.closing = (balance.closing || balance.opening || 0) + Number(amount);
+        } else if (type === 'expense' || type === 'lend') {
+          balance.closing = (balance.closing || balance.opening || 0) - Number(amount);
+        }
+        // Transfer doesn't change total (just moves between members)
+        await balance.save();
+      }
+    } catch (balErr) {
+      console.log('Balance auto-update skipped:', balErr.message);
+    }
 
     res.status(201).json({
       success: true,
