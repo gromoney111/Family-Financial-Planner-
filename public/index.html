@@ -1546,16 +1546,35 @@
           </div>
         </div>
 
-        <!-- Bank / Cash / Transfer Balances -->
+        <!-- Bank / Cash / Transfer Balances + Opening/Closing Balance -->
         <div class="card" style="margin-bottom:28px" id="dashBalanceSummary">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-            <h3 style="font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600">💰 Balance Summary (Cash & Bank)</h3>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+            <h3 style="font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600">💰 Balance Summary</h3>
+            <button class="btn btn-gold btn-sm" onclick="openBalanceModal()">+ Set Balance</button>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;" id="bankBalanceCards">
+          <!-- Per-bank balance cards -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px;" id="bankBalanceCards">
             <div style="padding:14px;background:var(--surface);border-radius:10px;text-align:center;">
-              <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;">Cash in Hand</div>
-              <div style="font-size:1.2rem;font-weight:700;color:var(--navy);" id="statCashBalance">₹0</div>
+              <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;">💵 Cash & UPI</div>
+              <div style="font-size:1.2rem;font-weight:700;color:var(--navy);">₹0</div>
             </div>
+          </div>
+          <!-- Opening/Closing Balance Table -->
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Account / Bank</th>
+                  <th>Opening Balance</th>
+                  <th>Closing Balance</th>
+                  <th>Net Change</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="balanceTableBody">
+                <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:20px">No balances set. Click "+ Set Balance" to add.</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -1592,30 +1611,6 @@
             </table>
           </div>
         </div>
-        <!-- Opening & Closing Balance Section -->
-        <div class="card" style="margin-bottom:28px" id="balanceCard">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-            <h3 style="font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600">Opening &amp; Closing Balance</h3>
-            <button class="btn btn-gold btn-sm" onclick="openBalanceModal()">+ Set Balance</button>
-          </div>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Vertical / Account</th>
-                  <th>Opening Balance</th>
-                  <th>Closing Balance</th>
-                  <th>Net Change</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="balanceTableBody">
-                <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:30px">No balances set. Click "+ Set Balance" to add opening/closing balance.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
         <div class="charts-grid">
           <div class="chart-card">
             <h3>Income vs Expense (Monthly)</h3>
