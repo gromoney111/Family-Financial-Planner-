@@ -5163,12 +5163,30 @@
   function renderBalances() {
     const tbody = document.getElementById('balanceTableBody');
     if (!currentUser || !currentUser.familyId) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:30px">Please login to view balances.</td></tr>';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:30px">Please login to view balances.</td></tr>';
       return;
     }
-    
-    const balances = getLocalBalances(currentUser.familyId);
-    
+
+    // Try to load from server first (syncs across desktop/mobile)
+    API.request('/balances').then(function(res) {
+      if (res.success && res.balances && res.balances.length > 0) {
+        var balances = res.balances.map(function(b) {
+          return { id: b._id, vertical: b.vertical, month: b.month, opening: b.opening, closing: b.closing, familyId: currentUser.familyId };
+        });
+        saveLocalBalances(currentUser.familyId, balances);
+        displayBalanceTable(balances);
+      } else {
+        // Fallback to local
+        displayBalanceTable(getLocalBalances(currentUser.familyId));
+      }
+    }).catch(function() {
+      displayBalanceTable(getLocalBalances(currentUser.familyId));
+    });
+  }
+
+  function displayBalanceTable(balances) {
+    const tbody = document.getElementById('balanceTableBody');
+    if (!tbody) return;
     if (balances.length === 0) {
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:30px">No balances set. Click "+ Set Balance" to add opening/closing balance.</td></tr>';
       return;
