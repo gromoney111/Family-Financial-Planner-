@@ -66,6 +66,9 @@ router.get('/stats', authenticate, async (req, res) => {
 
     const income = stats.find(s => s._id === 'income')?.total || 0;
     const expense = stats.find(s => s._id === 'expense')?.total || 0;
+    const borrowed = stats.find(s => s._id === 'borrow')?.total || 0;
+    const lent = stats.find(s => s._id === 'lend')?.total || 0;
+    const transferred = stats.find(s => s._id === 'transfer')?.total || 0;
 
     // Category breakdown
     const categories = await Transaction.aggregate([
@@ -112,8 +115,11 @@ router.get('/stats', authenticate, async (req, res) => {
       success: true,
       income,
       expense,
+      borrowed,
+      lent,
+      transferred,
       savings: income - expense,
-      balance: income - expense,
+      balance: income - expense + borrowed - lent,
       categories,
       members,
       trend
@@ -148,6 +154,32 @@ router.post('/', authenticate, async (req, res) => {
       transferTo: transferTo || '',
       transferFrom: transferFrom || ''
     });
+
+    // If it's a TRANSFER, create a matching entry for the receiver
+    // Sender: type=transfer, shows as outgoing
+    // Receiver: gets a matching record showing incoming
+    if (type === 'transfer' && transferTo && transferFrom) {
+      await Transaction.create({
+        familyId: req.familyId,
+        userId: req.userId,
+        type: 'transfer',
+        category: 'Transfer Received',
+        amount: Number(amount),
+        description: `Received from ${transferFrom}` + (description ? ' - ' + description : ''),
+        date: new Date(date),
+        memberName: transferTo,
+        paymentMethod: paymentMethod || 'Cash',
+        bankName: bankName || '',
+        borrowerLenderName: '',
+        transferTo: transferTo,
+        transferFrom: transferFrom
+      });
+      // Update the original entry description for clarity
+      transaction.description = `Sent to ${transferTo}` + (description ? ' - ' + description : '');
+      transaction.category = 'Transfer Sent';
+      transaction.memberName = transferFrom;
+      await transaction.save();
+    }
 
     // Auto-update closing balance for the month
     try {

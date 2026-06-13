@@ -1546,6 +1546,29 @@
           </div>
         </div>
 
+        <!-- Bank / Cash / Transfer Balances -->
+        <div class="card" style="margin-bottom:28px" id="dashBalanceSummary">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 style="font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600">💰 Balance Summary (Cash & Bank)</h3>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;" id="bankBalanceCards">
+            <div style="padding:14px;background:var(--surface);border-radius:10px;text-align:center;">
+              <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;">Cash in Hand</div>
+              <div style="font-size:1.2rem;font-weight:700;color:var(--navy);" id="statCashBalance">₹0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Transfers Between Members -->
+        <div class="card" style="margin-bottom:28px" id="dashTransfers">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 style="font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600">🔄 Recent Transfers</h3>
+          </div>
+          <div id="transfersList" style="font-size:0.85rem;">
+            <p style="color:var(--text-muted);text-align:center;padding:16px;">No transfers yet. Use "Transfer" type when adding a transaction.</p>
+          </div>
+        </div>
+
         <!-- Upcoming EMI / LIC / MF Payments Dashboard Section -->
         <div class="card" style="margin-bottom:28px" id="dashUpcomingCard">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -4476,13 +4499,17 @@
   // ╚══════════════════════════════════════════════════════════╝
   function renderStats() {
     const filtered = getFilteredTransactions();
+    // Exclude transfers, borrow, lend from income/expense totals
     const income = filtered.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
     const expense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+    const borrowed = filtered.filter(t => t.type === 'borrow').reduce((s, t) => s + Number(t.amount), 0);
+    const lent = filtered.filter(t => t.type === 'lend').reduce((s, t) => s + Number(t.amount), 0);
     const savings = income - expense;
+    
     document.getElementById('statIncome').textContent = formatCurrency(income);
     document.getElementById('statExpense').textContent = formatCurrency(expense);
     document.getElementById('statSavings').textContent = formatCurrency(savings > 0 ? savings : 0);
-    document.getElementById('statBalance').textContent = formatCurrency(savings);
+    document.getElementById('statBalance').textContent = formatCurrency(savings + borrowed - lent);
 
     // Loans total (outstanding balance)
     const activeLoans = familyData.loans.filter(l => l.emisPaid < l.tenure);
@@ -4492,6 +4519,88 @@
     // Investments total (current value)
     const totalInvestValue = familyData.investments.reduce((s, i) => s + Number(i.currentValue || i.amount || 0), 0);
     document.getElementById('statDashInvest').textContent = formatCurrency(totalInvestValue);
+
+    // Render bank/cash balances
+    renderBalanceSummary(filtered);
+    // Render recent transfers
+    renderRecentTransfers(filtered);
+  }
+
+  function renderBalanceSummary(transactions) {
+    var container = document.getElementById('bankBalanceCards');
+    if (!container) return;
+
+    // Calculate balance per payment method/bank
+    var balances = {};
+    transactions.forEach(function(t) {
+      var key = t.bankName || (t.payment && t.payment.split(' (')[0]) || 'Cash';
+      if (key === 'Cash' || key === 'UPI' || key === 'Wallet') key = 'Cash & UPI';
+      if (!balances[key]) balances[key] = 0;
+      if (t.type === 'income' || t.type === 'borrow') balances[key] += Number(t.amount);
+      else if (t.type === 'expense' || t.type === 'lend') balances[key] -= Number(t.amount);
+      // Transfer: subtract from sender method (we track where money left from)
+    });
+
+    // Add opening balances from stored balances
+    // (if user set opening balance, it adds to the respective vertical)
+
+    var html = '';
+    var keys = Object.keys(balances);
+    if (keys.length === 0) {
+      html = '<div style="padding:14px;background:var(--surface);border-radius:10px;text-align:center;"><div style="font-size:0.72rem;color:var(--text-muted);">No transactions yet</div><div style="font-size:1.2rem;font-weight:700;">₹0</div></div>';
+    } else {
+      keys.forEach(function(key) {
+        var icon = key.includes('Cash') || key.includes('UPI') ? '💵' : '🏦';
+        var color = balances[key] >= 0 ? 'var(--teal)' : 'var(--rose)';
+        html += '<div style="padding:14px;background:var(--surface);border-radius:10px;text-align:center;">' +
+          '<div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;">' + icon + ' ' + key + '</div>' +
+          '<div style="font-size:1.2rem;font-weight:700;color:' + color + ';">' + formatCurrency(balances[key]) + '</div></div>';
+      });
+    }
+    container.innerHTML = html;
+  }
+
+  function renderRecentTransfers(transactions) {
+    var container = document.getElementById('transfersList');
+    if (!container) return;
+
+    var transfers = transactions.filter(function(t) { return t.type === 'transfer'; });
+    // Also include borrow/lend for context
+    var borrowLend = transactions.filter(function(t) { return t.type === 'borrow' || t.type === 'lend'; });
+
+    if (transfers.length === 0 && borrowLend.length === 0) {
+      container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:16px;">No transfers yet.</p>';
+      return;
+    }
+
+    var html = '';
+
+    // Show transfers
+    transfers.slice(0, 10).forEach(function(t) {
+      var from = t.transferFrom || t.member || '?';
+      var to = t.transferTo || '?';
+      var method = t.payment || t.bankName || 'Cash';
+      var date = t.date ? new Date(t.date).toLocaleDateString('en-IN', {day:'2-digit', month:'short'}) : '';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">' +
+        '<div><span style="font-weight:600;">' + from + '</span> → <span style="font-weight:600;">' + to + '</span>' +
+        '<span style="font-size:0.75rem;color:var(--text-muted);margin-left:8px;">(' + method + ')</span></div>' +
+        '<div style="text-align:right;"><div style="font-weight:700;color:var(--navy);">' + formatCurrency(t.amount) + '</div>' +
+        '<div style="font-size:0.7rem;color:var(--text-muted);">' + date + '</div></div></div>';
+    });
+
+    // Show borrow/lend
+    borrowLend.slice(0, 5).forEach(function(t) {
+      var label = t.type === 'borrow' ? '📥 Borrowed from' : '📤 Lent to';
+      var name = t.borrowerLenderName || t.description || '?';
+      var date = t.date ? new Date(t.date).toLocaleDateString('en-IN', {day:'2-digit', month:'short'}) : '';
+      var color = t.type === 'borrow' ? 'var(--teal)' : 'var(--rose)';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">' +
+        '<div><span style="font-size:0.82rem;">' + label + ' <strong>' + name + '</strong></span></div>' +
+        '<div style="text-align:right;"><div style="font-weight:700;color:' + color + ';">' + (t.type === 'borrow' ? '+' : '-') + formatCurrency(t.amount) + '</div>' +
+        '<div style="font-size:0.7rem;color:var(--text-muted);">' + date + '</div></div></div>';
+    });
+
+    container.innerHTML = html;
   }
 
   function formatCurrency(amount) {
