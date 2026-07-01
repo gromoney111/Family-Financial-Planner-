@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GromoFinance - Premium Demo</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root {
+  --gold: #f59e0b;
+  --teal: #14b8a6;
+  --rose: #f43f5e;
+  --sky: #38bdf8;
+  --purple: #a78bfa;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: rgba(30, 41, 59, 0.8);
+  --bg-glass: rgba(15, 23, 42, 0.6);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border: rgba(148, 163, 184, 0.1);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --sidebar-bg: rgba(15, 23, 42, 0.95);
+}
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --bg-glass: rgba(255, 255, 255, 0.7);
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border: rgba(148, 163, 184, 0.2);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --sidebar-bg: rgba(255, 255, 255, 0.95);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: var(--transition);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.demo-banner {
+  background: linear-gradient(135deg, var(--gold), #d97706);
+  color: #000;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 0.85rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+.demo-banner .banner-left { display: flex; align-items: center; gap: 10px; }
+.demo-banner .badge-demo {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+}
+.demo-banner .banner-actions { display: flex; align-items: center; gap: 8px; }
+.demo-banner button, .theme-toggle {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  color: #000;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: var(--transition);
+}
+.demo-banner button:hover, .theme-toggle:hover { background: rgba(0, 0, 0, 0.25); }
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 44px);
+  padding: 20px;
+  background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+}
+.login-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 48px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow);
+  animation: fadeInUp 0.6s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.login-card h1 {
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--gold), var(--teal));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.login-card p { color: var(--text-secondary); margin-bottom: 32px; }
+.form-group { margin-bottom: 20px; }
+.form-group label {
+  display: block; margin-bottom: 6px;
+  font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;
+}
+.form-group input {
+  width: 100%; padding: 12px 16px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--bg-secondary);
+  color: var(--text-primary); font-size: 0.95rem;
+  transition: var(--transition); outline: none;
+}
+.form-group input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+.btn-primary {
+  width: 100%; padding: 14px; border: none; border-radius: 12px;
+  background: linear-gradient(135deg, var(--gold), #d97706);
+  color: #000; font-size: 1rem; font-weight: 700;
+  cursor: pointer; transition: var(--transition); margin-top: 8px;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.app-layout { display: flex; min-height: calc(100vh - 44px); }
+.sidebar {
+  width: 260px; background: var(--sidebar-bg);
+  backdrop-filter: blur(20px); border-right: 1px solid var(--border);
+  padding: 24px 12px; display: flex; flex-direction: column;
+  position: sticky; top: 44px; height: calc(100vh - 44px);
+  overflow-y: auto; transition: var(--transition);
+}
+.sidebar-brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 12px 24px; border-bottom: 1px solid var(--border); margin-bottom: 16px;
+}
+.sidebar-brand h2 {
+  font-size: 1.1rem;
+  background: linear-gradient(135deg, var(--gold), var(--teal));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.nav-btn {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 12px 16px; border: none; border-radius: 12px;
+  background: transparent; color: var(--text-secondary);
+  font-size: 0.9rem; cursor: pointer; transition: var(--transition);
+  text-align: left; margin-bottom: 4px;
+}
+.nav-btn:hover { background: var(--bg-card); color: var(--text-primary); }
+.nav-btn.active {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+  color: var(--gold); font-weight: 600;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+.nav-btn .nav-icon { font-size: 1.2rem; width: 24px; text-align: center; }
+.main-content { flex: 1; padding: 32px; overflow-y: auto; animation: fadeIn 0.4s ease; }
+.page-header { margin-bottom: 28px; }
+.page-header h1 { font-size: 1.8rem; margin-bottom: 6px; }
+.page-header p { color: var(--text-secondary); }
+.stat-cards {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px; margin-bottom: 32px;
+}
+.stat-card {
+  background: var(--bg-card); backdrop-filter: blur(16px);
+  border: 1px solid var(--border); border-radius: 16px;
+  padding: 24px; box-shadow: var(--shadow);
+  transition: var(--transition); position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--teal));
+  opacity: 0; transition: var(--transition);
+}
+.stat-card:hover::before { opacity: 1; }
+.stat-card:hover { transform: translateY(-4px); }
+.stat-card .stat-icon { font-size: 1.5rem; margin-bottom: 12px; }
+.stat-card .stat-value { font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
+.stat-card .stat-label {
+  font-size: 0.8rem; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.card {
+  background: var(--bg-card); backdrop-filter: blur(16px);
+  border: 1px solid var(--border); border-radius: 16px;
+  padding: 24px; box-shadow: var(--shadow);
+  margin-bottom: 20px; transition: var(--transition);
+}
+.card:hover { box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15); }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.card-header h3 { font-size: 1.1rem; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+.badge {
+  display: inline-block; padding: 4px 10px; border-radius: 20px;
+  font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.badge-income { background: rgba(20, 184, 166, 0.15); color: var(--teal); }
+.badge-expense { background: rgba(244, 63, 94, 0.15); color: var(--rose); }
+.badge-transfer { background: rgba(56, 189, 248, 0.15); color: var(--sky); }
+.badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--gold); }
+.badge-success { background: rgba(20, 184, 166, 0.15); color: var(--teal); }
+.badge-info { background: rgba(167, 139, 250, 0.15); color: var(--purple); }
+.progress-bar {
+  width: 100%; height: 8px; background: var(--border);
+  border-radius: 8px; overflow: hidden; margin: 8px 0;
+}
+.progress-bar .progress-fill {
+  height: 100%; border-radius: 8px; transition: width 1s ease;
+  background: linear-gradient(90deg, var(--gold), var(--teal));
+}
+.progress-bar .progress-fill.danger { background: linear-gradient(90deg, var(--rose), #e11d48); }
+.progress-bar .progress-fill.success { background: linear-gradient(90deg, var(--teal), #059669); }
+.table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.table th {
+  text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--border);
+  color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.table td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: var(--bg-glass); }
+.insight-card {
+  display: flex; align-items: flex-start; gap: 16px; padding: 20px;
+  background: var(--bg-card); border-radius: 12px;
+  border: 1px solid var(--border); margin-bottom: 12px; transition: var(--transition);
+}
+.insight-card:hover { transform: translateX(4px); }
+.insight-icon {
+  font-size: 1.5rem; width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 12px; flex-shrink: 0;
+}
+.insight-icon.warning { background: rgba(245, 158, 11, 0.15); }
+.insight-icon.success { background: rgba(20, 184, 166, 0.15); }
+.insight-icon.info { background: rgba(167, 139, 250, 0.15); }
+.member-card {
+  display: flex; align-items: center; gap: 16px; padding: 20px;
+  background: var(--bg-card); border-radius: 12px;
+  border: 1px solid var(--border); transition: var(--transition);
+}
+.member-card:hover { transform: translateY(-2px); }
+.member-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--teal));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; color: #000; font-size: 1.1rem;
+}
+.loading {
+  display: flex; align-items: center; justify-content: center;
+  padding: 60px; color: var(--text-secondary);
+}
+.loading::after {
+  content: ''; width: 24px; height: 24px;
+  border: 3px solid var(--border); border-top-color: var(--gold);
+  border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.mobile-menu-btn {
+  display: none; position: fixed; bottom: 20px; right: 20px;
+  width: 50px; height: 50px; border-radius: 50%;
+  background: var(--gold); border: none; color: #000;
+  font-size: 1.5rem; cursor: pointer; z-index: 999;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+}
+@media (max-width: 768px) {
+  .sidebar { position: fixed; left: -280px; top: 44px; z-index: 998; width: 280px; }
+  .sidebar.open { left: 0; }
+  .mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
+  .main-content { padding: 20px 16px; }
+  .stat-cards { grid-template-columns: 1fr 1fr; }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+.empty-state { text-align: center; padding: 40px; color: var(--text-secondary); }
+.empty-state .empty-icon { font-size: 3rem; margin-bottom: 16px; }
+.table-responsive { overflow-x: auto; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const API_BASE = '';
+let token = null;
+let userData = null;
+let currentSection = 'dashboard';
+let demoData = {};
+
+function formatCurrency(amount) {
+  return '\u20B9' + Number(amount || 0).toLocaleString('en-IN');
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+}
+
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+}
+
+async function apiCall(url, options = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  const res = await fetch(API_BASE + url, { ...options, headers });
+  if (!res.ok) throw new Error('API Error: ' + res.status);
+  return res.json();
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const btn = document.querySelector('.btn-primary');
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+  try {
+    const data = await apiCall('/api/demo/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
+    token = data.token;
+    userData = data.user;
+    await loadAllData();
+    renderApp();
+  } catch (err) {
+    alert('Login failed: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = 'Sign In to Demo';
+  }
+}
+
+async function loadAllData() {
+  try {
+    const [transactions, loans, investments, insurance, balances, goals, insights] = await Promise.all([
+      apiCall('/api/transactions').catch(() => ({ transactions: [] })),
+      apiCall('/api/loans').catch(() => ({ loans: [] })),
+      apiCall('/api/investments').catch(() => ({ investments: [] })),
+      apiCall('/api/insurance').catch(() => ({ policies: [] })),
+      apiCall('/api/balances').catch(() => ({ balances: [] })),
+      apiCall('/api/demo/goals').catch(() => []),
+      apiCall('/api/demo/ai-insights').catch(() => [])
+    ]);
+    demoData = {
+      transactions: transactions.transactions || [],
+      loans: loans.loans || [],
+      investments: investments.investments || [],
+      insurance: insurance.policies || [],
+      balances: balances.balances || [],
+      goals: (goals && goals.goals) ? goals.goals : (Array.isArray(goals) ? goals : []),
+      insights: (insights && insights.insights) ? insights.insights : (Array.isArray(insights) ? insights : [])
+    };
+  } catch (err) {
+    console.error('Load failed:', err);
+    demoData = { transactions: [], loans: [], investments: [], insurance: [], balances: [], goals: [], insights: [] };
+  }
+}
+
+async function resetDemo() {
+  if (!confirm('Reset all demo data?')) return;
+  try {
+    await apiCall('/api/demo/reset', { method: 'POST' });
+    await loadAllData();
+    navigateTo(currentSection);
+  } catch (err) {
+    alert('Reset failed: ' + err.message);
+  }
+}
+
+function navigateTo(section) {
+  currentSection = section;
+  document.querySelectorAll('.nav-btn').forEach(function(btn) { btn.classList.remove('active'); });
+  var activeBtn = document.querySelector('[data-section="' + section + '"]');
+  if (activeBtn) activeBtn.classList.add('active');
+  var main = document.getElementById('main-content');
+  switch (section) {
+    case 'dashboard': main.innerHTML = renderDashboard(); break;
+    case 'transactions': main.innerHTML = renderTransactions(); break;
+    case 'budgets': main.innerHTML = renderBudgets(); break;
+    case 'loans': main.innerHTML = renderLoans(); break;
+    case 'investments': main.innerHTML = renderInvestments(); break;
+    case 'insurance': main.innerHTML = renderInsurance(); break;
+    case 'goals': main.innerHTML = renderGoals(); break;
+    case 'insights': main.innerHTML = renderInsights(); break;
+    case 'members': main.innerHTML = renderMembers(); break;
+    case 'reports': main.innerHTML = renderReports(); break;
+  }
+  document.querySelector('.sidebar').classList.remove('open');
+}
+
+function renderDashboard() {
+  var txns = demoData.transactions;
+  var income = txns.filter(function(t){return t.type==='income'}).reduce(function(s,t){return s+(t.amount||0)},0);
+  var expense = txns.filter(function(t){return t.type==='expense'}).reduce(function(s,t){return s+(t.amount||0)},0);
+  var savings = income - expense;
+  var loansTotal = demoData.loans.reduce(function(s,l){return s+(l.remainingBalance||l.principal||0)},0);
+  var investTotal = demoData.investments.reduce(function(s,i){return s+(i.currentValue||i.amount||0)},0);
+  var recentTxns = txns.slice(0, 5);
+  var txnRows = recentTxns.map(function(t) {
+    var badgeClass = t.type==='income' ? 'badge-income' : t.type==='expense' ? 'badge-expense' : 'badge-transfer';
+    return '<tr><td>'+(t.description||t.category||'Transaction')+'</td><td><span class="badge '+badgeClass+'">'+(t.type||'other')+'</span></td><td>'+formatCurrency(t.amount)+'</td><td>'+new Date(t.date||Date.now()).toLocaleDateString('en-IN')+'</td></tr>';
+  }).join('');
+  if (!txnRows) txnRows = '<tr><td colspan="4" style="text-align:center;color:var(--text-secondary)">No transactions yet</td></tr>';
+  var savingsRate = income > 0 ? Math.round((savings/income)*100) : 0;
+  var rateClass = savingsRate < 20 ? ' danger' : ' success';
+  return '<div class="page-header"><h1>Dashboard</h1><p>Welcome back, '+(userData&&userData.name?userData.name:'Demo User')+'</p></div>'+
+    '<div class="stat-cards">'+
+    '<div class="stat-card"><div class="stat-icon">\ud83d\udcb0</div><div class="stat-value">'+formatCurrency(income)+'</div><div class="stat-label">Total Income</div></div>'+
+    '<div class="stat-card"><div class="stat-icon">\ud83d\udcb8</div><div class="stat-value">'+formatCurrency(expense)+'</div><div class="stat-label">Total Expenses</div></div>'+
+    '<div class="stat-card"><div class="stat-icon">\ud83c\udfaf</div><div class="stat-value">'+formatCurrency(savings)+'</div><div class="stat-label">Net Savings</div></div>'+
+    '<div class="stat-card"><div class="stat-icon">\ud83c\udfe6</div><div class="stat-value">'+formatCurrency(loansTotal)+'</div><div class="stat-label">Loans Outstanding</div></div>'+
+    '<div class="stat-card"><div class="stat-icon">\ud83d\udcc8</div><div class="stat-value">'+formatCurrency(investTotal)+'</div><div class="stat-label">Investments</div></div>'+
+    '</div>'+
+    '<div class="grid-2">'+
+    '<div class="card"><div class="card-header"><h3>Recent Transactions</h3></div><div class="table-responsive"><table class="table"><thead><tr><th>Description</th><th>Type</th><th>Amount</th><th>Date</th></tr></thead><tbody>'+txnRows+'</tbody></table></div></div>'+
+    '<div class="card"><div class="card-header"><h3>Quick Overview</h3></div><div style="padding:20px;text-align:center"><div style="font-size:3rem;margin-bottom:16px">\ud83d\udcca</div><p style="color:var(--text-secondary)">Savings Rate: <strong>'+savingsRate+'%</strong></p><div class="progress-bar" style="margin-top:16px"><div class="progress-fill'+rateClass+'" style="width:'+Math.min(Math.max(savingsRate,0),100)+'%"></div></div><p style="margin-top:12px;font-size:0.85rem;color:var(--text-secondary)">'+demoData.loans.length+' active loans \u2022 '+demoData.investments.length+' investments \u2022 '+demoData.goals.length+' goals</p></div></div>'+
+    '</div>';
+}
+
+function renderTransactions() {
+  var txns = demoData.transactions;
+  if (!txns.length) {
+    return '<div class="page-header"><h1>Transactions</h1><p>All your financial transactions</p></div><div class="empty-state"><div class="empty-icon">\ud83d\udccb</div><p>No transactions found</p></div>';
+  }
+  var rows = txns.map(function(t) {
+    var badgeClass = t.type==='income' ? 'badge-income' : t.type==='expense' ? 'badge-expense' : 'badge-transfer';
+    return '<tr><td>'+new Date(t.date||Date.now()).toLocaleDateString('en-IN')+'</td><td>'+(t.description||t.category||'Transaction')+'</td><td>'+(t.category||'-')+'</td><td><span class="badge '+badgeClass+'">'+(t.type||'other')+'</span></td><td style="font-weight:600">'+formatCurrency(t.amount)+'</td></tr>';
+  }).join('');
+  return '<div class="page-header"><h1>Transactions</h1><p>All your financial transactions</p></div>'+
+    '<div class="card"><div class="table-responsive"><table class="table"><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Type</th><th>Amount</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
+
+function renderBudgets() {
+  var txns = demoData.transactions;
+  var categories = {};
+  txns.filter(function(t){return t.type==='expense'}).forEach(function(t) {
+    var cat = t.category || 'Other';
+    categories[cat] = (categories[cat] || 0) + (t.amount || 0);
+  });
+  var budgetData = [
+    { name: 'Food & Dining', limit: 15000, icon: '\ud83c\udf55' },
+    { name: 'Transportation', limit: 8000, icon: '\ud83d\ude97' },
+    { name: 'Shopping', limit: 10000, icon: '\ud83d\uded2' },
+    { name: 'Entertainment', limit: 5000, icon: '\ud83c\udfac' },
+    { name: 'Utilities', limit: 6000, icon: '\ud83d\udca1' },
+    { name: 'Healthcare', limit: 4000, icon: '\ud83c\udfe5' }
+  ];
+  var cards = budgetData.map(function(b) {
+    var spent = categories[b.name] || Math.round(Math.random() * b.limit * 0.9);
+    var pct = Math.min(Math.round((spent / b.limit) * 100), 100);
+    var fillClass = pct > 90 ? 'danger' : pct > 70 ? '' : 'success';
+    return '<div class="card"><div class="card-header"><h3>'+b.icon+' '+b.name+'</h3><span class="badge '+(pct>90?'badge-expense':'badge-success')+'">'+pct+'%</span></div><div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--text-secondary)"><span>Spent: '+formatCurrency(spent)+'</span><span>Limit: '+formatCurrency(b.limit)+'</span></div><div class="progress-bar"><div class="progress-fill '+fillClass+'" style="width:'+pct+'%"></div></div></div>';
+  }).join('');
+  return '<div class="page-header"><h1>Budgets</h1><p>Track your spending limits</p></div><div class="grid-2">'+cards+'</div>';
+}
+
+function renderLoans() {
+  var loans = demoData.loans;
+  if (!loans.length) {
+    return '<div class="page-header"><h1>Loans & EMI</h1><p>Manage your loans and EMIs</p></div><div class="empty-state"><div class="empty-icon">\ud83c\udfe6</div><p>No active loans</p></div>';
+  }
+  var cards = loans.map(function(l) {
+    var paid = (l.principal||0) - (l.remainingBalance||0);
+    var pct = l.principal ? Math.round((paid / l.principal) * 100) : 0;
+    return '<div class="card"><div class="card-header"><h3>'+(l.name||l.type||'Loan')+'</h3><span class="badge badge-info">'+(l.status||'Active')+'</span></div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">'+
+      '<div><div style="font-size:0.8rem;color:var(--text-secondary)">Principal</div><div style="font-weight:600">'+formatCurrency(l.principal)+'</div></div>'+
+      '<div><div style="font-size:0.8rem;color:var(--text-secondary)">EMI</div><div style="font-weight:600">'+formatCurrency(l.emi||l.monthlyEMI)+'</div></div>'+
+      '<div><div style="font-size:0.8rem;color:var(--text-secondary)">Tenure</div><div style="font-weight:600">'+(l.tenure||l.termMonths||0)+' months</div></div>'+
+      '<div><div style="font-size:0.8rem;color:var(--text-secondary)">Balance</div><div style="font-weight:600">'+formatCurrency(l.remainingBalance)+'</div></div>'+
+      '</div>'+
+      '<div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:4px">Repayment: '+pct+'%</div>'+
+      '<div class="progress-bar"><div class="progress-fill success" style="width:'+pct+'%"></div></div></div>';
+  }).join('');
+  return '<div class="page-header"><h1>Loans & EMI</h1><p>Manage your loans and EMIs</p></div><div class="grid-2">'+cards+'</div>';
+}
+
+function renderInvestments() {
+  var invs = demoData.investments;
+  if (!invs.length) {
+    return '<div class="page-header"><h1>Investments</h1><p>Your investment portfolio</p></div><div class="empty-state"><div class="empty-icon">\ud83d\udcc8</div><p>No investments found</p></div>';
+  }
+  var cards = invs.map(function(i) {
+    var invested = i.amount || i.investedAmount || 0;
+    var current = i.currentValue || invested;
+    var returns = current - invested;
+    var returnPct = invested ? ((returns / invested) * 100).toFixed(1) : 0;
+    var isPositive = returns >= 0;
+    return '<div class="card"><div class="card-header"><h3>'+(i.name||i.type||'Investment')+'</h3><span class="badge '+(isPositive?'badge-success':'badge-expense')+'">'+(isPositive?'+':'')+returnPct+'%</span></div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+
+      '<div><div style="font-size:0.8rem;color:var(--text-secondary)">Invested</div><div style="font-weight:600">'+formatCurrency(invested)+'</div></div>'+
+      '<div><div style="font-size:0.8rem;color:var(--text-secondary)">Current Value</div><div style="font-weight:600">'+formatCurrency(current)+'</div></div>'+
+      '<div><div style="font-size:0.8rem;color:var(--text-secondary)">Returns</div><div style="font-weight:600;color:'+(isPositive?'var(--teal)':'var(--rose)')+'">'+(isPositive?'+':'')+formatCurrency(returns)+'</div></div>'+
+      '<div><div style="font-size:0.8rem;color:var(--text-secondary)">Type</div><div style="font-weight:600">'+(i.type||i.category||'General')+'</div></div>'+
+      '</div></div>';
+  }).join('');
+  return '<div class="page-header"><h1>Investments</h1><p>Your investment portfolio</p></div><div class="grid-2">'+cards+'</div>';
+}
+
+function renderInsurance() {
+  var policies = demoData.insurance;
+  if (!policies.length) {
+    return '<div class="page-header"><h1>Insurance</h1><p>Your insurance policies</p></div><div class="empty-state"><div class="empty-icon">\ud83d\udee1\ufe0f</div><p>No insurance policies found</p></div>';
+  }
+  var rows = policies.map(function(p) {
+    return '<tr><td>'+(p.name||p.provider||'Policy')+'</td><td>'+(p.type||'General')+'</td><td>'+formatCurrency(p.premium||p.amount)+'</td><td>'+formatCurrency(p.coverAmount||p.sumAssured||0)+'</td><td><span class="badge badge-success">'+(p.status||'Active')+'</span></td><td>'+(p.renewalDate ? new Date(p.renewalDate).toLocaleDateString('en-IN') : '-')+'</td></tr>';
+  }).join('');
+  return '<div class="page-header"><h1>Insurance</h1><p>Your insurance policies</p></div>'+
+    '<div class="card"><div class="table-responsive"><table class="table"><thead><tr><th>Policy</th><th>Type</th><th>Premium</th><th>Cover</th><th>Status</th><th>Renewal</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
+
+function renderGoals() {
+  var goals = demoData.goals;
+  if (!goals.length) {
+    return '<div class="page-header"><h1>Financial Goals</h1><p>Track your savings goals</p></div><div class="empty-state"><div class="empty-icon">\ud83c\udfaf</div><p>No goals set yet</p></div>';
+  }
+  var cards = goals.map(function(g) {
+    var target = g.targetAmount || g.target || 0;
+    var current = g.currentAmount || g.saved || 0;
+    var pct = target ? Math.min(Math.round((current / target) * 100), 100) : 0;
+    var fillClass = pct >= 80 ? 'success' : pct >= 50 ? '' : 'danger';
+    return '<div class="card"><div class="card-header"><h3>'+(g.name||g.title||'Goal')+'</h3><span class="badge '+(pct>=100?'badge-success':'badge-warning')+'">'+pct+'%</span></div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--text-secondary);margin-bottom:4px"><span>Saved: '+formatCurrency(current)+'</span><span>Target: '+formatCurrency(target)+'</span></div>'+
+      '<div class="progress-bar"><div class="progress-fill '+fillClass+'" style="width:'+pct+'%"></div></div>'+
+      (g.deadline ? '<div style="font-size:0.8rem;color:var(--text-secondary);margin-top:8px">Deadline: '+new Date(g.deadline).toLocaleDateString('en-IN')+'</div>' : '')+
+      '</div>';
+  }).join('');
+  return '<div class="page-header"><h1>Financial Goals</h1><p>Track your savings goals</p></div><div class="grid-2">'+cards+'</div>';
+}
+
+function renderInsights() {
+  var insights = demoData.insights;
+  if (!insights.length) {
+    return '<div class="page-header"><h1>AI Insights</h1><p>Smart financial recommendations</p></div><div class="empty-state"><div class="empty-icon">\ud83e\udde0</div><p>No insights available yet</p></div>';
+  }
+  var cards = insights.map(function(i) {
+    var type = i.type || 'info';
+    var icon = type==='warning' ? '\u26a0\ufe0f' : type==='success' ? '\u2705' : type==='alert' ? '\ud83d\udea8' : '\ud83d\udca1';
+    return '<div class="insight-card"><div class="insight-icon '+type+'">'+icon+'</div><div><div style="font-weight:600;margin-bottom:4px">'+(i.title||'Insight')+'</div><div style="font-size:0.9rem;color:var(--text-secondary)">'+(i.message||i.description||'')+'</div>'+
+      (i.action ? '<div style="margin-top:8px"><span class="badge badge-'+type+'">'+i.action+'</span></div>' : '')+
+      '</div></div>';
+  }).join('');
+  return '<div class="page-header"><h1>AI Insights</h1><p>Smart financial recommendations powered by AI</p></div>'+cards;
+}
+
+function renderMembers() {
+  var members = (userData && userData.family && userData.family.members) ? userData.family.members : [
+    { name: (userData&&userData.name)||'Demo User', role: 'Admin', email: (userData&&userData.email)||'demo@gromofinance.com' },
+    { name: 'Priya Sharma', role: 'Spouse', email: 'priya@example.com' },
+    { name: 'Arjun Sharma', role: 'Child', email: 'arjun@example.com' }
+  ];
+  var cards = members.map(function(m) {
+    var initials = (m.name||'U').split(' ').map(function(w){return w[0]}).join('').toUpperCase().slice(0,2);
+    return '<div class="member-card"><div class="member-avatar">'+initials+'</div><div><div style="font-weight:600">'+(m.name||'Member')+'</div><div style="font-size:0.85rem;color:var(--text-secondary)">'+(m.role||'Member')+' \u2022 '+(m.email||'')+'</div></div></div>';
+  }).join('');
+  return '<div class="page-header"><h1>Family Members</h1><p>Manage your family group</p></div><div class="grid-2">'+cards+'</div>';
+}
+
+function renderReports() {
+  var txns = demoData.transactions;
+  var income = txns.filter(function(t){return t.type==='income'}).reduce(function(s,t){return s+(t.amount||0)},0);
+  var expense = txns.filter(function(t){return t.type==='expense'}).reduce(function(s,t){return s+(t.amount||0)},0);
+  var savings = income - expense;
+  var loansTotal = demoData.loans.reduce(function(s,l){return s+(l.remainingBalance||l.principal||0)},0);
+  var investTotal = demoData.investments.reduce(function(s,i){return s+(i.currentValue||i.amount||0)},0);
+  var insurancePremium = demoData.insurance.reduce(function(s,p){return s+(p.premium||p.amount||0)},0);
+  var netWorth = investTotal + savings - loansTotal;
+  var categories = {};
+  txns.filter(function(t){return t.type==='expense'}).forEach(function(t) {
+    var cat = t.category || 'Other';
+    categories[cat] = (categories[cat] || 0) + (t.amount || 0);
+  });
+  var catEntries = Object.keys(categories).map(function(k){return [k,categories[k]]}).sort(function(a,b){return b[1]-a[1]});
+  var catRows = catEntries.map(function(entry) {
+    var pct = expense ? Math.round((entry[1] / expense) * 100) : 0;
+    return '<tr><td>'+entry[0]+'</td><td>'+formatCurrency(entry[1])+'</td><td>'+pct+'%</td></tr>';
+  }).join('');
+  if (!catRows) catRows = '<tr><td colspan="3" style="text-align:center;color:var(--text-secondary)">No expense data</td></tr>';
+  return '<div class="page-header"><h1>Financial Reports</h1><p>Summary of your finances</p></div>'+
+    '<div class="stat-cards">'+
+    '<div class="stat-card"><div class="stat-icon">\ud83d\udcb0</div><div class="stat-value">'+formatCurrency(netWorth)+'</div><div class="stat-label">Estimated Net Worth</div></div>'+
+    '<div class="stat-card"><div class="stat-icon">\ud83d\udcc9</div><div class="stat-value">'+formatCurrency(loansTotal)+'</div><div class="stat-label">Total Liabilities</div></div>'+
+    '<div class="stat-card"><div class="stat-icon">\ud83d\udee1\ufe0f</div><div class="stat-value">'+formatCurrency(insurancePremium)+'</div><div class="stat-label">Annual Premiums</div></div>'+
+    '</div>'+
+    '<div class="grid-2">'+
+    '<div class="card"><div class="card-header"><h3>Income vs Expenses</h3></div>'+
+    '<div style="display:flex;justify-content:space-around;padding:20px">'+
+    '<div style="text-align:center"><div style="font-size:2rem">\ud83d\udcb0</div><div style="font-weight:700;color:var(--teal);font-size:1.2rem">'+formatCurrency(income)+'</div><div style="font-size:0.8rem;color:var(--text-secondary)">Income</div></div>'+
+    '<div style="text-align:center"><div style="font-size:2rem">\ud83d\udcb8</div><div style="font-weight:700;color:var(--rose);font-size:1.2rem">'+formatCurrency(expense)+'</div><div style="font-size:0.8rem;color:var(--text-secondary)">Expenses</div></div>'+
+    '<div style="text-align:center"><div style="font-size:2rem">\ud83c\udfaf</div><div style="font-weight:700;color:var(--gold);font-size:1.2rem">'+formatCurrency(savings)+'</div><div style="font-size:0.8rem;color:var(--text-secondary)">Savings</div></div>'+
+    '</div></div>'+
+    '<div class="card"><div class="card-header"><h3>Expense Breakdown</h3></div><div class="table-responsive"><table class="table"><thead><tr><th>Category</th><th>Amount</th><th>Share</th></tr></thead><tbody>'+catRows+'</tbody></table></div></div>'+
+    '</div>';
+}
+
+function renderApp() {
+  var app = document.getElementById('app');
+  app.innerHTML =
+    '<div class="demo-banner"><div class="banner-left"><span class="badge-demo">DEMO MODE</span><span>Explore GromoFinance with sample data</span></div><div class="banner-actions"><button onclick="resetDemo()">Reset Data</button><button class="theme-toggle" onclick="toggleTheme()">\ud83c\udf19 Theme</button></div></div>'+
+    '<div class="app-layout">'+
+    '<aside class="sidebar">'+
+    '<div class="sidebar-brand"><h2>\ud83d\udcb0 GromoFinance</h2></div>'+
+    '<button class="nav-btn active" data-section="dashboard" onclick="navigateTo(\'dashboard\')"><span class="nav-icon">\ud83d\udcca</span>Dashboard</button>'+
+    '<button class="nav-btn" data-section="transactions" onclick="navigateTo(\'transactions\')"><span class="nav-icon">\ud83d\udccb</span>Transactions</button>'+
+    '<button class="nav-btn" data-section="budgets" onclick="navigateTo(\'budgets\')"><span class="nav-icon">\ud83d\udcb3</span>Budgets</button>'+
+    '<button class="nav-btn" data-section="loans" onclick="navigateTo(\'loans\')"><span class="nav-icon">\ud83c\udfe6</span>Loans & EMI</button>'+
+    '<button class="nav-btn" data-section="investments" onclick="navigateTo(\'investments\')"><span class="nav-icon">\ud83d\udcc8</span>Investments</button>'+
+    '<button class="nav-btn" data-section="insurance" onclick="navigateTo(\'insurance\')"><span class="nav-icon">\ud83d\udee1\ufe0f</span>Insurance</button>'+
+    '<button class="nav-btn" data-section="goals" onclick="navigateTo(\'goals\')"><span class="nav-icon">\ud83c\udfaf</span>Goals</button>'+
+    '<button class="nav-btn" data-section="insights" onclick="navigateTo(\'insights\')"><span class="nav-icon">\ud83e\udde0</span>AI Insights</button>'+
+    '<button class="nav-btn" data-section="members" onclick="navigateTo(\'members\')"><span class="nav-icon">\ud83d\udc65</span>Members</button>'+
+    '<button class="nav-btn" data-section="reports" onclick="navigateTo(\'reports\')"><span class="nav-icon">\ud83d\udcc4</span>Reports</button>'+
+    '</aside>'+
+    '<main class="main-content" id="main-content">'+renderDashboard()+'</main>'+
+    '</div>'+
+    '<button class="mobile-menu-btn" onclick="toggleSidebar()">\u2630</button>';
+}
+
+function renderLogin() {
+  var app = document.getElementById('app');
+  app.innerHTML =
+    '<div class="demo-banner"><div class="banner-left"><span class="badge-demo">DEMO MODE</span><span>Try GromoFinance - No signup required</span></div><div class="banner-actions"><button class="theme-toggle" onclick="toggleTheme()">\ud83c\udf19 Theme</button></div></div>'+
+    '<div class="login-container"><div class="login-card">'+
+    '<h1>GromoFinance</h1>'+
+    '<p>Family Financial Planner - Demo Access</p>'+
+    '<form onsubmit="handleLogin(event)">'+
+    '<div class="form-group"><label>Email</label><input type="email" id="email" value="demo@gromofinance.com"></div>'+
+    '<div class="form-group"><label>Password</label><input type="password" id="password" value="demo123"></div>'+
+    '<button type="submit" class="btn-primary">Sign In to Demo</button>'+
+    '</form>'+
+    '<p style="text-align:center;margin-top:20px;font-size:0.8rem;color:var(--text-secondary)">Credentials are pre-filled for demo access</p>'+
+    '</div></div>';
+}
+
+renderLogin();
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "gromofinance-demo",
+  "version": "1.0.0",
+  "description": "GromoFinance Demo - Standalone localhost preview",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
