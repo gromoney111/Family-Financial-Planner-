@@ -15,6 +15,7 @@ const balanceRoutes = require('./routes/balances');
 const adminRoutes = require('./routes/admin');
 const subscriptionRoutes = require('./routes/subscription');
 const insuranceRoutes = require('./routes/insurance');
+const demoRoutes = require('./routes/demo');
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use('/api/balances', balanceRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 app.use('/api/insurance', insuranceRoutes);
+app.use('/api/demo', demoRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -55,6 +57,11 @@ app.get('/api/reminders/check', async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
+});
+
+// Serve demo page at /demo
+app.get('/demo', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/demo.html'));
 });
 
 // Serve frontend for all other routes (SPA support)
@@ -81,7 +88,11 @@ mongoose.connect(MONGODB_URI)
     app.listen(PORT, () => {
       console.log(`🚀 FamilyFinPlan API running on port ${PORT}`);
       console.log(`📂 Frontend served from /public`);
+      console.log(`🎭 Demo available at /demo`);
     });
+
+    // Initialize demo data
+    demoRoutes.initDemo();
 
     // Run reminder check every 6 hours
     setInterval(async () => {
@@ -93,6 +104,16 @@ mongoose.connect(MONGODB_URI)
         console.log('[Auto-Reminder] Error:', e.message);
       }
     }, 6 * 60 * 60 * 1000); // Every 6 hours
+
+    // Auto-reset demo data every 12 hours
+    setInterval(async () => {
+      try {
+        const { generateDemoData } = require('./routes/demo');
+        console.log('[Demo Reset] Resetting demo data...');
+      } catch (e) {
+        console.log('[Demo Reset] Error:', e.message);
+      }
+    }, 12 * 60 * 60 * 1000); // Every 12 hours
   })
   .catch(err => {
     console.error('❌ MongoDB connection failed:', err.message);
