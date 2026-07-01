@@ -4127,8 +4127,33 @@
         familyData.transactions = result.transactions || [];
         familyData.members = result.members || [];
         familyData.budgets = result.budgets || [];
-        familyData.loans = getLocalLoans(currentUser.familyId);
-        familyData.investments = getLocalInvestments(currentUser.familyId);
+        
+        // Load loans from server API (syncs across devices)
+        try {
+          const loansRes = await API.request('/loans');
+          if (loansRes.success && loansRes.loans) {
+            familyData.loans = loansRes.loans.map(function(l) {
+              return { id: l._id, type: l.type, lender: l.lender, principal: l.principal, rate: l.rate, tenure: l.tenure, emi: l.emi, startDate: l.startDate, emisPaid: l.emisPaid || 0, member: l.memberName, notes: l.notes, familyId: currentUser.familyId, payments: l.payments || [], status: l.status, emiDueDay: l.emiDueDay };
+            });
+            saveLocalLoans(currentUser.familyId, familyData.loans);
+          } else {
+            familyData.loans = getLocalLoans(currentUser.familyId);
+          }
+        } catch(e) { familyData.loans = getLocalLoans(currentUser.familyId); }
+
+        // Load investments from server API (syncs across devices)
+        try {
+          const invRes = await API.request('/investments');
+          if (invRes.success && invRes.investments) {
+            familyData.investments = invRes.investments.map(function(i) {
+              return { id: i._id, type: i.type, name: i.name, amount: i.investedAmount || i.amount, currentValue: i.currentValue, startDate: i.startDate, maturityDate: i.maturityDate, expectedReturn: i.expectedReturn, member: i.memberName, notes: i.notes, familyId: currentUser.familyId, monthlyContribution: i.monthlyContribution, paymentDueDay: i.paymentDueDay };
+            });
+            saveLocalInvestments(currentUser.familyId, familyData.investments);
+          } else {
+            familyData.investments = getLocalInvestments(currentUser.familyId);
+          }
+        } catch(e) { familyData.investments = getLocalInvestments(currentUser.familyId); }
+
         familyData.emiPayments = getLocalEmiPayments(currentUser.familyId);
         
         // Ensure current user is always in members list
@@ -5145,6 +5170,8 @@
     }
 
     saveLocalBalances(currentUser.familyId, balances);
+    // Sync to server
+    API.request('/balances', { method: 'POST', body: JSON.stringify({ vertical: vertical, month: month, opening: opening, closing: closing }) }).catch(function(){});
     renderBalances();
     closeModal('balanceModal');
     showToast('Balance saved successfully!', 'success');
@@ -5156,6 +5183,8 @@
     let balances = getLocalBalances(currentUser.familyId);
     balances = balances.filter(b => b.id !== balId);
     saveLocalBalances(currentUser.familyId, balances);
+    // Sync delete to server
+    API.request('/balances/' + balId, { method: 'DELETE' }).catch(function(){});
     renderBalances();
     showToast('Balance entry deleted.', 'info');
   }
@@ -5848,6 +5877,12 @@
       familyData.loans.push(loanData);
     }
     saveLocalLoans(currentUser.familyId, familyData.loans);
+    // Sync to server
+    if (editId) {
+      API.request('/loans/' + editId, { method: 'PUT', body: JSON.stringify({ type: loanData.type, lender: loanData.lender, principal: loanData.principal, rate: loanData.rate, tenure: loanData.tenure, emi: loanData.emi, startDate: loanData.startDate, emisPaid: loanData.emisPaid, memberName: loanData.member, notes: loanData.notes }) }).catch(function(){});
+    } else {
+      API.request('/loans', { method: 'POST', body: JSON.stringify({ type: loanData.type, lender: loanData.lender, principal: loanData.principal, rate: loanData.rate, tenure: loanData.tenure, emi: loanData.emi, startDate: loanData.startDate, emisPaid: loanData.emisPaid, memberName: loanData.member, notes: loanData.notes }) }).then(function(res) { if (res.success && res.loan) { loanData.id = res.loan._id; familyData.loans[familyData.loans.length - 1].id = res.loan._id; saveLocalLoans(currentUser.familyId, familyData.loans); } }).catch(function(){});
+    }
     renderLoans();
     renderNetWorth();
     renderUpcomingPayments();
@@ -5859,6 +5894,8 @@
     if (!confirm('Delete this loan?')) return;
     familyData.loans = familyData.loans.filter(l => l.id !== loanId);
     saveLocalLoans(currentUser.familyId, familyData.loans);
+    // Sync delete to server
+    API.request('/loans/' + loanId, { method: 'DELETE' }).catch(function(){});
     renderLoans(); renderNetWorth();
     showToast('Loan deleted.', 'info');
   }
@@ -5974,8 +6011,13 @@
     const tbody = document.getElementById('loansTableBody');
     const histBody = document.getElementById('emiHistoryBody');
     if (!currentUser) return;
-    familyData.loans = getLocalLoans(currentUser.familyId);
-    familyData.emiPayments = getLocalEmiPayments(currentUser.familyId);
+    // Use familyData.loans already loaded from server (don't re-override from localStorage)
+    if (!familyData.loans || familyData.loans.length === 0) {
+      familyData.loans = getLocalLoans(currentUser.familyId);
+    }
+    if (!familyData.emiPayments) {
+      familyData.emiPayments = getLocalEmiPayments(currentUser.familyId);
+    }
     if (familyData.loans.length === 0) {
       tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:40px">No loans added yet.</td></tr>';
     } else {
@@ -6104,6 +6146,12 @@
       familyData.investments.push(data);
     }
     saveLocalInvestments(currentUser.familyId, familyData.investments);
+    // Sync to server
+    if (editId) {
+      API.request('/investments/' + editId, { method: 'PUT', body: JSON.stringify({ type: data.type, name: data.name, investedAmount: data.amount, currentValue: data.currentValue, startDate: data.startDate, maturityDate: data.maturityDate, expectedReturn: data.expectedReturn, memberName: data.member, notes: data.notes }) }).catch(function(){});
+    } else {
+      API.request('/investments', { method: 'POST', body: JSON.stringify({ type: data.type, name: data.name, investedAmount: data.amount, currentValue: data.currentValue, startDate: data.startDate, maturityDate: data.maturityDate, expectedReturn: data.expectedReturn, memberName: data.member, notes: data.notes }) }).then(function(res) { if (res.success && res.investment) { data.id = res.investment._id; familyData.investments[familyData.investments.length - 1].id = res.investment._id; saveLocalInvestments(currentUser.familyId, familyData.investments); } }).catch(function(){});
+    }
     renderInvestments(); renderNetWorth();
     closeModal('investmentModal');
     showToast(editId ? 'Investment updated!' : 'Investment added!', 'success');
@@ -6113,6 +6161,8 @@
     if (!confirm('Delete this investment?')) return;
     familyData.investments = familyData.investments.filter(i => i.id !== invId);
     saveLocalInvestments(currentUser.familyId, familyData.investments);
+    // Sync delete to server
+    API.request('/investments/' + invId, { method: 'DELETE' }).catch(function(){});
     renderInvestments(); renderNetWorth();
     showToast('Investment deleted.', 'info');
   }
@@ -6133,7 +6183,10 @@
 
   function renderInvestments() {
     if (!currentUser) return;
-    familyData.investments = getLocalInvestments(currentUser.familyId);
+    // Use familyData.investments already loaded from server (don't re-override from localStorage)
+    if (!familyData.investments || familyData.investments.length === 0) {
+      familyData.investments = getLocalInvestments(currentUser.familyId);
+    }
     const tbody = document.getElementById('investmentsTableBody');
     if (familyData.investments.length === 0) {
       tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:40px">No investments yet.</td></tr>';
